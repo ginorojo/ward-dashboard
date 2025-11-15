@@ -2,8 +2,10 @@
  * @fileoverview Firestore Security Rules for the Ward Dashboard application.
  *
  * Core Philosophy:
- * This ruleset employs a hybrid security model: user-ownership for profile data and role-based access control.
- * The user with the email 'ginorojoj@gmail.com' is designated as the 'bishop' with full administrative rights over user management.
+ * This ruleset employs a hierarchical role-based access control model.
+ * The user with the email 'ginorojoj@gmail.com' is the designated 'administrator' with full rights.
+ * An 'administrator' can create 'bishops'.
+ * 'Bishops' can create 'counselors' and 'secretaries'.
  *
  * Data Structure:
  * - /users/{userId}: Stores individual user profiles.
@@ -11,11 +13,6 @@
  * - /bishopricMeetings/{meetingId}: Stores bishopric meeting records.
  * - /sacramentMeetings/{meetingId}: Stores sacrament meeting agendas.
  * - /logs/{logId}: Stores user action logs.
- *
- * Key Security Decisions:
- * - User data is strictly controlled. The bishop can manage all users. Other users can only manage their own profile.
- * - Collaborative data is accessible to all authenticated users.
- * - Logs can only be created.
  */
 rules_version = '2';
 service cloud.firestore {
@@ -33,9 +30,14 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(userId)).data;
     }
 
+    function isAdministrator() {
+        // The user with this email is always an administrator.
+        return request.auth.token.email == "ginorojoj@gmail.com";
+    }
+
     function isBishop() {
-      // The user with this email is always considered a bishop.
-      if (request.auth.token.email == "ginorojoj@gmail.com") {
+      // The user with the admin email is also considered a bishop for general purposes.
+      if (isAdministrator()) {
         return true;
       }
       // Or if their role in the database is 'bishop'.
@@ -48,17 +50,28 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      // Allow creation if the user is a bishop, or if the user is creating their own profile.
-      allow create: if isSignedIn() && (isBishop() || isOwner(userId));
-      // Allow reading if the user is a bishop or the owner of the profile.
-      allow get: if isSignedIn() && (isBishop() || isOwner(userId));
-      // Bishops can list all users.
-      allow list: if isSignedIn() && isBishop();
-      // Bishops can update any user. Users can update their own profile.
-      // Nobody can change their own role or UID.
-      allow update: if isSignedIn() && (isBishop() || (isOwner(userId) && request.resource.data.role == resource.data.role && request.resource.data.uid == resource.data.uid));
-      // Only bishops can delete users (but not themselves).
-      allow delete: if isSignedIn() && isBishop() && request.auth.uid != userId;
+      // Allow creation if the user is an admin, or a bishop creating a counselor/secretary.
+      allow create: if isSignedIn() && (isAdministrator() || 
+                      (isBishop() && request.resource.data.role in ['counselor', 'secretary']));
+
+      // Admins and bishops can view user profiles. Users can view their own.
+      allow get: if isSignedIn() && (isAdministrator() || isBishop() || isOwner(userId));
+      
+      // Admins and bishops can list all users.
+      allow list: if isSignedIn() && (isAdministrator() || isBishop());
+
+      // Update permissions:
+      // - Admins can update any user.
+      // - Bishops can update counselors/secretaries and themselves (but not their own role).
+      // - Users can update their own profile (but not their role or UID).
+      allow update: if isSignedIn() && (
+                      isAdministrator() ||
+                      (isBishop() && (resource.data.role in ['counselor', 'secretary'] || (isOwner(userId) && request.resource.data.role == resource.data.role))) ||
+                      (isOwner(userId) && request.resource.data.role == resource.data.role && request.resource.data.uid == resource.data.uid)
+                    );
+
+      // Only administrators can delete users (but not themselves).
+      allow delete: if isSignedIn() && isAdministrator() && request.auth.uid != userId;
     }
 
     /**

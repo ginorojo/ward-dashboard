@@ -26,13 +26,13 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
     }
 
     // Determine role, giving precedence to the special email address.
-    const isBishopByEmail = user?.email === 'ginorojoj@gmail.com';
-    const role = isBishopByEmail ? 'bishop' : userProfile?.role;
+    const isAdministrator = user?.email === 'ginorojoj@gmail.com';
+    const role = isAdministrator ? 'administrator' : userProfile?.role;
 
 
     const navItems = [
         { href: '/dashboard', label: t('dashboard.title'), icon: LayoutDashboard },
-        { href: '/dashboard/users', label: t('dashboard.users'), icon: Users, roles: ['bishop'] },
+        { href: '/dashboard/users', label: t('dashboard.users'), icon: Users, roles: ['administrator', 'bishop'] },
         { href: '/dashboard/interviews', label: t('dashboard.interviews'), icon: CalendarCheck },
         { href: '/dashboard/bishopric-meeting', label: t('dashboard.bishopricMeeting'), icon: BookUser },
         { href: '/dashboard/sacrament-meeting', label: t('dashboard.sacramentMeeting'), icon: BookOpenCheck },

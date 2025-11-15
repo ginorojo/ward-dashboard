@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
+import { useUser } from '@/firebase';
 
 type UserFormValues = z.infer<typeof userSchema>;
 
@@ -19,6 +20,9 @@ interface UserFormProps {
 }
 
 export default function UserForm({ onSubmit, defaultValues, isEditMode = false, t }: UserFormProps) {
+  const { user } = useUser();
+  const isAdministrator = user?.email === 'ginorojoj@gmail.com';
+
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: defaultValues || {
@@ -88,6 +92,7 @@ export default function UserForm({ onSubmit, defaultValues, isEditMode = false, 
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
+                  {isAdministrator && <SelectItem value="administrator">Administrador</SelectItem>}
                   <SelectItem value="bishop">{t('users.roleBishop')}</SelectItem>
                   <SelectItem value="counselor">{t('users.roleCounselor')}</SelectItem>
                   <SelectItem value="secretary">{t('users.roleSecretary')}</SelectItem>
