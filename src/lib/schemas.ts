@@ -31,6 +31,7 @@ export const sacramentMeetingSchema = z.object({
     preside: z.string().min(2, "Required"),
     dirige: z.string().min(2, "Required"),
     pianist: z.string().min(2, "Required"),
+    musicDirector: z.string().min(2, "Required"),
     authorities: z.string().optional(),
     hymnSacramental: z.object({
         name: z.string().min(2, "Required"),

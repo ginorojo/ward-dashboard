@@ -37,6 +37,7 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
           preside: '',
           dirige: '',
           pianist: '',
+          musicDirector: '',
           authorities: '',
           hymnSacramental: { name: '', number: 0 },
           speakers: ['', '', '', ''],
@@ -88,7 +89,8 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
                 <FormField control={form.control} name="preside" render={({ field }) => (<FormItem><FormLabel>Presiding</FormLabel><FormControl><Input placeholder="Bishop Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="dirige" render={({ field }) => (<FormItem><FormLabel>Conducting</FormLabel><FormControl><Input placeholder="Counselor Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="pianist" render={({ field }) => (<FormItem><FormLabel>Pianist</FormLabel><FormControl><Input placeholder="Member Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                 <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem className="md:col-span-2"><FormLabel>Visiting Authorities (optional)</FormLabel><FormControl><Input placeholder="President Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="musicDirector" render={({ field }) => (<FormItem><FormLabel>Music Director</FormLabel><FormControl><Input placeholder="Member Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem><FormLabel>Visiting Authorities (optional)</FormLabel><FormControl><Input placeholder="President Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
             </div>
 
             <Separator />

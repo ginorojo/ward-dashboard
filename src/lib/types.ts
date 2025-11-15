@@ -62,6 +62,7 @@ export interface SacramentMeeting {
   preside: string;
   dirige: string;
   pianist: string;
+  musicDirector: string;
   authorities: string;
   hymnSacramental: Hymn;
   speakers: string[];
