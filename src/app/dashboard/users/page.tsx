@@ -141,7 +141,7 @@ export default function UsersPage() {
     setIsFormOpen(true);
   };
 
-  const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t, handleDeleteUser }), [fetchUsers, currentUser, t, handleDeleteUser]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, currentUser, t }), [currentUser, t, handleDeleteUser]);
   
   const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
   const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
