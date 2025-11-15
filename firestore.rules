@@ -36,13 +36,12 @@ service cloud.firestore {
     }
 
     function isBishop() {
-      // The user with the admin email is also considered a bishop for general purposes.
-      if (isAdministrator()) {
-        return true;
-      }
-      // Or if their role in the database is 'bishop'.
-      let userRole = getUserData(request.auth.uid).role;
-      return userRole == 'bishop';
+        let userRole = getUserData(request.auth.uid).role;
+        return userRole == 'bishop' || isAdministrator();
+    }
+    
+    function isRequestingUserBishop() {
+        return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'bishop';
     }
 
     /**
@@ -71,7 +70,7 @@ service cloud.firestore {
                     );
 
       // Only administrators can delete users. Bishops can delete counselors and secretaries.
-      allow delete: if isSignedIn() && (isAdministrator() || (isBishop() && getUserData(userId).role in ['counselor', 'secretary']));
+      allow delete: if isSignedIn() && (isAdministrator() || (isRequestingUserBishop() && getUserData(userId).role in ['counselor', 'secretary']));
     }
 
     /**
