@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
-import { getCollection, updateUserProfile, logAction, addDocument } from '@/lib/firebase/firestore';
+import { getCollection, updateUserProfile, logAction, addDocument, deleteUser } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
@@ -93,6 +93,14 @@ export default function UsersPage() {
     toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
     fetchUsers();
   };
+
+  const handleDeleteUser = (uid: string) => {
+    if (!authUser || !firestore) return;
+    deleteUser(firestore, uid);
+    logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
+    toast({ title: t('common.success'), description: t('users.userDeleted') });
+    fetchUsers();
+  }
   
   const openEditForm = (user: UserProfile) => {
     setEditingUser(user);
@@ -104,7 +112,7 @@ export default function UsersPage() {
     setIsFormOpen(true);
   };
 
-  const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t }), [fetchUsers, currentUser, t]);
+  const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t, deleteUser: handleDeleteUser }), [fetchUsers, currentUser, t]);
   
   const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
   const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
@@ -153,7 +161,7 @@ export default function UsersPage() {
                       </AlertDialogHeader>
                       <AlertDialogFooter>
                       <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                      <AlertDialogAction className="bg-destructive hover:bg-destructive/90">
+                      <AlertDialogAction onClick={() => handleDeleteUser(user.uid)} className="bg-destructive hover:bg-destructive/90">
                           {t('users.continue')}
                       </AlertDialogAction>
                       </AlertDialogFooter>

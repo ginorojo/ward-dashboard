@@ -142,6 +142,17 @@ export const updateUserProfile = (firestore: Firestore, uid: string, data: Parti
     });
 };
 
+export const deleteUser = (firestore: Firestore, uid: string) => {
+    const userRef = doc(firestore, 'users', uid);
+    deleteDoc(userRef).catch(serverError => {
+        const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'delete'
+        });
+        errorEmitter.emit('permission-error', permissionError);
+    });
+};
+
 
 // Specific for Bishopric Meeting Notes (subcollection)
 export const getNotesForMeeting = async (firestore: Firestore, meetingId: string): Promise<BishopricMeetingNote[]> => {

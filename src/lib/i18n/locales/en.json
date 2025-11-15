@@ -42,6 +42,7 @@
     "userCreated": "User created successfully.",
     "userUpdated": "User updated successfully.",
     "userStatusUpdated": "User status updated.",
+    "userDeleted": "User deleted successfully.",
     "deleteUser": "Delete User",
     "deleteUserConfirm": "This action cannot be undone. This will permanently deactivate the user's account and remove their data from our servers.",
     "continue": "Continue",

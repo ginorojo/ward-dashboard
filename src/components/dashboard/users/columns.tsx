@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useUser } from '@/firebase';
-import { updateUserProfile, logAction } from '@/lib/firebase/firestore';
+import { updateUserProfile, logAction, deleteUser } from '@/lib/firebase/firestore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import UserForm from './user-form';
@@ -30,9 +30,10 @@ type ColumnsProps = {
   fetchUsers: () => void;
   currentUser: UserProfile | null;
   t: (key: string) => string;
+  deleteUser: (uid: string) => void;
 }
 
-export const columns = ({ fetchUsers, currentUser, t }: ColumnsProps): ColumnDef<UserProfile>[] => [
+export const columns = ({ fetchUsers, currentUser, t, deleteUser: handleDeleteUser }: ColumnsProps): ColumnDef<UserProfile>[] => [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -135,7 +136,7 @@ export const columns = ({ fetchUsers, currentUser, t }: ColumnsProps): ColumnDef
                 <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   className="bg-destructive hover:bg-destructive/90"
-                  onClick={() => { /* Implement permanent deletion if needed, e.g., via a Cloud Function */ }}
+                  onClick={() => handleDeleteUser(user.uid)}
                 >
                   {t('users.continue')}
                 </AlertDialogAction>

@@ -42,6 +42,7 @@
     "userCreated": "Usuario creado con éxito.",
     "userUpdated": "Usuario actualizado con éxito.",
     "userStatusUpdated": "Estado del usuario actualizado.",
+    "userDeleted": "Usuario eliminado con éxito.",
     "deleteUser": "Eliminar Usuario",
     "deleteUserConfirm": "Esta acción no se puede deshacer. Esto desactivará permanentemente la cuenta del usuario y eliminará sus datos de nuestros servidores.",
     "continue": "Continuar",
