@@ -4,7 +4,7 @@ import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
 import { getCollection, updateUserProfile, logAction, addDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
 import { columns } from '@/components/dashboard/users/columns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -14,6 +14,12 @@ import { z } from 'zod';
 import { userSchema } from '@/lib/schemas';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/lib/i18n';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 type UserFormValues = z.infer<typeof userSchema>;
 
@@ -26,6 +32,8 @@ export default function UsersPage() {
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
+  const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
   const fetchUsers = async () => {
     if (!firestore) return;
@@ -51,8 +59,6 @@ export default function UsersPage() {
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore) return;
     try {
-      // Note: This only creates user in Firestore. Auth user must be created separately.
-      // This form is for management, assuming auth user is created elsewhere or not needed.
       const userId = await addDocument(firestore, 'users', {
         name: data.name,
         email: data.email,
@@ -67,8 +73,118 @@ export default function UsersPage() {
       toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to create user.' });
     }
   };
+  
+  const handleUpdateUser = async (data: UserFormValues) => {
+    if(!authUser || !firestore || !editingUser) return;
+    try {
+        await updateUserProfile(firestore, editingUser.uid, {name: data.name, email: data.email, role: data.role});
+        await logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
+        toast({ title: t('common.success'), description: t('users.userUpdated') });
+        setIsFormOpen(false);
+        setEditingUser(null);
+        fetchUsers();
+    } catch(error: any) {
+         toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to update user.' });
+    }
+  }
+
+  const handleStatusToggle = async (user: UserProfile) => {
+    if (!authUser || !firestore) return;
+    try {
+      await updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
+      await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
+      toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
+      fetchUsers();
+    } catch (error) {
+      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
+    }
+  };
+  
+  const openEditForm = (user: UserProfile) => {
+    setEditingUser(user);
+    setIsFormOpen(true);
+  }
 
   const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t }), [fetchUsers, currentUser, t]);
+  
+  const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
+  const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
+  
+  const formDefaultValues = editingUser ? {
+    name: editingUser.name,
+    email: editingUser.email,
+    role: editingUser.role,
+  } : undefined;
+
+  const renderMobileUsers = () => (
+    <div className="space-y-4">
+      {users.map(user => {
+        const isCurrentUser = currentUser?.uid === user.uid;
+        return (
+          <Card key={user.uid}>
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle className='text-lg'>{user.name}</CardTitle>
+                  <CardDescription>{user.email}</CardDescription>
+                </div>
+                <AlertDialog>
+                  <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" className="h-8 w-8 p-0">
+                          <span className="sr-only">Open menu</span>
+                          <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => openEditForm(user)}>{t('common.edit')}</DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => handleStatusToggle(user)} disabled={isCurrentUser}>
+                        {user.isActive ? t('users.deactivate') : t('users.activate')}
+                      </DropdownMenuItem>
+                      <DropdownMenuSeparator />
+                      <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>{t('users.deleteUser')}</DropdownMenuItem>
+                      </AlertDialogTrigger>
+                      </DropdownMenuContent>
+                  </DropdownMenu>
+                  <AlertDialogContent>
+                      <AlertDialogHeader>
+                      <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
+                      <AlertDialogDescription>{t('users.deleteUserConfirm')}</AlertDialogDescription>
+                      </AlertDialogHeader>
+                      <AlertDialogFooter>
+                      <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                      <AlertDialogAction className="bg-destructive hover:bg-destructive/90">
+                          {t('users.continue')}
+                      </AlertDialogAction>
+                      </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-2 text-sm">
+              <div className='flex justify-between'>
+                <div>
+                  <p className="font-semibold">{t('common.role')}</p>
+                  <Badge variant="secondary" className="capitalize mt-1">{t(`users.role${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`)}</Badge>
+                </div>
+                <div>
+                  <p className="font-semibold">{t('common.status')}</p>
+                   <Badge variant={user.isActive ? 'default' : 'destructive'} className="mt-1">
+                      {user.isActive ? t('users.active') : t('users.inactive')}
+                    </Badge>
+                </div>
+              </div>
+              <div>
+                <p className="font-semibold">{t('users.createdAt')}</p>
+                <p className="text-muted-foreground">{user.createdAt ? format((user.createdAt as any).toDate(), 'PP') : 'N/A'}</p>
+              </div>
+            </CardContent>
+          </Card>
+        )
+      })}
+    </div>
+  );
 
   return (
     <div className="space-y-8">
@@ -77,18 +193,18 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold font-headline">{t('users.title')}</h1>
           <p className="text-muted-foreground">{t('users.description')}</p>
         </div>
-        <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+        <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingUser(null); }}>
           <DialogTrigger asChild>
-            <Button>
+            <Button onClick={() => setEditingUser(null)}>
               <PlusCircle className="mr-2 h-4 w-4" />
               {t('users.addUser')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>{t('users.createNewUser')}</DialogTitle>
+              <DialogTitle>{dialogTitle}</DialogTitle>
             </DialogHeader>
-            <UserForm onSubmit={handleCreateUser} t={t} />
+            <UserForm onSubmit={formSubmitHandler} defaultValues={formDefaultValues} isEditMode={!!editingUser} t={t} />
           </DialogContent>
         </Dialog>
       </div>
@@ -97,9 +213,13 @@ export default function UsersPage() {
             <Skeleton className="h-10 w-1/3" />
             <Skeleton className="h-40 w-full" />
          </div>
+      ) : isMobile ? (
+        renderMobileUsers()
       ) : (
         <DataTable columns={tableColumns} data={users} t={t}/>
       )}
     </div>
   );
 }
+
+    
