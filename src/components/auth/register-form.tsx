@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
-import { useAuth, useFirestore } from '@/firebase';
+import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
@@ -54,7 +54,7 @@ export default function RegisterForm() {
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
       if (userCredential.user) {
           const userDocRef = doc(firestore, 'users', userCredential.user.uid);
-          await setDoc(userDocRef, {
+          const userData = {
             uid: userCredential.user.uid,
             email: data.email,
             name: data.name,
@@ -62,13 +62,24 @@ export default function RegisterForm() {
             createdAt: serverTimestamp(),
             createdBy: userCredential.user.uid, // Self-created
             isActive: true,
-          });
-
-          toast({
-            title: 'Registration Successful',
-            description: 'Your account has been created.',
-          });
-          router.push('/dashboard');
+          };
+          
+          setDoc(userDocRef, userData)
+            .then(() => {
+                toast({
+                    title: 'Registration Successful',
+                    description: 'Your account has been created.',
+                });
+                router.push('/dashboard');
+            })
+            .catch(async (error) => {
+                const permissionError = new FirestorePermissionError({
+                    path: userDocRef.path,
+                    operation: 'create',
+                    requestResourceData: userData,
+                });
+                errorEmitter.emit('permission-error', permissionError);
+            });
       }
     } catch (error: any) {
       toast({
@@ -77,7 +88,9 @@ export default function RegisterForm() {
         description: error.message || 'Could not create account. Please try again.',
       });
     } finally {
-      setLoading(false);
+      // Don't set loading to false here, as we navigate away on success
+      // and want to keep the loader spinning during the Firestore operation.
+      // The toast for auth errors will appear, and the user can retry.
     }
   }
 
