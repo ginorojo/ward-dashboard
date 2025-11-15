@@ -50,47 +50,49 @@ export default function RegisterForm() {
         setLoading(false);
         return;
     }
+    
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
-      if (userCredential.user) {
-          const userDocRef = doc(firestore, 'users', userCredential.user.uid);
-          const userData = {
-            uid: userCredential.user.uid,
-            email: data.email,
-            name: data.name,
-            role: data.role,
-            createdAt: serverTimestamp(),
-            createdBy: userCredential.user.uid, // Self-created
-            isActive: true,
-          };
-          
-          setDoc(userDocRef, userData)
-            .then(() => {
-                toast({
-                    title: 'Registration Successful',
-                    description: 'Your account has been created.',
-                });
-                router.push('/dashboard');
-            })
-            .catch(async (error) => {
-                const permissionError = new FirestorePermissionError({
-                    path: userDocRef.path,
-                    operation: 'create',
-                    requestResourceData: userData,
-                });
-                errorEmitter.emit('permission-error', permissionError);
-            });
-      }
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: 'Registration Failed',
-        description: error.message || 'Could not create account. Please try again.',
-      });
-    } finally {
-      // Don't set loading to false here, as we navigate away on success
-      // and want to keep the loader spinning during the Firestore operation.
-      // The toast for auth errors will appear, and the user can retry.
+        const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+        if (userCredential.user) {
+            const userDocRef = doc(firestore, 'users', userCredential.user.uid);
+            const userData = {
+              uid: userCredential.user.uid,
+              email: data.email,
+              name: data.name,
+              role: data.role,
+              createdAt: serverTimestamp(),
+              createdBy: userCredential.user.uid, // Self-created
+              isActive: true,
+            };
+            
+            // This is non-blocking and has its own error handling
+            setDoc(userDocRef, userData)
+              .then(() => {
+                  toast({
+                      title: 'Registration Successful',
+                      description: 'Your account has been created.',
+                  });
+                  router.push('/dashboard');
+              })
+              .catch(async (serverError) => {
+                  const permissionError = new FirestorePermissionError({
+                      path: userDocRef.path,
+                      operation: 'create',
+                      requestResourceData: userData,
+                  });
+                  errorEmitter.emit('permission-error', permissionError);
+                  // Stop loading so user can try again if needed
+                  setLoading(false);
+              });
+        }
+    } catch (authError: any) {
+        // This catches errors from createUserWithEmailAndPassword (e.g., email already in use)
+        toast({
+            variant: 'destructive',
+            title: 'Registration Failed',
+            description: authError.message || 'Could not create account. Please try again.',
+        });
+        setLoading(false);
     }
   }
 
