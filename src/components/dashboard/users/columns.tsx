@@ -13,21 +13,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { useToast } from '@/hooks/use-toast';
-import { useUser, useFirestore } from '@/firebase';
-import { updateUserProfile, logAction } from '@/lib/firebase/firestore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-
 
 type ColumnsProps = {
   openEditForm: (user: UserProfile) => void;
   handleDelete: (uid: string) => void;
-  fetchUsers: () => void;
+  handleStatusToggle: (user: UserProfile) => void;
   currentUser: UserProfile | null;
   t: (key: string) => string;
 }
 
-export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t }: ColumnsProps): ColumnDef<UserProfile>[] => [
+export const columns = ({ openEditForm, handleDelete, handleStatusToggle, currentUser, t }: ColumnsProps): ColumnDef<UserProfile>[] => [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -73,17 +69,6 @@ export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t
     id: 'actions',
     cell: ({ row }) => {
       const user = row.original;
-      const { toast } = useToast();
-      const { user: authUser, firestore } = useFirebase();
-      
-      const handleStatusToggle = () => {
-        if (!authUser || !firestore) return;
-        updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
-        logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
-        toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
-        fetchUsers();
-      };
-      
       const isCurrentUser = currentUser?.uid === user.uid;
 
       return (
@@ -98,7 +83,7 @@ export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
                  <DropdownMenuItem onClick={() => openEditForm(user)}>{t('common.edit')}</DropdownMenuItem>
-                <DropdownMenuItem onClick={handleStatusToggle} disabled={isCurrentUser}>
+                <DropdownMenuItem onClick={() => handleStatusToggle(user)} disabled={isCurrentUser}>
                   {user.isActive ? t('users.deactivate') : t('users.activate')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

@@ -112,13 +112,13 @@ export default function UsersPage() {
     fetchUsers();
   }
 
-  const handleStatusToggle = (user: UserProfile) => {
+  const handleStatusToggle = useCallback((user: UserProfile) => {
     if (!authUser || !firestore) return;
     updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
     logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
     toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
     fetchUsers();
-  };
+  }, [firestore, authUser, toast, t, fetchUsers]);
   
   const handleDeleteUser = useCallback((uid: string) => {
     if (!authUser || !firestore) {
@@ -141,7 +141,7 @@ export default function UsersPage() {
     setIsFormOpen(true);
   };
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, currentUser, t, fetchUsers }), [currentUser, t, handleDeleteUser, fetchUsers, openEditForm]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, handleStatusToggle, currentUser, t }), [currentUser, t, handleDeleteUser, handleStatusToggle]);
   
   const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
   const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
