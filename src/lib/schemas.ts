@@ -28,21 +28,21 @@ export const bishopricNoteSchema = z.object({
 
 export const sacramentMeetingSchema = z.object({
     date: z.date(),
-    preside: z.string().min(2, "Required"),
-    dirige: z.string().min(2, "Required"),
-    pianist: z.string().min(2, "Required"),
-    musicDirector: z.string().min(2, "Required"),
+    preside: z.string().optional(),
+    dirige: z.string().optional(),
+    pianist: z.string().optional(),
+    musicDirector: z.string().optional(),
     authorities: z.string().optional(),
     hymnSacramental: z.object({
-        name: z.string().min(2, "Required"),
-        number: z.coerce.number().min(1, "Required"),
-    }),
-    speakers: z.array(z.string()).max(4),
+        name: z.string().optional(),
+        number: z.coerce.number().optional(),
+    }).optional(),
+    speakers: z.array(z.string()).max(4).optional(),
     hymnFinal: z.object({
-        name: z.string().min(2, "Required"),
-        number: z.coerce.number().min(1, "Required"),
-    }),
-    closingPrayer: z.string().min(2, "Required"),
+        name: z.string().optional(),
+        number: z.coerce.number().optional(),
+    }).optional(),
+    closingPrayer: z.string().optional(),
     asuntosDelBarrio: z.array(z.object({
         id: z.string().optional(),
         type: z.enum(['relevo', 'sostenimiento']),

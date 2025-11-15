@@ -6,12 +6,15 @@ import ThemeToggle from './settings/theme-toggle';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
-import { LogOut, Settings } from 'lucide-react';
+import { LogOut, Settings, PanelLeft } from 'lucide-react';
 import { UserProfile } from '@/lib/types';
+import { useSidebar } from '@/components/ui/sidebar';
+import { Button } from '../ui/button';
 
 export default function DashboardHeader({ userProfile }: { userProfile: UserProfile | null }) {
   const auth = useAuth();
   const router = useRouter();
+  const { toggleSidebar } = useSidebar();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -24,6 +27,12 @@ export default function DashboardHeader({ userProfile }: { userProfile: UserProf
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-card px-4 sm:px-6">
+      <div className="flex items-center gap-2 md:hidden">
+          <Button variant="ghost" size="icon" onClick={toggleSidebar}>
+              <PanelLeft className="h-6 w-6" />
+              <span className="sr-only">Toggle Sidebar</span>
+          </Button>
+      </div>
       <div className="flex-1">
         {/* Can add breadcrumbs or page title here if needed */}
       </div>

@@ -39,9 +39,9 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
           pianist: '',
           musicDirector: '',
           authorities: '',
-          hymnSacramental: { name: '', number: 0 },
+          hymnSacramental: { name: '', number: undefined },
           speakers: ['', '', '', ''],
-          hymnFinal: { name: '', number: 0 },
+          hymnFinal: { name: '', number: undefined },
           closingPrayer: '',
           asuntosDelBarrio: [],
         },
@@ -136,7 +136,7 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
               <h3 className="text-lg font-medium">Speakers</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[0, 1, 2, 3].map(i => (
-                    <FormField key={i} control={form.control} name={`speakers.${i}`} render={({ field }) => (<FormItem><FormLabel>Speaker {i + 1}</FormLabel><FormControl><Input placeholder="Speaker Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField key={i} control={form.control} name={`speakers.${i}`} render={({ field }) => (<FormItem><FormLabel>Speaker {i + 1}</FormLabel><FormControl><Input placeholder="Speaker Name" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
                 ))}
               </div>
             </div>
