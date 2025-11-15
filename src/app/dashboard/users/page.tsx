@@ -104,6 +104,11 @@ export default function UsersPage() {
     setEditingUser(user);
     setIsFormOpen(true);
   }
+  
+  const openNewForm = () => {
+    setEditingUser(null);
+    setIsFormOpen(true);
+  };
 
   const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t }), [fetchUsers, currentUser, t]);
   
@@ -162,8 +167,8 @@ export default function UsersPage() {
                 </AlertDialog>
               </div>
             </CardHeader>
-            <CardContent className="space-y-2 text-sm">
-              <div className='flex justify-between'>
+            <CardContent className="space-y-4 text-sm">
+              <div className="flex items-center justify-between gap-4">
                 <div>
                   <p className="font-semibold">{t('common.role')}</p>
                   <Badge variant="secondary" className="capitalize mt-1">{t(`users.role${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`)}</Badge>
@@ -193,13 +198,13 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold font-headline">{t('users.title')}</h1>
           <p className="text-muted-foreground">{t('users.description')}</p>
         </div>
-        <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingUser(null); }}>
-          <DialogTrigger asChild>
-            <Button onClick={() => setEditingUser(null)}>
-              <PlusCircle className="mr-2 h-4 w-4" />
-              {t('users.addUser')}
-            </Button>
-          </DialogTrigger>
+        <Button onClick={openNewForm}>
+          <PlusCircle className="mr-2 h-4 w-4" />
+          {t('users.addUser')}
+        </Button>
+      </div>
+
+      <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingUser(null); }}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{dialogTitle}</DialogTitle>
@@ -207,7 +212,7 @@ export default function UsersPage() {
             <UserForm onSubmit={formSubmitHandler} defaultValues={formDefaultValues} isEditMode={!!editingUser} t={t} />
           </DialogContent>
         </Dialog>
-      </div>
+
       {loading ? (
          <div className="space-y-4">
             <Skeleton className="h-10 w-1/3" />

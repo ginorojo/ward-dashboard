@@ -14,6 +14,12 @@ import { bishopricNoteSchema } from '@/lib/schemas';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslation } from '@/lib/i18n';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { format } from 'date-fns';
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
+import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type NoteFormValues = z.infer<typeof bishopricNoteSchema>;
 
@@ -28,6 +34,7 @@ export default function BishopricMeetingPage() {
   const [editingNote, setEditingNote] = useState<BishopricMeetingNote | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   const fetchMeetings = async () => {
     if (!firestore) return;
@@ -107,8 +114,59 @@ export default function BishopricMeetingPage() {
     }
   };
   
+  const handleSelectChange = (meetingId: string) => {
+    const meeting = meetings.find(m => m.id === meetingId);
+    if (meeting) {
+      setSelectedMeeting(meeting);
+    }
+  };
+  
   const dialogTitle = editingNote ? t('bishopricMeeting.editNote') : t('bishopricMeeting.createNewNote');
   const formDefaultValues = editingNote ? { ...editingNote, date: editingNote.date.toDate() } : { meetingId: selectedMeeting?.id || '' };
+
+  const renderMobileNotes = () => (
+    <div className="space-y-4">
+      {notes.map(note => (
+        <Card key={note.id}>
+          <CardContent className="p-4">
+            <div className="flex justify-between items-start">
+              <div>
+                <p className="text-sm font-semibold">{format(note.date.toDate(), 'PPP')}</p>
+                <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{note.content}</p>
+              </div>
+              <AlertDialog>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => handleEditNote(note)}>{t('common.edit')}</DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <AlertDialogTrigger asChild>
+                      <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
+                    </AlertDialogTrigger>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>{t('common.delete')} Note?</AlertDialogTitle>
+                    <AlertDialogDescription>{t('bishopricMeeting.deleteNoteConfirm')}</AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteNote(note.id)} className="bg-destructive hover:bg-destructive/90">{t('common.delete')}</AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
 
   return (
     <div className="space-y-8">
@@ -144,15 +202,42 @@ export default function BishopricMeetingPage() {
                 </CardContent>
             </Card>
         ) : (
-            <NotesList 
-                meetings={meetings}
-                notes={notes}
-                selectedMeeting={selectedMeeting}
-                onSelectMeeting={setSelectedMeeting}
-                onEditNote={handleEditNote}
-                onDeleteNote={handleDeleteNote}
-                t={t}
-            />
+          <>
+            <div className="flex justify-end">
+              <Select onValueChange={handleSelectChange} value={selectedMeeting?.id}>
+                  <SelectTrigger className="w-full sm:w-[280px]">
+                      <SelectValue placeholder={t('bishopricMeeting.selectAMeeting')} />
+                  </SelectTrigger>
+                  <SelectContent>
+                      {meetings.map(meeting => (
+                          <SelectItem key={meeting.id} value={meeting.id}>
+                              {format(meeting.date.toDate(), 'PPP')}
+                          </SelectItem>
+                      ))}
+                  </SelectContent>
+              </Select>
+            </div>
+
+            {loadingNotes ? (
+              <Skeleton className="h-64 w-full" />
+            ) : notes.length === 0 ? (
+              <Card className="text-center py-16">
+                <CardContent>
+                    <h3 className="text-lg font-semibold">{t('bishopricMeeting.noNotes')}</h3>
+                    <p className="text-muted-foreground text-sm">{t('bishopricMeeting.noNotesDescription')}</p>
+                </CardContent>
+              </Card>
+            ) : isMobile ? (
+              renderMobileNotes()
+            ) : (
+              <NotesList 
+                  notes={notes}
+                  onEditNote={handleEditNote}
+                  onDeleteNote={handleDeleteNote}
+                  t={t}
+              />
+            )}
+          </>
         )}
     </div>
   );
