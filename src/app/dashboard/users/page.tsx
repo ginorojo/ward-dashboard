@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, Fragment } from 'react';
+import { useState, useEffect, useMemo, Fragment, useCallback } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
 import { getCollection, updateUserProfile, logAction, deleteUser } from '@/lib/firebase/firestore';
@@ -120,7 +120,7 @@ export default function UsersPage() {
     fetchUsers();
   };
 
-  const handleDeleteUser = (uid: string) => {
+  const handleDeleteUser = useCallback((uid: string) => {
     if (!authUser || !firestore) {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Could not delete user. Firebase not available.' });
         return;
@@ -129,7 +129,7 @@ export default function UsersPage() {
     logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
     toast({ title: t('common.success'), description: t('users.userDeleted') });
     fetchUsers();
-  }
+  }, [firestore, authUser, t]);
   
   const openEditForm = (user: UserProfile) => {
     setEditingUser(user);
