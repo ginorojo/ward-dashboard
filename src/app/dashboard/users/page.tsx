@@ -112,13 +112,22 @@ export default function UsersPage() {
     fetchUsers();
   }
 
-  const handleStatusToggle = useCallback((user: UserProfile) => {
+ const handleStatusToggle = useCallback(async (userToToggle: UserProfile) => {
     if (!authUser || !firestore) return;
-    updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
-    logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
-    toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
-    fetchUsers();
-  }, [firestore, authUser, toast, t, fetchUsers]);
+    const newStatus = !userToToggle.isActive;
+    try {
+        await updateUserProfile(firestore, userToToggle.uid, { isActive: newStatus });
+        logAction(firestore, authUser.uid, 'update', 'user', userToToggle.uid, `Set status to ${newStatus ? 'active' : 'inactive'}`);
+        toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
+        setUsers(currentUsers =>
+            currentUsers.map(user =>
+                user.uid === userToToggle.uid ? { ...user, isActive: newStatus } : user
+            )
+        );
+    } catch (error) {
+        toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
+    }
+}, [firestore, authUser, toast]);
   
   const handleDeleteUser = useCallback((uid: string) => {
     if (!authUser || !firestore) {

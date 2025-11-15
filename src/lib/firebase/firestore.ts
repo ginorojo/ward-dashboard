@@ -131,7 +131,7 @@ export const getUsers = async (firestore: Firestore): Promise<UserProfile[]> => 
 export const updateUserProfile = (firestore: Firestore, uid: string, data: Partial<UserProfile>) => {
   const userRef = doc(firestore, 'users', uid);
   const updateData = { ...data, updatedAt: serverTimestamp() };
-  updateDoc(userRef, updateData)
+  return updateDoc(userRef, updateData) // return the promise
     .catch(serverError => {
       const permissionError = new FirestorePermissionError({
         path: userRef.path,
@@ -139,6 +139,7 @@ export const updateUserProfile = (firestore: Firestore, uid: string, data: Parti
         requestResourceData: updateData
       });
       errorEmitter.emit('permission-error', permissionError);
+      throw serverError; // Re-throw to be caught by the caller
     });
 };
 
