@@ -59,7 +59,7 @@ export default function UsersPage() {
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore) return;
     try {
-      const userId = await addDocument(firestore, 'users', {
+      await addDocument(firestore, 'users', {
         name: data.name,
         email: data.email,
         role: data.role,
@@ -70,34 +70,28 @@ export default function UsersPage() {
       setIsFormOpen(false);
       fetchUsers();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to create user.' });
+      // The contextual error is already emitted by addDocument
+      // We can still show a generic toast if we want
+      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to create user.' });
     }
   };
   
-  const handleUpdateUser = async (data: UserFormValues) => {
+  const handleUpdateUser = (data: UserFormValues) => {
     if(!authUser || !firestore || !editingUser) return;
-    try {
-        await updateUserProfile(firestore, editingUser.uid, {name: data.name, email: data.email, role: data.role});
-        await logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
-        toast({ title: t('common.success'), description: t('users.userUpdated') });
-        setIsFormOpen(false);
-        setEditingUser(null);
-        fetchUsers();
-    } catch(error: any) {
-         toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to update user.' });
-    }
+    updateUserProfile(firestore, editingUser.uid, {name: data.name, email: data.email, role: data.role});
+    logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
+    toast({ title: t('common.success'), description: t('users.userUpdated') });
+    setIsFormOpen(false);
+    setEditingUser(null);
+    fetchUsers();
   }
 
-  const handleStatusToggle = async (user: UserProfile) => {
+  const handleStatusToggle = (user: UserProfile) => {
     if (!authUser || !firestore) return;
-    try {
-      await updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
-      await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
-      toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
-      fetchUsers();
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
-    }
+    updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
+    logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
+    toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
+    fetchUsers();
   };
   
   const openEditForm = (user: UserProfile) => {
@@ -226,5 +220,3 @@ export default function UsersPage() {
     </div>
   );
 }
-
-    

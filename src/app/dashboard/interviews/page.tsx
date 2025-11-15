@@ -66,7 +66,7 @@ export default function InterviewsPage() {
       setEditingInterview(null);
       fetchInterviews();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to save interview.' });
+      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to save interview.' });
     }
   };
 
@@ -80,27 +80,19 @@ export default function InterviewsPage() {
     setIsFormOpen(true);
   }
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (!user || !firestore) return;
-    try {
-      await deleteDocument(firestore, 'interviews', id, user.uid, 'interview');
-      toast({ title: t('common.success'), description: t('interviews.interviewDeleted') });
-      fetchInterviews();
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete interview.' });
-    }
+    deleteDocument(firestore, 'interviews', id, user.uid, 'interview');
+    toast({ title: t('common.success'), description: t('interviews.interviewDeleted') });
+    fetchInterviews();
   };
   
-  const handleStatusToggle = async (interview: Interview) => {
+  const handleStatusToggle = (interview: Interview) => {
       if (!user || !firestore) return;
       const newStatus = interview.status === 'pending' ? 'completed' : 'pending';
-      try {
-          await updateDocument(firestore, 'interviews', interview.id, { status: newStatus }, user.uid, 'interview');
-          toast({ title: t('common.success'), description: t('interviews.statusUpdated')});
-          fetchInterviews();
-      } catch (error) {
-          toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update status.' });
-      }
+      updateDocument(firestore, 'interviews', interview.id, { status: newStatus }, user.uid, 'interview');
+      toast({ title: t('common.success'), description: t('interviews.statusUpdated')});
+      fetchInterviews();
   };
 
   const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, handleStatusToggle, t }), [interviews, t]);

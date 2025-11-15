@@ -65,20 +65,16 @@ export default function SacramentMeetingPage() {
       setCurrentView('list');
       setSelectedAgenda(null);
     } catch (error: any) {
-      toast({ variant: 'destructive', title: t('common.error'), description: error.message || t('sacramentMeeting.failedToSaveAgenda') });
+      toast({ variant: 'destructive', title: t('common.error'), description: t('sacramentMeeting.failedToSaveAgenda') });
     }
   };
 
-  const handleDeleteAgenda = async () => {
+  const handleDeleteAgenda = () => {
     if (!user || !firestore || !selectedAgenda) return;
-    try {
-      await deleteDocument(firestore, 'sacramentMeetings', selectedAgenda.id, user.uid, 'sacramentMeeting');
-      toast({ title: t('common.success'), description: t('sacramentMeeting.agendaDeleted') });
-      setCurrentView('list');
-      setSelectedAgenda(null);
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete agenda.' });
-    }
+    deleteDocument(firestore, 'sacramentMeetings', selectedAgenda.id, user.uid, 'sacramentMeeting');
+    toast({ title: t('common.success'), description: t('sacramentMeeting.agendaDeleted') });
+    setCurrentView('list');
+    setSelectedAgenda(null);
   };
   
   const handleEdit = (agenda: SacramentMeeting) => {

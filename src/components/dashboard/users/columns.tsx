@@ -83,29 +83,21 @@ export const columns = ({ fetchUsers, currentUser, t }: ColumnsProps): ColumnDef
       const firestore = useFirestore();
       const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
-      const handleStatusToggle = async () => {
+      const handleStatusToggle = () => {
         if (!authUser || !firestore) return;
-        try {
-          await updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
-          await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
-          toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
-          fetchUsers();
-        } catch (error) {
-          toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
-        }
+        updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
+        logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
+        toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
+        fetchUsers();
       };
       
-      const handleUpdateUser = async (data: UserFormValues) => {
+      const handleUpdateUser = (data: UserFormValues) => {
         if(!authUser || !firestore) return;
-        try {
-            await updateUserProfile(firestore, user.uid, {name: data.name, email: data.email, role: data.role});
-            await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Updated user profile`);
-            toast({ title: t('common.success'), description: t('users.userUpdated') });
-            setIsEditDialogOpen(false);
-            fetchUsers();
-        } catch(error: any) {
-             toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to update user.' });
-        }
+        updateUserProfile(firestore, user.uid, {name: data.name, email: data.email, role: data.role});
+        logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Updated user profile`);
+        toast({ title: t('common.success'), description: t('users.userUpdated') });
+        setIsEditDialogOpen(false);
+        fetchUsers();
       }
 
       const isCurrentUser = currentUser?.uid === user.uid;

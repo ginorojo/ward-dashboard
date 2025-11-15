@@ -83,7 +83,7 @@ export default function BishopricMeetingPage() {
     if (!user || !firestore || !selectedMeeting) return;
     try {
       if (editingNote) {
-        await updateNoteInMeeting(firestore, selectedMeeting.id, editingNote.id, data, user.uid);
+        updateNoteInMeeting(firestore, selectedMeeting.id, editingNote.id, data, user.uid);
         toast({ title: t('common.success'), description: t('bishopricMeeting.noteUpdated') });
       } else {
         await addNoteToMeeting(firestore, selectedMeeting.id, data, user.uid);
@@ -94,7 +94,7 @@ export default function BishopricMeetingPage() {
       const newNotes = await getNotesForMeeting(firestore, selectedMeeting.id);
       setNotes(newNotes);
     } catch (error: any) {
-      toast({ variant: 'destructive', title: t('common.error'), description: error.message || t('bishopricMeeting.failedToSaveNote') });
+      toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToSaveNote') });
     }
   };
 
@@ -103,15 +103,11 @@ export default function BishopricMeetingPage() {
     setIsFormOpen(true);
   };
 
-  const handleDeleteNote = async (noteId: string) => {
+  const handleDeleteNote = (noteId: string) => {
     if (!user || !firestore || !selectedMeeting) return;
-    try {
-      await deleteNoteFromMeeting(firestore, selectedMeeting.id, noteId, user.uid);
-      toast({ title: t('common.success'), description: t('bishopricMeeting.noteDeleted') });
-      setNotes(notes.filter(n => n.id !== noteId));
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete note.' });
-    }
+    deleteNoteFromMeeting(firestore, selectedMeeting.id, noteId, user.uid);
+    toast({ title: t('common.success'), description: t('bishopricMeeting.noteDeleted') });
+    setNotes(notes.filter(n => n.id !== noteId));
   };
   
   const handleSelectChange = (meetingId: string) => {
