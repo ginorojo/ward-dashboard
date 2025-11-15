@@ -1,20 +1,20 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import ThemeToggle from './settings/theme-toggle';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { signOutUser } from '@/lib/firebase/auth';
+import { signOut } from 'firebase/auth';
 import { useRouter } from 'next/navigation';
 import { LogOut, Settings } from 'lucide-react';
+import { UserProfile } from '@/lib/types';
 
-export default function DashboardHeader() {
-  const { userProfile } = useAuth();
+export default function DashboardHeader({ userProfile }: { userProfile: UserProfile | null }) {
+  const auth = useAuth();
   const router = useRouter();
 
   const handleLogout = async () => {
-    await signOutUser();
+    await signOut(auth);
     router.push('/login');
   };
 

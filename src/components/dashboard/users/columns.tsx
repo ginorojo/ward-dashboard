@@ -15,13 +15,14 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useAuth } from '@/hooks/use-auth';
+import { useUser } from '@/firebase';
 import { updateUserProfile, logAction } from '@/lib/firebase/firestore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import UserForm from './user-form';
 import { userSchema } from '@/lib/schemas';
 import { z } from 'zod';
+import { useFirestore } from '@/firebase';
 
 type UserFormValues = z.infer<typeof userSchema>;
 
@@ -77,14 +78,15 @@ export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<Us
     cell: ({ row }) => {
       const user = row.original;
       const { toast } = useToast();
-      const { user: authUser } = useAuth();
+      const { user: authUser } = useUser();
+      const firestore = useFirestore();
       const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
       const handleStatusToggle = async () => {
-        if (!authUser) return;
+        if (!authUser || !firestore) return;
         try {
-          await updateUserProfile(user.uid, { isActive: !user.isActive });
-          await logAction(authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
+          await updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
+          await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
           toast({ title: 'Success', description: 'User status updated.' });
           fetchUsers();
         } catch (error) {
@@ -93,10 +95,10 @@ export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<Us
       };
       
       const handleUpdateUser = async (data: UserFormValues) => {
-        if(!authUser) return;
+        if(!authUser || !firestore) return;
         try {
-            await updateUserProfile(user.uid, {name: data.name, email: data.email, role: data.role});
-            await logAction(authUser.uid, 'update', 'user', user.uid, `Updated user profile`);
+            await updateUserProfile(firestore, user.uid, {name: data.name, email: data.email, role: data.role});
+            await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Updated user profile`);
             toast({ title: 'Success', description: 'User updated successfully.' });
             setIsEditDialogOpen(false);
             fetchUsers();

@@ -10,8 +10,10 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
-import { signInUser, logUserLogin } from '@/lib/firebase/auth';
 import { Loader2 } from 'lucide-react';
+import { useAuth, useFirestore } from '@/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -19,6 +21,8 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+  const auth = useAuth();
+  const firestore = useFirestore();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -30,10 +34,28 @@ export default function LoginForm() {
 
   async function onSubmit(data: LoginFormValues) {
     setLoading(true);
+    if (!auth || !firestore) {
+        toast({
+            variant: 'destructive',
+            title: 'Login Failed',
+            description: 'Firebase not initialized. Please try again later.',
+        });
+        setLoading(false);
+        return;
+    }
     try {
-      const userCredential = await signInUser(data.email, data.password);
-      if (userCredential) {
-          await logUserLogin(userCredential.user.uid);
+      const userCredential = await signInWithEmailAndPassword(auth, data.email, data.password);
+      if (userCredential.user) {
+          const logRef = doc(collection(firestore, 'logs'));
+          await setDoc(logRef, {
+              userId: userCredential.user.uid,
+              action: 'login',
+              entity: 'user',
+              entityId: userCredential.user.uid,
+              timestamp: serverTimestamp(),
+              details: 'User logged in'
+          });
+
           toast({
             title: 'Login Successful',
             description: 'Welcome back!',

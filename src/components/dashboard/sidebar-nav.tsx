@@ -4,9 +4,10 @@ import { usePathname, useRouter } from 'next/navigation';
 import { BookOpenCheck, BookUser, CalendarCheck, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
 import { SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
 import Logo from '@/components/icons/logo';
-import { useAuth } from '@/hooks/use-auth';
-import { signOutUser } from '@/lib/firebase/auth';
+import { useAuth } from '@/firebase';
+import { signOut } from 'firebase/auth';
 import { Separator } from '../ui/separator';
+import { UserProfile } from '@/lib/types';
 
 const navItems = [
     { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -20,13 +21,14 @@ const bottomNavItems = [
     { href: '/dashboard/settings', label: 'Settings', icon: Settings },
 ]
 
-export default function SidebarNav() {
+export default function SidebarNav({ userProfile }: { userProfile: UserProfile | null }) {
     const pathname = usePathname();
     const router = useRouter();
-    const { role, userProfile } = useAuth();
+    const auth = useAuth();
+    const role = userProfile?.role;
 
     const handleLogout = async () => {
-        await signOutUser();
+        await signOut(auth);
         router.push('/login');
     }
 

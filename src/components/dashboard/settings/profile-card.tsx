@@ -1,13 +1,29 @@
 'use client';
 
-import { useAuth } from '@/hooks/use-auth';
+import { useUser, useFirebase } from '@/firebase';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { UserProfile } from '@/lib/types';
+import { useEffect, useState } from 'react';
+import { doc, getDoc } from 'firebase/firestore';
 
 export default function ProfileCard() {
-  const { userProfile } = useAuth();
+  const { user } = useUser();
+  const { firestore } = useFirebase();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    if (user && firestore) {
+      const userDocRef = doc(firestore, 'users', user.uid);
+      getDoc(userDocRef).then(userDoc => {
+        if (userDoc.exists()) {
+          setUserProfile(userDoc.data() as UserProfile);
+        }
+      });
+    }
+  }, [user, firestore]);
 
   const getInitials = (name?: string) => {
     if (!name) return '';
@@ -42,7 +58,7 @@ export default function ProfileCard() {
           <div>
             <p className="font-medium">Account Created</p>
             <p className="text-muted-foreground mt-1">
-              {userProfile.createdAt ? format(userProfile.createdAt.toDate(), 'PPP') : 'N/A'}
+              {userProfile.createdAt ? format((userProfile.createdAt as any).toDate(), 'PPP') : 'N/A'}
             </p>
           </div>
         </div>
