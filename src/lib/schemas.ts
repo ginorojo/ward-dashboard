@@ -1,0 +1,51 @@
+import { z } from 'zod';
+
+export const loginSchema = z.object({
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+});
+
+export const userSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  email: z.string().email({ message: 'Invalid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }).optional(),
+  role: z.enum(['bishop', 'counselor', 'secretary']),
+});
+
+export const interviewSchema = z.object({
+  personInterviewed: z.string().min(2, { message: 'Name is required' }),
+  interviewer: z.string().min(2, { message: 'Interviewer is required' }),
+  purpose: z.string().min(3, { message: 'Purpose is required' }),
+  scheduledDate: z.date(),
+  status: z.enum(['pending', 'completed']),
+});
+
+export const bishopricNoteSchema = z.object({
+  date: z.date(),
+  content: z.string().min(10, { message: 'Note content must be at least 10 characters' }),
+  meetingId: z.string()
+});
+
+export const sacramentMeetingSchema = z.object({
+    date: z.date(),
+    preside: z.string().min(2, "Required"),
+    dirige: z.string().min(2, "Required"),
+    pianist: z.string().min(2, "Required"),
+    authorities: z.string().optional(),
+    hymnSacramental: z.object({
+        name: z.string().min(2, "Required"),
+        number: z.coerce.number().min(1, "Required"),
+    }),
+    speakers: z.array(z.string()).max(4),
+    hymnFinal: z.object({
+        name: z.string().min(2, "Required"),
+        number: z.coerce.number().min(1, "Required"),
+    }),
+    closingPrayer: z.string().min(2, "Required"),
+    asuntosDelBarrio: z.array(z.object({
+        id: z.string().optional(),
+        type: z.enum(['relevo', 'sostenimiento']),
+        personName: z.string().min(2, "Required"),
+        calling: z.string().min(2, "Required"),
+    })).optional(),
+});

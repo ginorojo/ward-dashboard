@@ -1,0 +1,54 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function getRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+    }
+    
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // USERS
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && getRole() == "bishop";
+      allow update: if isSignedIn() && (
+        getRole() == "bishop" ||
+        request.auth.uid == userId
+      );
+      allow delete: if isSignedIn() && getRole() == "bishop";
+    }
+
+    // INTERVIEWS
+    match /interviews/{id} {
+      allow read, create, update, delete: if isSignedIn();
+    }
+
+    // BISHOPRIC MEETINGS + NOTES
+    match /bishopricMeetings/{id} {
+      allow read, create, update, delete: if isSignedIn();
+
+      match /notes/{noteId} {
+        allow read, create, update, delete: if isSignedIn();
+      }
+    }
+
+    // SACRAMENT MEETINGS + ASUNTOS BARRIO
+    match /sacramentMeetings/{id} {
+      allow read, create, update, delete: if isSignedIn();
+
+      match /asuntosBarrio/{asuntoId} {
+        allow read, create, update, delete: if isSignedIn();
+      }
+    }
+
+    // LOGS
+    match /logs/{logId} {
+      allow create: if isSignedIn();
+      allow read, update, delete: if false;
+    }
+  }
+}
