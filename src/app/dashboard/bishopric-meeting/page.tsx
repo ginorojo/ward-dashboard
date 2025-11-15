@@ -166,12 +166,12 @@ export default function BishopricMeetingPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className=" flex items-center justify-between sm: flex-col  ">
         <div>
           <h1 className="text-3xl font-bold font-headline">{t('bishopricMeeting.title')}</h1>
           <p className="text-muted-foreground">{t('bishopricMeeting.description')}</p>
         </div>
-        <div className='flex gap-2'>
+        <div className='flex gap-1 sm: flex-col'>
             <Button variant="outline" onClick={handleCreateMeeting}>{t('bishopricMeeting.createTodaysMeeting')}</Button>
             <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingNote(null); }}>
                 <DialogTrigger asChild>
