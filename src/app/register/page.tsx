@@ -1,9 +1,12 @@
+'use client';
 import RegisterForm from '@/components/auth/register-form';
 import Logo from '@/components/icons/logo';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { useTranslation } from '@/lib/i18n';
 import Link from 'next/link';
 
 export default function RegisterPage() {
+  const { t } = useTranslation();
   return (
     <div className="flex min-h-screen items-center justify-center bg-background p-4">
       <Card className="w-full max-w-md shadow-2xl">
@@ -11,15 +14,15 @@ export default function RegisterPage() {
             <div className="flex justify-center items-center mb-4">
                 <Logo className="h-12 w-12 text-primary" />
             </div>
-          <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
-          <CardDescription>Enter your details to get started</CardDescription>
+          <CardTitle className="text-2xl font-headline">{t('auth.registerTitle')}</CardTitle>
+          <CardDescription>{t('auth.registerDescription')}</CardDescription>
         </CardHeader>
         <CardContent>
           <RegisterForm />
            <div className="mt-4 text-center text-sm">
-            Already have an account?{' '}
+            {t('auth.alreadyHaveAccount')}{' '}
             <Link href="/login" className="underline">
-              Sign in
+              {t('auth.signIn')}
             </Link>
           </div>
         </CardContent>

@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { UserProfile } from '@/lib/types';
 import { doc, getDoc } from 'firebase/firestore';
+import { useTranslation } from '@/lib/i18n';
 
 export default function DashboardHomePage() {
   const { user, isUserLoading } = useUser();
@@ -17,6 +18,8 @@ export default function DashboardHomePage() {
     agendas: 0,
   });
   const [loading, setLoading] = useState(true);
+  const { t } = useTranslation();
+
 
   useEffect(() => {
     if (user && firestore) {
@@ -53,14 +56,14 @@ export default function DashboardHomePage() {
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold font-headline">Welcome, {loading ? '...' : userProfile?.name}</h1>
-        <p className="text-muted-foreground">Here's an overview of your ward's activities.</p>
+        <h1 className="text-3xl font-bold font-headline">{t('dashboard.welcome')}, {loading ? '...' : userProfile?.name}</h1>
+        <p className="text-muted-foreground">{t('dashboard.overview')}</p>
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Users</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.totalUsers')}</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
@@ -69,22 +72,22 @@ export default function DashboardHomePage() {
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Pending Interviews</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.pendingInterviews')}</CardTitle>
             <CalendarCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{loading ? '...' : stats.interviews}</div>
-            <p className="text-xs text-muted-foreground">Total scheduled interviews</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.totalScheduled')}</p>
           </CardContent>
         </Card>
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Sacrament Agendas</CardTitle>
+            <CardTitle className="text-sm font-medium">{t('dashboard.sacramentAgendas')}</CardTitle>
             <BookOpenCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{loading ? '...' : stats.agendas}</div>
-            <p className="text-xs text-muted-foreground">Total created agendas</p>
+            <p className="text-xs text-muted-foreground">{t('dashboard.totalCreatedAgendas')}</p>
           </CardContent>
         </Card>
       </div>

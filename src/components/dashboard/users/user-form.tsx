@@ -15,9 +15,10 @@ interface UserFormProps {
   onSubmit: (data: UserFormValues) => Promise<void>;
   defaultValues?: Partial<UserFormValues>;
   isEditMode?: boolean;
+  t: (key: string) => string;
 }
 
-export default function UserForm({ onSubmit, defaultValues, isEditMode = false }: UserFormProps) {
+export default function UserForm({ onSubmit, defaultValues, isEditMode = false, t }: UserFormProps) {
   const form = useForm<UserFormValues>({
     resolver: zodResolver(userSchema),
     defaultValues: defaultValues || {
@@ -38,7 +39,7 @@ export default function UserForm({ onSubmit, defaultValues, isEditMode = false }
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>{t('users.fullName')}</FormLabel>
               <FormControl>
                 <Input placeholder="John Doe" {...field} />
               </FormControl>
@@ -51,7 +52,7 @@ export default function UserForm({ onSubmit, defaultValues, isEditMode = false }
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('common.email')}</FormLabel>
               <FormControl>
                 <Input type="email" placeholder="name@example.com" {...field} />
               </FormControl>
@@ -65,7 +66,7 @@ export default function UserForm({ onSubmit, defaultValues, isEditMode = false }
             name="password"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Password</FormLabel>
+                <FormLabel>{t('common.password')}</FormLabel>
                 <FormControl>
                   <Input type="password" placeholder="••••••••" {...field} />
                 </FormControl>
@@ -79,17 +80,17 @@ export default function UserForm({ onSubmit, defaultValues, isEditMode = false }
           name="role"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Role</FormLabel>
+              <FormLabel>{t('common.role')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
+                    <SelectValue placeholder={t('common.role')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="bishop">Bishop</SelectItem>
-                  <SelectItem value="counselor">Counselor</SelectItem>
-                  <SelectItem value="secretary">Secretary</SelectItem>
+                  <SelectItem value="bishop">{t('users.roleBishop')}</SelectItem>
+                  <SelectItem value="counselor">{t('users.roleCounselor')}</SelectItem>
+                  <SelectItem value="secretary">{t('users.roleSecretary')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -98,7 +99,7 @@ export default function UserForm({ onSubmit, defaultValues, isEditMode = false }
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {isEditMode ? 'Save Changes' : 'Create User'}
+          {isEditMode ? t('users.saveChanges') : t('users.createNewUser')}
         </Button>
       </form>
     </Form>

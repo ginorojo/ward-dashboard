@@ -10,11 +10,14 @@ import { LogOut, Settings, PanelLeft } from 'lucide-react';
 import { UserProfile } from '@/lib/types';
 import { useSidebar } from '@/components/ui/sidebar';
 import { Button } from '../ui/button';
+import { useTranslation } from '@/lib/i18n';
+import LanguageSwitcher from './language-switcher';
 
 export default function DashboardHeader({ userProfile }: { userProfile: UserProfile | null }) {
   const auth = useAuth();
   const router = useRouter();
   const { toggleSidebar } = useSidebar();
+  const { t } = useTranslation();
 
   const handleLogout = async () => {
     await signOut(auth);
@@ -37,6 +40,7 @@ export default function DashboardHeader({ userProfile }: { userProfile: UserProf
         {/* Can add breadcrumbs or page title here if needed */}
       </div>
       <div className="flex items-center gap-4">
+        <LanguageSwitcher />
         <ThemeToggle />
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -56,12 +60,12 @@ export default function DashboardHeader({ userProfile }: { userProfile: UserProf
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={() => router.push('/dashboard/settings')}>
                 <Settings className="mr-2 h-4 w-4" />
-                <span>Settings</span>
+                <span>{t('dashboard.settings')}</span>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={handleLogout}>
               <LogOut className="mr-2 h-4 w-4" />
-              <span>Log out</span>
+              <span>{t('dashboard.logout')}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

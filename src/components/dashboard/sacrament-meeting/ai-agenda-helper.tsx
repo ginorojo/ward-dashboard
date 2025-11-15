@@ -13,9 +13,10 @@ import { Card, CardContent } from '@/components/ui/card';
 
 interface AIAgendaHelperProps {
   currentAgenda: SacramentMeeting | null;
+  t: (key: string) => string;
 }
 
-export default function AIAgendaHelper({ currentAgenda }: AIAgendaHelperProps) {
+export default function AIAgendaHelper({ currentAgenda, t }: AIAgendaHelperProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [wardNeeds, setWardNeeds] = useState('');
   const [pastMeetings, setPastMeetings] = useState('');
@@ -39,8 +40,8 @@ export default function AIAgendaHelper({ currentAgenda }: AIAgendaHelperProps) {
     if (!wardNeeds || !pastMeetings) {
       toast({
         variant: 'destructive',
-        title: 'Missing Information',
-        description: 'Please provide details on ward needs and past meetings.',
+        title: t('sacramentMeeting.missingInfo'),
+        description: t('sacramentMeeting.missingInfoDescription'),
       });
       return;
     }
@@ -57,8 +58,8 @@ export default function AIAgendaHelper({ currentAgenda }: AIAgendaHelperProps) {
     } catch (error) {
       toast({
         variant: 'destructive',
-        title: 'AI Generation Failed',
-        description: 'Could not generate suggestions. Please try again.',
+        title: t('sacramentMeeting.aiFailed'),
+        description: t('sacramentMeeting.aiFailedDescription'),
       });
     } finally {
       setLoading(false);
@@ -70,31 +71,31 @@ export default function AIAgendaHelper({ currentAgenda }: AIAgendaHelperProps) {
       <DialogTrigger asChild>
         <Button variant="outline">
           <Sparkles className="mr-2 h-4 w-4" />
-          AI Helper
+          {t('sacramentMeeting.aiHelper')}
         </Button>
       </DialogTrigger>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>AI Agenda Improvement Suggestions</DialogTitle>
+          <DialogTitle>{t('sacramentMeeting.aiHelperTitle')}</DialogTitle>
           <DialogDescription>
-            Provide some context about your ward, and our AI assistant will suggest improvements for your sacrament meeting agenda.
+            {t('sacramentMeeting.aiHelperDescription')}
           </DialogDescription>
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="ward-needs">Ward Needs</Label>
+            <Label htmlFor="ward-needs">{t('sacramentMeeting.wardNeeds')}</Label>
             <Textarea
               id="ward-needs"
-              placeholder="e.g., Focus on ministering, youth engagement, temple attendance..."
+              placeholder={t('sacramentMeeting.wardNeedsPlaceholder')}
               value={wardNeeds}
               onChange={(e) => setWardNeeds(e.target.value)}
             />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="past-meetings">Past Meeting Data</Label>
+            <Label htmlFor="past-meetings">{t('sacramentMeeting.pastMeetingData')}</Label>
             <Textarea
               id="past-meetings"
-              placeholder="e.g., Last month's themes were faith and repentance. Attendance was average..."
+              placeholder={t('sacramentMeeting.pastMeetingDataPlaceholder')}
               value={pastMeetings}
               onChange={(e) => setPastMeetings(e.target.value)}
             />
@@ -102,12 +103,12 @@ export default function AIAgendaHelper({ currentAgenda }: AIAgendaHelperProps) {
         </div>
         <Button onClick={handleGenerateSuggestion} disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Generate Suggestions
+          {t('sacramentMeeting.generateSuggestions')}
         </Button>
 
         {suggestion && (
           <div className="mt-6">
-            <h3 className="text-lg font-semibold mb-2">Suggested Improvements</h3>
+            <h3 className="text-lg font-semibold mb-2">{t('sacramentMeeting.suggestedImprovements')}</h3>
             <Card>
                 <CardContent className="p-4 text-sm bg-secondary rounded-md">
                     <p className='whitespace-pre-wrap'>{suggestion}</p>

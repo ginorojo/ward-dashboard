@@ -14,6 +14,7 @@ import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore, errorEmitter, FirestorePermissionError } from '@/firebase';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useTranslation } from '@/lib/i18n';
 
 // We omit password confirmation from the type that goes to the server.
 const registerSchema = userSchema.extend({
@@ -28,6 +29,7 @@ export default function RegisterForm() {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
+  const { t } = useTranslation();
 
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -44,7 +46,7 @@ export default function RegisterForm() {
     if (!auth || !firestore) {
         toast({
             variant: 'destructive',
-            title: 'Registration Failed',
+            title: t('auth.registrationFailed'),
             description: 'Firebase not initialized. Please try again later.',
         });
         setLoading(false);
@@ -69,8 +71,8 @@ export default function RegisterForm() {
             setDoc(userDocRef, userData)
               .then(() => {
                   toast({
-                      title: 'Registration Successful',
-                      description: 'Your account has been created.',
+                      title: t('auth.registrationSuccess'),
+                      description: t('auth.accountCreated'),
                   });
                   router.push('/dashboard');
               })
@@ -89,7 +91,7 @@ export default function RegisterForm() {
         // This catches errors from createUserWithEmailAndPassword (e.g., email already in use)
         toast({
             variant: 'destructive',
-            title: 'Registration Failed',
+            title: t('auth.registrationFailed'),
             description: authError.message || 'Could not create account. Please try again.',
         });
         setLoading(false);
@@ -104,7 +106,7 @@ export default function RegisterForm() {
           name="name"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Full Name</FormLabel>
+              <FormLabel>{t('users.fullName')}</FormLabel>
               <FormControl>
                 <Input placeholder="John Doe" {...field} />
               </FormControl>
@@ -117,7 +119,7 @@ export default function RegisterForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('common.email')}</FormLabel>
               <FormControl>
                 <Input placeholder="name@example.com" {...field} />
               </FormControl>
@@ -130,7 +132,7 @@ export default function RegisterForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('common.password')}</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
@@ -140,7 +142,7 @@ export default function RegisterForm() {
         />
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Create Account
+          {t('auth.createAccount')}
         </Button>
       </form>
     </Form>

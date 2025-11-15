@@ -19,9 +19,10 @@ type InterviewFormValues = z.infer<typeof interviewSchema>;
 interface InterviewFormProps {
   onSubmit: (data: InterviewFormValues) => Promise<void>;
   defaultValues?: Partial<InterviewFormValues>;
+  t: (key: string) => string;
 }
 
-export default function InterviewForm({ onSubmit, defaultValues }: InterviewFormProps) {
+export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewFormProps) {
   const form = useForm<InterviewFormValues>({
     resolver: zodResolver(interviewSchema),
     defaultValues: defaultValues || {
@@ -43,9 +44,9 @@ export default function InterviewForm({ onSubmit, defaultValues }: InterviewForm
           name="personInterviewed"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Person to be Interviewed</FormLabel>
+              <FormLabel>{t('interviews.personToBeInterviewed')}</FormLabel>
               <FormControl>
-                <Input placeholder="Name of the member" {...field} />
+                <Input placeholder={t('interviews.nameOfMember')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -56,9 +57,9 @@ export default function InterviewForm({ onSubmit, defaultValues }: InterviewForm
           name="interviewer"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Interviewer</FormLabel>
+              <FormLabel>{t('interviews.interviewer')}</FormLabel>
               <FormControl>
-                <Input placeholder="Bishop, Counselor, etc." {...field} />
+                <Input placeholder={t('interviews.bishopCounselorEtc')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -69,9 +70,9 @@ export default function InterviewForm({ onSubmit, defaultValues }: InterviewForm
           name="purpose"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Purpose</FormLabel>
+              <FormLabel>{t('interviews.purpose')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Temple recommend, ministering, etc." {...field} />
+                <Textarea placeholder={t('interviews.templeRecommendEtc')} {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -82,7 +83,7 @@ export default function InterviewForm({ onSubmit, defaultValues }: InterviewForm
           name="scheduledDate"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Date and Time</FormLabel>
+              <FormLabel>{t('interviews.dateTime')}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -93,7 +94,7 @@ export default function InterviewForm({ onSubmit, defaultValues }: InterviewForm
                         !field.value && 'text-muted-foreground'
                       )}
                     >
-                      {field.value ? format(field.value, 'PPP p') : <span>Pick a date</span>}
+                      {field.value ? format(field.value, 'PPp') : <span>{t('interviews.pickADate')}</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -117,16 +118,16 @@ export default function InterviewForm({ onSubmit, defaultValues }: InterviewForm
           name="status"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Status</FormLabel>
+              <FormLabel>{t('common.status')}</FormLabel>
               <Select onValueChange={field.onChange} defaultValue={field.value}>
                 <FormControl>
                   <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
+                    <SelectValue placeholder={t('interviews.selectStatus')} />
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="completed">Completed</SelectItem>
+                  <SelectItem value="pending">{t('interviews.pending')}</SelectItem>
+                  <SelectItem value="completed">{t('interviews.completed')}</SelectItem>
                 </SelectContent>
               </Select>
               <FormMessage />
@@ -135,7 +136,7 @@ export default function InterviewForm({ onSubmit, defaultValues }: InterviewForm
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {defaultValues ? 'Save Changes' : 'Create Interview'}
+          {defaultValues ? t('common.save') : t('common.create')}
         </Button>
       </form>
     </Form>

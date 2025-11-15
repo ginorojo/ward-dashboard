@@ -15,9 +15,10 @@ interface NotesListProps {
   onSelectMeeting: (meeting: BishopricMeeting) => void;
   onEditNote: (note: BishopricMeetingNote) => void;
   onDeleteNote: (noteId: string) => void;
+  t: (key: string) => string;
 }
 
-export default function NotesList({ meetings, notes, selectedMeeting, onSelectMeeting, onEditNote, onDeleteNote }: NotesListProps) {
+export default function NotesList({ meetings, notes, selectedMeeting, onSelectMeeting, onEditNote, onDeleteNote, t }: NotesListProps) {
   const handleSelectChange = (meetingId: string) => {
     const meeting = meetings.find(m => m.id === meetingId);
     if (meeting) {
@@ -30,13 +31,13 @@ export default function NotesList({ meetings, notes, selectedMeeting, onSelectMe
       <CardHeader>
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
-                <CardTitle>Meeting Notes</CardTitle>
-                <CardDescription>Notes for the selected meeting.</CardDescription>
+                <CardTitle>{t('bishopricMeeting.meetingNotes')}</CardTitle>
+                <CardDescription>{t('bishopricMeeting.notesForSelectedMeeting')}</CardDescription>
             </div>
             <div className="mt-4 sm:mt-0">
                 <Select onValueChange={handleSelectChange} value={selectedMeeting?.id}>
                     <SelectTrigger className="w-[280px]">
-                        <SelectValue placeholder="Select a meeting" />
+                        <SelectValue placeholder={t('bishopricMeeting.selectAMeeting')} />
                     </SelectTrigger>
                     <SelectContent>
                         {meetings.map(meeting => (
@@ -69,27 +70,27 @@ export default function NotesList({ meetings, notes, selectedMeeting, onSelectMe
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => onEditNote(note)}>
                             <Pencil className="mr-2 h-4 w-4" />
-                            Edit
+                            {t('common.edit')}
                           </DropdownMenuItem>
                           <AlertDialogTrigger asChild>
                             <DropdownMenuItem className="text-destructive">
                                 <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
+                                {t('common.delete')}
                             </DropdownMenuItem>
                           </AlertDialogTrigger>
                         </DropdownMenuContent>
                       </DropdownMenu>
                       <AlertDialogContent>
                             <AlertDialogHeader>
-                                <AlertDialogTitle>Delete Note?</AlertDialogTitle>
+                                <AlertDialogTitle>{t('common.delete')} Note?</AlertDialogTitle>
                                 <AlertDialogDescription>
-                                This action cannot be undone. This will permanently delete the note.
+                                {t('bishopricMeeting.deleteNoteConfirm')}
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>
-                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                                 <AlertDialogAction onClick={() => onDeleteNote(note.id)} className="bg-destructive hover:bg-destructive/90">
-                                    Delete
+                                    {t('common.delete')}
                                 </AlertDialogAction>
                             </AlertDialogFooter>
                         </AlertDialogContent>
@@ -100,8 +101,8 @@ export default function NotesList({ meetings, notes, selectedMeeting, onSelectMe
           </div>
         ) : (
           <div className="text-center text-muted-foreground py-16">
-            <p>No notes for this meeting.</p>
-            <p className="text-sm">Create a new note to get started.</p>
+            <p>{t('bishopricMeeting.noNotes')}</p>
+            <p className="text-sm">{t('bishopricMeeting.noNotesDescription')}</p>
           </div>
         )}
       </CardContent>

@@ -29,9 +29,10 @@ type UserFormValues = z.infer<typeof userSchema>;
 type ColumnsProps = {
   fetchUsers: () => void;
   currentUser: UserProfile | null;
+  t: (key: string) => string;
 }
 
-export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<UserProfile>[] => [
+export const columns = ({ fetchUsers, currentUser, t }: ColumnsProps): ColumnDef<UserProfile>[] => [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -40,7 +41,7 @@ export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<Us
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
         >
-          Name
+          {t('common.name')}
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
@@ -49,25 +50,25 @@ export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<Us
   },
   {
     accessorKey: 'email',
-    header: 'Email',
+    header: t('common.email'),
   },
   {
     accessorKey: 'role',
-    header: 'Role',
+    header: t('common.role'),
     cell: ({ row }) => <Badge variant="secondary" className="capitalize">{row.getValue('role')}</Badge>,
   },
   {
     accessorKey: 'isActive',
-    header: 'Status',
+    header: t('common.status'),
     cell: ({ row }) => (
       <Badge variant={row.getValue('isActive') ? 'default' : 'destructive'}>
-        {row.getValue('isActive') ? 'Active' : 'Inactive'}
+        {row.getValue('isActive') ? t('users.active') : t('users.inactive')}
       </Badge>
     ),
   },
   {
     accessorKey: 'createdAt',
-    header: 'Created At',
+    header: t('users.createdAt'),
     cell: ({ row }) => {
       const date = (row.getValue('createdAt') as any)?.toDate();
       return date ? format(date, 'PP') : 'N/A';
@@ -87,10 +88,10 @@ export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<Us
         try {
           await updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
           await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
-          toast({ title: 'Success', description: 'User status updated.' });
+          toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
           fetchUsers();
         } catch (error) {
-          toast({ variant: 'destructive', title: 'Error', description: 'Failed to update user status.' });
+          toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
         }
       };
       
@@ -99,11 +100,11 @@ export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<Us
         try {
             await updateUserProfile(firestore, user.uid, {name: data.name, email: data.email, role: data.role});
             await logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Updated user profile`);
-            toast({ title: 'Success', description: 'User updated successfully.' });
+            toast({ title: t('common.success'), description: t('users.userUpdated') });
             setIsEditDialogOpen(false);
             fetchUsers();
         } catch(error: any) {
-             toast({ variant: 'destructive', title: 'Error', description: error.message || 'Failed to update user.' });
+             toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to update user.' });
         }
       }
 
@@ -120,42 +121,40 @@ export const columns = ({ fetchUsers, currentUser }: ColumnsProps): ColumnDef<Us
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
                 <DialogTrigger asChild>
-                    <DropdownMenuItem>Edit Profile</DropdownMenuItem>
+                    <DropdownMenuItem>{t('common.edit')}</DropdownMenuItem>
                 </DialogTrigger>
                 <DropdownMenuItem onClick={handleStatusToggle} disabled={isCurrentUser}>
-                  {user.isActive ? 'Deactivate' : 'Activate'}
+                  {user.isActive ? t('users.deactivate') : t('users.activate')}
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>Delete User</DropdownMenuItem>
+                  <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>{t('users.deleteUser')}</DropdownMenuItem>
                 </AlertDialogTrigger>
               </DropdownMenuContent>
             </DropdownMenu>
             <AlertDialogContent>
               <AlertDialogHeader>
-                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This action cannot be undone. This will permanently deactivate the user's account and remove their data from our servers.
-                </AlertDialogDescription>
+                <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
+                <AlertDialogDescription>{t('users.deleteUserConfirm')}</AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   className="bg-destructive hover:bg-destructive/90"
                   onClick={() => { /* Implement permanent deletion if needed, e.g., via a Cloud Function */ }}
                 >
-                  Continue
+                  {t('users.continue')}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Edit User</DialogTitle>
+              <DialogTitle>{t('users.editUser')}</DialogTitle>
             </DialogHeader>
-            <UserForm onSubmit={handleUpdateUser} defaultValues={user} isEditMode={true} />
+            <UserForm onSubmit={handleUpdateUser} defaultValues={user} isEditMode={true} t={t} />
           </DialogContent>
         </Dialog>
       );

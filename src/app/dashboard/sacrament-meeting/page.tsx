@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import AIAgendaHelper from '@/components/dashboard/sacrament-meeting/ai-agenda-helper';
+import { useTranslation } from '@/lib/i18n';
 
 type AgendaFormValues = z.infer<typeof sacramentMeetingSchema>;
 
@@ -23,6 +24,7 @@ export default function SacramentMeetingPage() {
   const [currentView, setCurrentView] = useState<'list' | 'form'>('list');
   const [selectedAgenda, setSelectedAgenda] = useState<SacramentMeeting | null>(null);
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   const fetchAgendas = async () => {
     if (!firestore) return;
@@ -31,7 +33,7 @@ export default function SacramentMeetingPage() {
       const agendaList = await getCollection<SacramentMeeting>(firestore, 'sacramentMeetings', { field: 'date', direction: 'desc' });
       setAgendas(agendaList);
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch agendas.' });
+      toast({ variant: 'destructive', title: t('common.error'), description: t('sacramentMeeting.failedToFetchAgendas') });
     } finally {
       setLoading(false);
     }
@@ -55,15 +57,15 @@ export default function SacramentMeetingPage() {
     try {
       if (selectedAgenda) {
         await updateDocument(firestore, 'sacramentMeetings', selectedAgenda.id, finalData, user.uid, 'sacramentMeeting');
-        toast({ title: 'Success', description: 'Agenda updated successfully.' });
+        toast({ title: t('common.success'), description: t('sacramentMeeting.agendaUpdated') });
       } else {
         await addDocument(firestore, 'sacramentMeetings', finalData, user.uid, 'sacramentMeeting');
-        toast({ title: 'Success', description: 'Agenda created successfully.' });
+        toast({ title: t('common.success'), description: t('sacramentMeeting.agendaCreated') });
       }
       setCurrentView('list');
       setSelectedAgenda(null);
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message || 'Failed to save agenda.' });
+      toast({ variant: 'destructive', title: t('common.error'), description: error.message || t('sacramentMeeting.failedToSaveAgenda') });
     }
   };
 
@@ -71,11 +73,11 @@ export default function SacramentMeetingPage() {
     if (!user || !firestore || !selectedAgenda) return;
     try {
       await deleteDocument(firestore, 'sacramentMeetings', selectedAgenda.id, user.uid, 'sacramentMeeting');
-      toast({ title: 'Success', description: 'Agenda deleted successfully.' });
+      toast({ title: t('common.success'), description: t('sacramentMeeting.agendaDeleted') });
       setCurrentView('list');
       setSelectedAgenda(null);
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete agenda.' });
+      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete agenda.' });
     }
   };
   
@@ -93,14 +95,20 @@ export default function SacramentMeetingPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-headline">Sacrament Meeting</h1>
-          <p className="text-muted-foreground">Manage agendas for sacrament meetings.</p>
+          <h1 className="text-3xl font-bold font-headline">{t('sacramentMeeting.title')}</h1>
+          <p className="text-muted-foreground">{t('sacramentMeeting.description')}</p>
         </div>
         <div className="flex gap-2">
-            {currentView === 'form' && <AIAgendaHelper currentAgenda={selectedAgenda} />}
-            <Button variant="outline" onClick={() => setCurrentView(currentView === 'list' ? 'form' : 'list')}>
+            {currentView === 'form' && <AIAgendaHelper currentAgenda={selectedAgenda} t={t} />}
+            <Button variant="outline" onClick={() => {
+                if (currentView === 'list') {
+                    handleCreateNew();
+                } else {
+                    setCurrentView('list');
+                }
+             }}>
                 {currentView === 'list' ? <FilePlus className="mr-2 h-4 w-4" /> : <List className="mr-2 h-4 w-4" />}
-                {currentView === 'list' ? 'Create New' : 'View All'}
+                {currentView === 'list' ? t('sacramentMeeting.createNew') : t('sacramentMeeting.viewAll')}
             </Button>
         </div>
       </div>
@@ -113,8 +121,8 @@ export default function SacramentMeetingPage() {
         ) : agendas.length === 0 ? (
              <Card className="text-center py-16">
                 <CardContent>
-                    <h3 className="text-lg font-semibold">No Agendas Found</h3>
-                    <p className="text-muted-foreground text-sm">Create a new agenda to get started.</p>
+                    <h3 className="text-lg font-semibold">{t('sacramentMeeting.noAgendas')}</h3>
+                    <p className="text-muted-foreground text-sm">{t('sacramentMeeting.noAgendasDescription')}</p>
                 </CardContent>
             </Card>
         ) : (
@@ -123,10 +131,10 @@ export default function SacramentMeetingPage() {
               <Card key={agenda.id} className="flex flex-col">
                 <CardHeader>
                   <CardTitle>{format(agenda.date.toDate(), 'PPP')}</CardTitle>
-                  <CardDescription>Conducted by: {agenda.dirige}</CardDescription>
+                  <CardDescription>{t('sacramentMeeting.conductedBy')} {agenda.dirige}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
-                    <p className="text-sm font-semibold">Speakers:</p>
+                    <p className="text-sm font-semibold">{t('sacramentMeeting.speakers')}</p>
                     <ul className="list-disc list-inside text-sm text-muted-foreground">
                         {agenda.speakers.filter(s => s).map((speaker, i) => (
                             <li key={i}>{speaker}</li>
@@ -136,7 +144,7 @@ export default function SacramentMeetingPage() {
                 <div className="p-6 pt-0">
                     <Button onClick={() => handleEdit(agenda)} className="w-full">
                         <FileText className="mr-2 h-4 w-4" />
-                        View/Edit Agenda
+                        {t('sacramentMeeting.viewEditAgenda')}
                     </Button>
                 </div>
               </Card>
@@ -150,6 +158,7 @@ export default function SacramentMeetingPage() {
           onSave={handleSaveAgenda} 
           onDelete={selectedAgenda ? handleDeleteAgenda : undefined}
           initialData={selectedAgenda}
+          t={t}
         />
       )}
     </div>

@@ -9,7 +9,7 @@ import { UserProfile } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 
-export default function ProfileCard() {
+export default function ProfileCard({ t }: { t: (key: string) => string }) {
   const { user } = useUser();
   const { firestore } = useFirebase();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -37,7 +37,7 @@ export default function ProfileCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Profile Information</CardTitle>
+        <CardTitle>{t('settings.profileInfo')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center gap-4">
@@ -52,11 +52,11 @@ export default function ProfileCard() {
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
           <div>
-            <p className="font-medium">Role</p>
+            <p className="font-medium">{t('common.role')}</p>
             <Badge variant="secondary" className="capitalize mt-1">{userProfile.role}</Badge>
           </div>
           <div>
-            <p className="font-medium">Account Created</p>
+            <p className="font-medium">{t('settings.accountCreated')}</p>
             <p className="text-muted-foreground mt-1">
               {userProfile.createdAt ? format((userProfile.createdAt as any).toDate(), 'PPP') : 'N/A'}
             </p>

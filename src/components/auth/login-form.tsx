@@ -14,6 +14,7 @@ import { Loader2 } from 'lucide-react';
 import { useAuth, useFirestore } from '@/firebase';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { collection, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useTranslation } from '@/lib/i18n';
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -23,6 +24,7 @@ export default function LoginForm() {
   const { toast } = useToast();
   const auth = useAuth();
   const firestore = useFirestore();
+  const { t } = useTranslation();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -37,7 +39,7 @@ export default function LoginForm() {
     if (!auth || !firestore) {
         toast({
             variant: 'destructive',
-            title: 'Login Failed',
+            title: t('auth.loginFailed'),
             description: 'Firebase not initialized. Please try again later.',
         });
         setLoading(false);
@@ -57,16 +59,16 @@ export default function LoginForm() {
           });
 
           toast({
-            title: 'Login Successful',
-            description: 'Welcome back!',
+            title: t('auth.loginSuccess'),
+            description: t('auth.welcomeBack'),
           });
           router.push('/dashboard');
       }
     } catch (error: any) {
       toast({
         variant: 'destructive',
-        title: 'Login Failed',
-        description: error.message || 'Invalid credentials. Please try again.',
+        title: t('auth.loginFailed'),
+        description: error.message || t('auth.invalidCredentials'),
       });
     } finally {
       setLoading(false);
@@ -81,7 +83,7 @@ export default function LoginForm() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>{t('common.email')}</FormLabel>
               <FormControl>
                 <Input placeholder="name@example.com" {...field} />
               </FormControl>
@@ -94,7 +96,7 @@ export default function LoginForm() {
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel>{t('common.password')}</FormLabel>
               <FormControl>
                 <Input type="password" placeholder="••••••••" {...field} />
               </FormControl>
@@ -104,7 +106,7 @@ export default function LoginForm() {
         />
         <Button type="submit" className="w-full" disabled={loading}>
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          Sign In
+          {t('auth.signIn')}
         </Button>
       </form>
     </Form>

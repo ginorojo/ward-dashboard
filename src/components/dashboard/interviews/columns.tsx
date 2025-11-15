@@ -19,14 +19,15 @@ type ColumnsProps = {
   openEditForm: (interview: Interview) => void;
   handleDelete: (id: string) => void;
   handleStatusToggle: (interview: Interview) => void;
+  t: (key: string) => string;
 };
 
-export const columns = ({ openEditForm, handleDelete, handleStatusToggle }: ColumnsProps): ColumnDef<Interview>[] => [
+export const columns = ({ openEditForm, handleDelete, handleStatusToggle, t }: ColumnsProps): ColumnDef<Interview>[] => [
   {
     accessorKey: 'personInterviewed',
     header: ({ column }) => (
       <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
-        Person
+        {t('interviews.person')}
         <ArrowUpDown className="ml-2 h-4 w-4" />
       </Button>
     ),
@@ -34,15 +35,15 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle }: Colu
   },
   {
     accessorKey: 'interviewer',
-    header: 'Interviewer',
+    header: t('interviews.interviewer'),
   },
   {
     accessorKey: 'purpose',
-    header: 'Purpose',
+    header: t('interviews.purpose'),
   },
   {
     accessorKey: 'scheduledDate',
-    header: 'Date',
+    header: t('common.date'),
     cell: ({ row }) => {
       const date = (row.getValue('scheduledDate') as any)?.toDate();
       return date ? format(date, 'PPp') : 'N/A';
@@ -50,12 +51,12 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle }: Colu
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: t('common.status'),
     cell: ({ row }) => {
       const status: "pending" | "completed" = row.getValue('status');
       return (
         <Badge variant={status === 'completed' ? 'default' : 'secondary'} className="capitalize">
-          {status}
+          {t(`interviews.${status}`)}
         </Badge>
       );
     },
@@ -75,28 +76,28 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle }: Colu
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => openEditForm(interview)}>Edit</DropdownMenuItem>
+              <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => openEditForm(interview)}>{t('common.edit')}</DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleStatusToggle(interview)}>
-                Mark as {interview.status === 'pending' ? 'Completed' : 'Pending'}
+                {interview.status === 'pending' ? t('interviews.markCompleted') : t('interviews.markPending')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <AlertDialogTrigger asChild>
-                <DropdownMenuItem className="text-destructive">Delete</DropdownMenuItem>
+                <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
               </AlertDialogTrigger>
             </DropdownMenuContent>
           </DropdownMenu>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
               <AlertDialogDescription>
-                This action will permanently delete this interview record.
+                {t('interviews.deleteConfirmDescription')}
               </AlertDialogDescription>
             </AlertDialogHeader>
             <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
               <AlertDialogAction onClick={() => handleDelete(interview.id)} className="bg-destructive hover:bg-destructive/90">
-                Delete
+                {t('common.delete')}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

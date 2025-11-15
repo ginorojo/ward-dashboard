@@ -17,9 +17,10 @@ type NoteFormValues = z.infer<typeof bishopricNoteSchema>;
 interface NoteFormProps {
   onSubmit: (data: NoteFormValues) => Promise<void>;
   defaultValues?: Partial<NoteFormValues>;
+  t: (key: string) => string;
 }
 
-export default function NoteForm({ onSubmit, defaultValues }: NoteFormProps) {
+export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) {
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(bishopricNoteSchema),
     defaultValues: defaultValues || {
@@ -39,7 +40,7 @@ export default function NoteForm({ onSubmit, defaultValues }: NoteFormProps) {
           name="date"
           render={({ field }) => (
             <FormItem className="flex flex-col">
-              <FormLabel>Note Date</FormLabel>
+              <FormLabel>{t('bishopricMeeting.noteDate')}</FormLabel>
               <Popover>
                 <PopoverTrigger asChild>
                   <FormControl>
@@ -50,7 +51,7 @@ export default function NoteForm({ onSubmit, defaultValues }: NoteFormProps) {
                         !field.value && 'text-muted-foreground'
                       )}
                     >
-                      {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                      {field.value ? format(field.value, 'PPP') : <span>{t('interviews.pickADate')}</span>}
                       <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                     </Button>
                   </FormControl>
@@ -73,9 +74,9 @@ export default function NoteForm({ onSubmit, defaultValues }: NoteFormProps) {
           name="content"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Note Content</FormLabel>
+              <FormLabel>{t('bishopricMeeting.noteContent')}</FormLabel>
               <FormControl>
-                <Textarea placeholder="Decisions, assignments, etc." className="min-h-[200px]" {...field} />
+                <Textarea placeholder={t('bishopricMeeting.decisionsAssignmentsEtc')} className="min-h-[200px]" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -83,7 +84,7 @@ export default function NoteForm({ onSubmit, defaultValues }: NoteFormProps) {
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {defaultValues?.content ? 'Save Changes' : 'Create Note'}
+          {defaultValues?.content ? t('users.saveChanges') : t('common.create')}
         </Button>
       </form>
     </Form>

@@ -8,24 +8,26 @@ import { useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Separator } from '../ui/separator';
 import { UserProfile } from '@/lib/types';
-
-const navItems = [
-    { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { href: '/dashboard/users', label: 'Users', icon: Users, roles: ['bishop'] },
-    { href: '/dashboard/interviews', label: 'Interviews', icon: CalendarCheck },
-    { href: '/dashboard/bishopric-meeting', label: 'Bishopric Meeting', icon: BookUser },
-    { href: '/dashboard/sacrament-meeting', label: 'Sacrament Meeting', icon: BookOpenCheck },
-]
-
-const bottomNavItems = [
-    { href: '/dashboard/settings', label: 'Settings', icon: Settings },
-]
+import { useTranslation } from '@/lib/i18n';
 
 export default function SidebarNav({ userProfile }: { userProfile: UserProfile | null }) {
     const pathname = usePathname();
     const router = useRouter();
     const auth = useAuth();
     const role = userProfile?.role;
+    const { t } = useTranslation();
+
+    const navItems = [
+        { href: '/dashboard', label: t('dashboard.title'), icon: LayoutDashboard },
+        { href: '/dashboard/users', label: t('dashboard.users'), icon: Users, roles: ['bishop'] },
+        { href: '/dashboard/interviews', label: t('dashboard.interviews'), icon: CalendarCheck },
+        { href: '/dashboard/bishopric-meeting', label: t('dashboard.bishopricMeeting'), icon: BookUser },
+        { href: '/dashboard/sacrament-meeting', label: t('dashboard.sacramentMeeting'), icon: BookOpenCheck },
+    ]
+    
+    const bottomNavItems = [
+        { href: '/dashboard/settings', label: t('dashboard.settings'), icon: Settings },
+    ]
 
     const handleLogout = async () => {
         await signOut(auth);
@@ -39,7 +41,7 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
             <SidebarHeader>
                 <div className="flex items-center gap-2">
                     <Logo className="w-8 h-8 text-primary" />
-                    <h1 className="text-xl font-semibold text-foreground font-headline">Ward Dashboard</h1>
+                    <h1 className="text-xl font-semibold text-foreground font-headline">{t('dashboard.title')}</h1>
                 </div>
             </SidebarHeader>
             <SidebarContent>
@@ -74,9 +76,9 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
                         </SidebarMenuItem>
                     ))}
                      <SidebarMenuItem>
-                        <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
+                        <SidebarMenuButton onClick={handleLogout} tooltip={t('dashboard.logout')}>
                             <LogOut />
-                            <span>Logout</span>
+                            <span>{t('dashboard.logout')}</span>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
                 </SidebarMenu>

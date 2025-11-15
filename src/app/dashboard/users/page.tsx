@@ -13,6 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
 import { userSchema } from '@/lib/schemas';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslation } from '@/lib/i18n';
 
 type UserFormValues = z.infer<typeof userSchema>;
 
@@ -24,6 +25,7 @@ export default function UsersPage() {
   const [isFormOpen, setIsFormOpen] = useState(false);
   const { toast } = useToast();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const { t } = useTranslation();
 
   const fetchUsers = async () => {
     if (!firestore) return;
@@ -36,7 +38,7 @@ export default function UsersPage() {
         setCurrentUser(currentUserProfile || null);
       }
     } catch (error) {
-      toast({ variant: 'destructive', title: 'Error', description: 'Failed to fetch users.' });
+      toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
     } finally {
       setLoading(false);
     }
@@ -58,35 +60,35 @@ export default function UsersPage() {
         isActive: true,
       }, authUser.uid, 'user');
       
-      toast({ title: 'Success', description: 'User created successfully.' });
+      toast({ title: t('common.success'), description: t('users.userCreated') });
       setIsFormOpen(false);
       fetchUsers();
     } catch (error: any) {
-      toast({ variant: 'destructive', title: 'Error', description: error.message || 'Failed to create user.' });
+      toast({ variant: 'destructive', title: t('common.error'), description: error.message || 'Failed to create user.' });
     }
   };
 
-  const tableColumns = useMemo(() => columns({ fetchUsers, currentUser }), [fetchUsers, currentUser]);
+  const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t }), [fetchUsers, currentUser, t]);
 
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold font-headline">User Management</h1>
-          <p className="text-muted-foreground">Manage all users in the ward.</p>
+          <h1 className="text-3xl font-bold font-headline">{t('users.title')}</h1>
+          <p className="text-muted-foreground">{t('users.description')}</p>
         </div>
         <Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
           <DialogTrigger asChild>
             <Button>
               <PlusCircle className="mr-2 h-4 w-4" />
-              Add User
+              {t('users.addUser')}
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New User</DialogTitle>
+              <DialogTitle>{t('users.createNewUser')}</DialogTitle>
             </DialogHeader>
-            <UserForm onSubmit={handleCreateUser} />
+            <UserForm onSubmit={handleCreateUser} t={t} />
           </DialogContent>
         </Dialog>
       </div>
@@ -96,7 +98,7 @@ export default function UsersPage() {
             <Skeleton className="h-40 w-full" />
          </div>
       ) : (
-        <DataTable columns={tableColumns} data={users} />
+        <DataTable columns={tableColumns} data={users} t={t}/>
       )}
     </div>
   );

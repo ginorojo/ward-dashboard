@@ -25,9 +25,10 @@ interface AgendaFormProps {
   onSave: (data: AgendaFormValues) => Promise<void>;
   onDelete?: () => Promise<void>;
   initialData?: SacramentMeeting | null;
+  t: (key: string) => string;
 }
 
-export default function AgendaForm({ onSave, onDelete, initialData }: AgendaFormProps) {
+export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaFormProps) {
   const form = useForm<AgendaFormValues>({
     resolver: zodResolver(sacramentMeetingSchema),
     defaultValues: initialData
@@ -65,7 +66,7 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
                     name="date"
                     render={({ field }) => (
                         <FormItem className="flex flex-col">
-                        <FormLabel>Meeting Date</FormLabel>
+                        <FormLabel>{t('sacramentMeeting.meetingDate')}</FormLabel>
                         <Popover>
                             <PopoverTrigger asChild>
                             <FormControl>
@@ -73,7 +74,7 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
                                 variant={'outline'}
                                 className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
                                 >
-                                {field.value ? format(field.value, 'PPP') : <span>Pick a date</span>}
+                                {field.value ? format(field.value, 'PPP') : <span>{t('interviews.pickADate')}</span>}
                                 <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                 </Button>
                             </FormControl>
@@ -86,64 +87,64 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
                         </FormItem>
                     )}
                 />
-                <FormField control={form.control} name="preside" render={({ field }) => (<FormItem><FormLabel>Presiding</FormLabel><FormControl><Input placeholder="Bishop Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="dirige" render={({ field }) => (<FormItem><FormLabel>Conducting</FormLabel><FormControl><Input placeholder="Counselor Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="pianist" render={({ field }) => (<FormItem><FormLabel>Pianist</FormLabel><FormControl><Input placeholder="Member Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="musicDirector" render={({ field }) => (<FormItem><FormLabel>Music Director</FormLabel><FormControl><Input placeholder="Member Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem><FormLabel>Visiting Authorities (optional)</FormLabel><FormControl><Input placeholder="President Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="preside" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.presiding')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="dirige" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.conducting')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="pianist" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.pianist')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="musicDirector" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.musicDirector')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.visitingAuthorities')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
             </div>
 
             <Separator />
 
              <div className="space-y-4">
-              <h3 className="text-lg font-medium">Ward Business</h3>
+              <h3 className="text-lg font-medium">{t('sacramentMeeting.wardBusiness')}</h3>
               {fields.map((item, index) => (
                 <div key={item.id} className="flex items-end gap-2 p-3 border rounded-md">
                   <FormField
                     control={form.control}
                     name={`asuntosDelBarrio.${index}.type`}
                     render={({ field }) => (
-                      <FormItem className='flex-1'><FormLabel>Type</FormLabel>
+                      <FormItem className='flex-1'><FormLabel>{t('sacramentMeeting.type')}</FormLabel>
                         <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue placeholder="Select type" /></SelectTrigger></FormControl>
-                            <SelectContent><SelectItem value="sostenimiento">Sustaining</SelectItem><SelectItem value="relevo">Release</SelectItem></SelectContent>
+                            <FormControl><SelectTrigger><SelectValue placeholder={t('sacramentMeeting.type')} /></SelectTrigger></FormControl>
+                            <SelectContent><SelectItem value="sostenimiento">{t('sacramentMeeting.sustaining')}</SelectItem><SelectItem value="relevo">{t('sacramentMeeting.release')}</SelectItem></SelectContent>
                         </Select>
                       </FormItem>
                     )}
                   />
-                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.personName`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>Name</FormLabel><FormControl><Input placeholder="Person's Name" {...field} /></FormControl></FormItem>)} />
-                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.calling`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>Calling</FormLabel><FormControl><Input placeholder="Calling Name" {...field} /></FormControl></FormItem>)} />
+                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.personName`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>{t('common.name')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl></FormItem>)} />
+                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.calling`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>{t('sacramentMeeting.calling')}</FormLabel><FormControl><Input placeholder={t('sacramentMeeting.calling')} {...field} /></FormControl></FormItem>)} />
                   <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
                 </div>
               ))}
               <Button type="button" variant="outline" size="sm" onClick={() => append({ type: 'sostenimiento', personName: '', calling: '' })}>
-                <PlusCircle className="mr-2 h-4 w-4" /> Add Business
+                <PlusCircle className="mr-2 h-4 w-4" /> {t('sacramentMeeting.addBusiness')}
               </Button>
             </div>
 
             <Separator />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="space-y-2"><FormLabel>Sacramental Hymn</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnSacramental.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnSacramental.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder="Hymn Name" {...field} /></FormControl></FormItem>)} /></div></div>
-                 <div className="space-y-2"><FormLabel>Closing Hymn</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnFinal.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnFinal.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder="Hymn Name" {...field} /></FormControl></FormItem>)} /></div></div>
+                 <div className="space-y-2"><FormLabel>{t('sacramentMeeting.sacramentalHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnSacramental.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnSacramental.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl></FormItem>)} /></div></div>
+                 <div className="space-y-2"><FormLabel>{t('sacramentMeeting.closingHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnFinal.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnFinal.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl></FormItem>)} /></div></div>
             </div>
 
             <Separator />
 
              <div className="space-y-4">
-              <h3 className="text-lg font-medium">Speakers</h3>
+              <h3 className="text-lg font-medium">{t('sacramentMeeting.speakers')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {[0, 1, 2, 3].map(i => (
-                    <FormField key={i} control={form.control} name={`speakers.${i}`} render={({ field }) => (<FormItem><FormLabel>Speaker {i + 1}</FormLabel><FormControl><Input placeholder="Speaker Name" {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
+                    <FormField key={i} control={form.control} name={`speakers.${i}`} render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.speaker')} {i + 1}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
                 ))}
               </div>
             </div>
 
             <Separator />
 
-            <FormField control={form.control} name="closingPrayer" render={({ field }) => (<FormItem><FormLabel>Closing Prayer</FormLabel><FormControl><Input placeholder="Member Name" {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="closingPrayer" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.closingPrayer')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
             
           </CardContent>
         </Card>
@@ -152,20 +153,20 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
                 <AlertDialog>
                     <AlertDialogTrigger asChild>
                         <Button type="button" variant="destructive" disabled={isSubmitting}>
-                            Delete Agenda
+                            {t('sacramentMeeting.deleteAgenda')}
                         </Button>
                     </AlertDialogTrigger>
                      <AlertDialogContent>
                         <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Agenda?</AlertDialogTitle>
+                            <AlertDialogTitle>{t('sacramentMeeting.deleteAgenda')}?</AlertDialogTitle>
                             <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete this agenda.
+                            {t('sacramentMeeting.deleteAgendaConfirm')}
                             </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
+                            <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                             <AlertDialogAction onClick={onDelete} className="bg-destructive hover:bg-destructive/90">
-                                Delete
+                                {t('common.delete')}
                             </AlertDialogAction>
                         </AlertDialogFooter>
                     </AlertDialogContent>
@@ -173,7 +174,7 @@ export default function AgendaForm({ onSave, onDelete, initialData }: AgendaForm
             )}
             <Button type="submit" disabled={isSubmitting}>
             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save Agenda
+            {t('sacramentMeeting.saveAgenda')}
             </Button>
         </div>
       </form>
