@@ -117,7 +117,7 @@ export default function UsersPage() {
     const newStatus = !userToToggle.isActive;
     try {
         await updateUserProfile(firestore, userToToggle.uid, { isActive: newStatus });
-        logAction(firestore, authUser.uid, 'update', 'user', userToToggle.uid, `Set status to ${newStatus ? 'active' : 'inactive'}`);
+        await logAction(firestore, authUser.uid, 'update', 'user', userToToggle.uid, `Set status to ${newStatus ? 'active' : 'inactive'}`);
         toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
         setUsers(currentUsers =>
             currentUsers.map(user =>
@@ -127,7 +127,7 @@ export default function UsersPage() {
     } catch (error) {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
     }
-}, [firestore, authUser, toast]);
+}, [firestore, authUser, toast, t]);
   
   const handleDeleteUser = useCallback((uid: string) => {
     if (!authUser || !firestore) {
@@ -137,8 +137,8 @@ export default function UsersPage() {
     deleteUser(firestore, uid);
     logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
     toast({ title: t('common.success'), description: t('users.userDeleted') });
-    fetchUsers();
-  }, [firestore, authUser, t, fetchUsers, toast]);
+    setUsers(currentUsers => currentUsers.filter(user => user.uid !== uid));
+  }, [firestore, authUser, t, toast]);
   
   const openEditForm = (user: UserProfile) => {
     setEditingUser(user);

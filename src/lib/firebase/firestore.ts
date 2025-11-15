@@ -128,7 +128,7 @@ export const getUsers = async (firestore: Firestore): Promise<UserProfile[]> => 
   return querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as UserProfile));
 };
 
-export const updateUserProfile = (firestore: Firestore, uid: string, data: Partial<UserProfile>) => {
+export const updateUserProfile = (firestore: Firestore, uid: string, data: Partial<UserProfile>): Promise<void> => {
   const userRef = doc(firestore, 'users', uid);
   const updateData = { ...data, updatedAt: serverTimestamp() };
   return updateDoc(userRef, updateData) // return the promise
