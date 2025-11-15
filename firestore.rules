@@ -62,7 +62,7 @@ service cloud.firestore {
 
       // Update permissions:
       // - Admins can update any user.
-      // - Bishops can update counselors/secretaries and themselves (but not their own role).
+      // - Bishops can update counselors/secretaries and themselves (but not their own role if they are not admin).
       // - Users can update their own profile (but not their role or UID).
       allow update: if isSignedIn() && (
                       isAdministrator() ||
@@ -70,8 +70,8 @@ service cloud.firestore {
                       (isOwner(userId) && request.resource.data.role == resource.data.role && request.resource.data.uid == resource.data.uid)
                     );
 
-      // Only administrators can delete users (but not themselves).
-      allow delete: if isSignedIn() && isAdministrator() && request.auth.uid != userId;
+      // Only administrators can delete users. Bishops can delete counselors and secretaries.
+      allow delete: if isSignedIn() && (isAdministrator() || (isBishop() && getUserData(userId).role in ['counselor', 'secretary']));
     }
 
     /**
