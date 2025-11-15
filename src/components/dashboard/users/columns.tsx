@@ -13,18 +13,11 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore } from '@/firebase';
 import { updateUserProfile, logAction } from '@/lib/firebase/firestore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import UserForm from './user-form';
-import { userSchema } from '@/lib/schemas';
-import { z } from 'zod';
 
-
-type UserFormValues = z.infer<typeof userSchema>;
 
 type ColumnsProps = {
   openEditForm: (user: UserProfile) => void;
@@ -82,8 +75,7 @@ export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t
       const user = row.original;
       const { toast } = useToast();
       const { user: authUser, firestore } = useFirebase();
-      const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
+      
       const handleStatusToggle = () => {
         if (!authUser || !firestore) return;
         updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
@@ -92,19 +84,9 @@ export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t
         fetchUsers();
       };
       
-      const handleUpdateUser = (data: UserFormValues) => {
-        if(!authUser || !firestore) return;
-        updateUserProfile(firestore, user.uid, {name: data.name, email: data.email, role: data.role});
-        logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Updated user profile`);
-        toast({ title: t('common.success'), description: t('users.userUpdated') });
-        setIsEditDialogOpen(false);
-        fetchUsers();
-      }
-
       const isCurrentUser = currentUser?.uid === user.uid;
 
       return (
-        <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
           <AlertDialog>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -115,9 +97,7 @@ export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
                 <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
-                <DialogTrigger asChild>
-                    <DropdownMenuItem>{t('common.edit')}</DropdownMenuItem>
-                </DialogTrigger>
+                 <DropdownMenuItem onClick={() => openEditForm(user)}>{t('common.edit')}</DropdownMenuItem>
                 <DropdownMenuItem onClick={handleStatusToggle} disabled={isCurrentUser}>
                   {user.isActive ? t('users.deactivate') : t('users.activate')}
                 </DropdownMenuItem>
@@ -143,13 +123,6 @@ export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t
               </AlertDialogFooter>
             </AlertDialogContent>
           </AlertDialog>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t('users.editUser')}</DialogTitle>
-            </DialogHeader>
-            <UserForm onSubmit={handleUpdateUser} defaultValues={user} isEditMode={true} t={t} />
-          </DialogContent>
-        </Dialog>
       );
     },
   },
