@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
-import { getCollection, updateUserProfile, logAction, addDocument, deleteUser } from '@/lib/firebase/firestore';
+import { getCollection, updateUserProfile, logAction, deleteUser } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import UserForm from '@/components/dashboard/users/user-form';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
-import { userSchema } from '@/lib/schemas';
+import { userSchema, createUserSchema } from '@/lib/schemas';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/lib/i18n';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -20,11 +20,14 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { errorEmitter, FirestorePermissionError } from '@/firebase';
 
-type UserFormValues = z.infer<typeof userSchema>;
+type UserFormValues = z.infer<typeof createUserSchema>;
 
 export default function UsersPage() {
-  const { firestore } = useFirebase();
+  const { firestore, auth } = useFirebase();
   const { user: authUser } = useUser();
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,26 +60,48 @@ export default function UsersPage() {
   }, [firestore, authUser]);
 
   const handleCreateUser = async (data: UserFormValues) => {
-    if (!authUser || !firestore) return;
+    if (!authUser || !firestore || !auth) return;
     try {
-      await addDocument(firestore, 'users', {
+      // 1. Create user in Firebase Auth
+      const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password!);
+      const newUid = userCredential.user.uid;
+
+      // 2. Create user document in Firestore
+      const userDocRef = doc(firestore, 'users', newUid);
+      const userDocData = {
+        uid: newUid,
         name: data.name,
         email: data.email,
         role: data.role,
         isActive: true,
-      }, authUser.uid, 'user');
+        createdBy: authUser.uid,
+        createdAt: serverTimestamp(),
+      };
+      
+      await setDoc(userDocRef, userDocData);
+
+      await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
       toast({ title: t('common.success'), description: t('users.userCreated') });
       setIsFormOpen(false);
       fetchUsers();
     } catch (error: any) {
-      // The contextual error is already emitted by addDocument
-      // We can still show a generic toast if we want
-      toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to create user.' });
+        if (error.code && error.code.startsWith('auth/')) {
+             toast({ variant: 'destructive', title: t('auth.registrationFailed'), description: error.message });
+        } else {
+             // Assume Firestore error if not an auth error
+            const permissionError = new FirestorePermissionError({
+                path: `users`,
+                operation: 'create',
+                requestResourceData: { email: data.email, role: data.role },
+            });
+            errorEmitter.emit('permission-error', permissionError);
+             toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to create user in Firestore.' });
+        }
     }
   };
   
-  const handleUpdateUser = (data: UserFormValues) => {
+  const handleUpdateUser = (data: z.infer<typeof userSchema>) => {
     if(!authUser || !firestore || !editingUser) return;
     updateUserProfile(firestore, editingUser.uid, {name: data.name, email: data.email, role: data.role});
     logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
@@ -211,7 +236,7 @@ export default function UsersPage() {
             <DialogHeader>
               <DialogTitle>{dialogTitle}</DialogTitle>
             </DialogHeader>
-            <UserForm onSubmit={formSubmitHandler} defaultValues={formDefaultValues} isEditMode={!!editingUser} t={t} />
+            <UserForm onSubmit={formSubmitHandler as any} defaultValues={formDefaultValues} isEditMode={!!editingUser} t={t} />
           </DialogContent>
         </Dialog>
 

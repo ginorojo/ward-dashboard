@@ -2,7 +2,7 @@
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { userSchema } from '@/lib/schemas';
+import { userSchema, createUserSchema } from '@/lib/schemas';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -10,11 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2 } from 'lucide-react';
 import { useUser } from '@/firebase';
 
-type UserFormValues = z.infer<typeof userSchema>;
+type CreateUserFormValues = z.infer<typeof createUserSchema>;
+type EditUserFormValues = z.infer<typeof userSchema>;
 
 interface UserFormProps {
-  onSubmit: (data: UserFormValues) => Promise<void>;
-  defaultValues?: Partial<UserFormValues>;
+  onSubmit: (data: CreateUserFormValues | EditUserFormValues) => Promise<void>;
+  defaultValues?: Partial<CreateUserFormValues | EditUserFormValues>;
   isEditMode?: boolean;
   t: (key: string) => string;
 }
@@ -23,8 +24,8 @@ export default function UserForm({ onSubmit, defaultValues, isEditMode = false, 
   const { user } = useUser();
   const isAdministrator = user?.email === 'ginorojoj@gmail.com';
 
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userSchema),
+  const form = useForm<CreateUserFormValues | EditUserFormValues>({
+    resolver: zodResolver(isEditMode ? userSchema : createUserSchema),
     defaultValues: defaultValues || {
       name: '',
       email: '',
