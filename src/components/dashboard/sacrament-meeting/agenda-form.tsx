@@ -99,7 +99,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
              <div className="space-y-4">
               <h3 className="text-lg font-medium">{t('sacramentMeeting.wardBusiness')}</h3>
               {fields.map((item, index) => (
-                <div key={item.id} className="flex items-end gap-2 p-3 border rounded-md">
+                <div key={item.id} className="grid grid-cols-1 md:grid-cols-3 gap-2 p-3 border rounded-md items-end">
                   <FormField
                     control={form.control}
                     name={`asuntosDelBarrio.${index}.type`}

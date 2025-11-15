@@ -29,14 +29,14 @@ export default function NotesList({ meetings, notes, selectedMeeting, onSelectMe
   return (
     <Card>
       <CardHeader>
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
                 <CardTitle>{t('bishopricMeeting.meetingNotes')}</CardTitle>
                 <CardDescription>{t('bishopricMeeting.notesForSelectedMeeting')}</CardDescription>
             </div>
-            <div className="mt-4 sm:mt-0">
+            <div className="sm:mt-0">
                 <Select onValueChange={handleSelectChange} value={selectedMeeting?.id}>
-                    <SelectTrigger className="w-[280px]">
+                    <SelectTrigger className="w-full sm:w-[280px]">
                         <SelectValue placeholder={t('bishopricMeeting.selectAMeeting')} />
                     </SelectTrigger>
                     <SelectContent>

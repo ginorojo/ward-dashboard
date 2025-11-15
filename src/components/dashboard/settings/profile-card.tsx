@@ -40,17 +40,17 @@ export default function ProfileCard({ t }: { t: (key: string) => string }) {
         <CardTitle>{t('settings.profileInfo')}</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div className="flex items-center gap-4">
+        <div className="flex flex-col sm:flex-row items-center gap-4">
           <Avatar className="h-16 w-16">
             <AvatarImage src={`https://api.dicebear.com/7.x/initials/svg?seed=${userProfile.name}`} alt={userProfile.name} />
             <AvatarFallback>{getInitials(userProfile.name)}</AvatarFallback>
           </Avatar>
-          <div>
+          <div className='text-center sm:text-left'>
             <h3 className="text-lg font-semibold">{userProfile.name}</h3>
             <p className="text-sm text-muted-foreground">{userProfile.email}</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm pt-4">
           <div>
             <p className="font-medium">{t('common.role')}</p>
             <Badge variant="secondary" className="capitalize mt-1">{userProfile.role}</Badge>
