@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, Fragment, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
 import { getCollection, updateUserProfile, logAction, deleteUser } from '@/lib/firebase/firestore';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
 import { columns } from '@/components/dashboard/users/columns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import UserForm from '@/components/dashboard/users/user-form';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -39,26 +39,25 @@ export default function UsersPage() {
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
-  const fetchUsers = useCallback(async () => {
-    if (!firestore) return;
-    setLoading(true);
-    try {
-      const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
-      setUsers(usersList);
-      if (authUser) {
+  useEffect(() => {
+    const fetchUsers = async () => {
+      if (!firestore || !authUser) return;
+      setLoading(true);
+      try {
+        const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
+        setUsers(usersList);
         const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
         setCurrentUser(currentUserProfile || null);
+      } catch (error) {
+        toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
-    } finally {
-      setLoading(false);
-    }
-  }, [firestore, authUser, toast, t]);
+    };
 
-  useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+  }, [firestore, authUser, t, toast]);
+
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
@@ -84,8 +83,8 @@ export default function UsersPage() {
       await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
       toast({ title: t('common.success'), description: t('users.userCreated') });
+      setUsers(prevUsers => [...prevUsers, { ...userDocData, createdAt: new Date() } as unknown as UserProfile]);
       setIsFormOpen(false);
-      fetchUsers();
     } catch (error: any) {
         if (error.code && error.code.startsWith('auth/')) {
              toast({ variant: 'destructive', title: t('auth.registrationFailed'), description: error.message });
@@ -104,29 +103,32 @@ export default function UsersPage() {
   
   const handleUpdateUser = (data: z.infer<typeof userSchema>) => {
     if(!authUser || !firestore || !editingUser) return;
-    updateUserProfile(firestore, editingUser.uid, {name: data.name, email: data.email, role: data.role});
-    logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
-    toast({ title: t('common.success'), description: t('users.userUpdated') });
-    setIsFormOpen(false);
-    setEditingUser(null);
-    fetchUsers();
+    
+    const updateData = {name: data.name, email: data.email, role: data.role};
+
+    updateUserProfile(firestore, editingUser.uid, updateData).then(() => {
+        logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
+        toast({ title: t('common.success'), description: t('users.userUpdated') });
+        setUsers(prevUsers => prevUsers.map(u => u.uid === editingUser.uid ? {...u, ...updateData} : u));
+        setIsFormOpen(false);
+        setEditingUser(null);
+    });
   }
 
- const handleStatusToggle = useCallback(async (userToToggle: UserProfile) => {
+ const handleStatusToggle = useCallback((userToToggle: UserProfile) => {
     if (!authUser || !firestore) return;
     const newStatus = !userToToggle.isActive;
-    try {
-        await updateUserProfile(firestore, userToToggle.uid, { isActive: newStatus });
-        await logAction(firestore, authUser.uid, 'update', 'user', userToToggle.uid, `Set status to ${newStatus ? 'active' : 'inactive'}`);
+    updateUserProfile(firestore, userToToggle.uid, { isActive: newStatus }).then(() => {
+        logAction(firestore, authUser.uid, 'update', 'user', userToToggle.uid, `Set status to ${newStatus ? 'active' : 'inactive'}`);
         toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
         setUsers(currentUsers =>
             currentUsers.map(user =>
                 user.uid === userToToggle.uid ? { ...user, isActive: newStatus } : user
             )
         );
-    } catch (error) {
+    }).catch(() => {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
-    }
+    });
 }, [firestore, authUser, toast, t]);
   
   const handleDeleteUser = useCallback((uid: string) => {
@@ -266,3 +268,5 @@ export default function UsersPage() {
     </div>
   );
 }
+
+    
