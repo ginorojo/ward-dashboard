@@ -30,10 +30,10 @@ type ColumnsProps = {
   fetchUsers: () => void;
   currentUser: UserProfile | null;
   t: (key: string) => string;
-  deleteUser: (uid: string) => void;
+  handleDeleteUser: (uid: string) => void;
 }
 
-export const columns = ({ fetchUsers, currentUser, t, deleteUser: handleDeleteUser }: ColumnsProps): ColumnDef<UserProfile>[] => [
+export const columns = ({ fetchUsers, currentUser, t, handleDeleteUser }: ColumnsProps): ColumnDef<UserProfile>[] => [
   {
     accessorKey: 'name',
     header: ({ column }) => {

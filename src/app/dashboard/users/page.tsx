@@ -121,7 +121,10 @@ export default function UsersPage() {
   };
 
   const handleDeleteUser = (uid: string) => {
-    if (!authUser || !firestore) return;
+    if (!authUser || !firestore) {
+        toast({ variant: 'destructive', title: t('common.error'), description: 'Could not delete user. Firebase not available.' });
+        return;
+    }
     deleteUser(firestore, uid);
     logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
     toast({ title: t('common.success'), description: t('users.userDeleted') });
@@ -138,7 +141,7 @@ export default function UsersPage() {
     setIsFormOpen(true);
   };
 
-  const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t, deleteUser: handleDeleteUser }), [fetchUsers, currentUser, t]);
+  const tableColumns = useMemo(() => columns({ fetchUsers, currentUser, t, handleDeleteUser }), [fetchUsers, currentUser, t]);
   
   const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
   const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
