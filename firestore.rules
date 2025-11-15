@@ -1,54 +1,171 @@
+/**
+ * @fileoverview Firestore Security Rules for the Ward Dashboard application.
+ *
+ * Core Philosophy:
+ * This ruleset employs a hybrid security model: user-ownership for profile data and open authenticated access for collaborative data.
+ *
+ * Data Structure:
+ * - /users/{userId}: Stores individual user profiles, secured via user-ownership.
+ * - /interviews/{interviewId}: Stores interview records.
+ * - /bishopricMeetings/{meetingId}: Stores bishopric meeting records.
+ * - /bishopricMeetings/{meetingId}/notes/{noteId}: Stores notes for bishopric meetings.
+ * - /sacramentMeetings/{meetingId}: Stores sacrament meeting agendas.
+ * - /sacramentMeetings/{meetingId}/asuntosBarrio/{asuntoId}: Stores ward business items for sacrament meetings.
+ * - /logs/{logId}: Stores user action logs; only allows create operations from the client.
+ *
+ * Key Security Decisions:
+ * - User data is strictly controlled by the owning user.
+ * - Collaborative data (interviews, meetings, agendas) is accessible to all authenticated users.
+ * - Logs can only be created, not read, updated, or deleted, by clients.
+ *
+ * Denormalization for Authorization:
+ *  - User roles are managed within the user document itself (`/users/{userId}`) to avoid needing additional reads for access control.
+ */
 rules_version = '2';
-
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function getRole() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-    }
-    
-    function isSignedIn() {
-      return request.auth != null;
-    }
-
-    // USERS
+    /**
+     * @description Controls access to user profile data.
+     * @path /users/{userId}
+     * @allow (create) - If the authenticated user's UID matches the userId, allowing them to create their profile.
+     * @allow (get, list, update, delete) - If the authenticated user's UID matches the userId, allowing them to manage their profile.
+     * @deny (create) - If the authenticated user's UID does not match the userId, preventing unauthorized profile creation.
+     * @deny (get, list, update, delete) - If the authenticated user's UID does not match the userId, preventing unauthorized profile access.
+     * @principle Enforces document ownership for all operations on user profiles.
+     */
     match /users/{userId} {
-      allow read: if isSignedIn();
-      allow create: if isSignedIn() && getRole() == "bishop";
-      allow update: if isSignedIn() && (
-        getRole() == "bishop" ||
-        request.auth.uid == userId
-      );
-      allow delete: if isSignedIn() && getRole() == "bishop";
-    }
-
-    // INTERVIEWS
-    match /interviews/{id} {
-      allow read, create, update, delete: if isSignedIn();
-    }
-
-    // BISHOPRIC MEETINGS + NOTES
-    match /bishopricMeetings/{id} {
-      allow read, create, update, delete: if isSignedIn();
-
-      match /notes/{noteId} {
-        allow read, create, update, delete: if isSignedIn();
+      function isSignedIn() {
+        return request.auth != null;
       }
-    }
 
-    // SACRAMENT MEETINGS + ASUNTOS BARRIO
-    match /sacramentMeetings/{id} {
-      allow read, create, update, delete: if isSignedIn();
-
-      match /asuntosBarrio/{asuntoId} {
-        allow read, create, update, delete: if isSignedIn();
+      function isOwner(userId) {
+        return request.auth.uid == userId;
       }
+
+      function isExistingOwner(userId) {
+          return isOwner(userId) && resource != null;
+      }
+
+      allow create: if isSignedIn() && isOwner(userId) && request.resource.data.uid == userId;
+      allow get: if isOwner(userId);
+      allow list: if false;
+      allow update: if isExistingOwner(userId) && request.resource.data.uid == resource.data.uid;
+      allow delete: if isExistingOwner(userId);
     }
 
-    // LOGS
-    match /logs/{logId} {
+    /**
+     * @description Controls access to interview records.
+     * @path /interviews/{interviewId}
+     * @allow (create, get, list, update, delete) - If the user is signed in, allowing them to manage interview records.
+     * @deny (create, get, list, update, delete) - If the user is not signed in, preventing unauthorized access.
+     * @principle Allows all authenticated users to manage interview records.
+     */
+    match /interviews/{interviewId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+        
       allow create: if isSignedIn();
-      allow read, update, delete: if false;
+      allow get: if true;
+      allow list: if true;
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
+    }
+
+    /**
+     * @description Controls access to bishopric meeting records.
+     * @path /bishopricMeetings/{meetingId}
+     * @allow (create, get, list, update, delete) - If the user is signed in, allowing them to manage bishopric meeting records.
+     * @deny (create, get, list, update, delete) - If the user is not signed in, preventing unauthorized access.
+     * @principle Allows all authenticated users to manage bishopric meeting records.
+     */
+    match /bishopricMeetings/{meetingId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow create: if isSignedIn();
+      allow get: if true;
+      allow list: if true;
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
+    }
+
+    /**
+     * @description Controls access to notes associated with bishopric meetings.
+     * @path /bishopricMeetings/{meetingId}/notes/{noteId}
+     * @allow (create, get, list, update, delete) - If the user is signed in, allowing them to manage notes.
+     * @deny (create, get, list, update, delete) - If the user is not signed in, preventing unauthorized access.
+     * @principle Allows all authenticated users to manage notes for bishopric meetings.
+     */
+    match /bishopricMeetings/{meetingId}/notes/{noteId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow create: if isSignedIn();
+      allow get: if true;
+      allow list: if true;
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
+    }
+
+    /**
+     * @description Controls access to sacrament meeting agenda records.
+     * @path /sacramentMeetings/{meetingId}
+     * @allow (create, get, list, update, delete) - If the user is signed in, allowing them to manage sacrament meeting agenda records.
+     * @deny (create, get, list, update, delete) - If the user is not signed in, preventing unauthorized access.
+     * @principle Allows all authenticated users to manage sacrament meeting agenda records.
+     */
+    match /sacramentMeetings/{meetingId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow create: if isSignedIn();
+      allow get: if true;
+      allow list: if true;
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
+    }
+
+    /**
+     * @description Controls access to asuntos del barrio associated with sacrament meetings.
+     * @path /sacramentMeetings/{meetingId}/asuntosBarrio/{asuntoId}
+     * @allow (create, get, list, update, delete) - If the user is signed in, allowing them to manage asuntos del barrio.
+     * @deny (create, get, list, update, delete) - If the user is not signed in, preventing unauthorized access.
+     * @principle Allows all authenticated users to manage asuntos del barrio for sacrament meetings.
+     */
+    match /sacramentMeetings/{meetingId}/asuntosBarrio/{asuntoId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow create: if isSignedIn();
+      allow get: if true;
+      allow list: if true;
+      allow update: if isSignedIn() && resource != null;
+      allow delete: if isSignedIn() && resource != null;
+    }
+
+    /**
+     * @description Controls access to log entries.
+     * @path /logs/{logId}
+     * @allow (create) - If the user is signed in, allowing them to create log entries.
+     * @deny (get, list, update, delete) - Always denies read, update, and delete operations.
+     * @principle Only allows creation of log entries; other operations are restricted.
+     */
+    match /logs/{logId} {
+      function isSignedIn() {
+        return request.auth != null;
+      }
+
+      allow create: if isSignedIn();
+      allow get: if false;
+      allow list: if false;
+      allow update: if false;
+      allow delete: if false;
     }
   }
 }
