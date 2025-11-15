@@ -51,7 +51,7 @@ export default function SacramentMeetingPage() {
     // Filter out empty speakers
     const finalData = {
         ...data,
-        speakers: data.speakers.filter(s => s && s.trim() !== ''),
+        speakers: data.speakers?.filter(s => s && s.trim() !== '') || [],
     };
 
     try {
@@ -126,17 +126,17 @@ export default function SacramentMeetingPage() {
                 </CardContent>
             </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid w-full grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {agendas.map(agenda => (
               <Card key={agenda.id} className="flex flex-col">
                 <CardHeader>
-                  <CardTitle>{format(agenda.date.toDate(), 'PPP')}</CardTitle>
+                  <CardTitle>{agenda.date ? format(agenda.date.toDate(), 'PPP') : 'No date'}</CardTitle>
                   <CardDescription>{t('sacramentMeeting.conductedBy')} {agenda.dirige}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">
                     <p className="text-sm font-semibold">{t('sacramentMeeting.speakers')}</p>
                     <ul className="list-disc list-inside text-sm text-muted-foreground">
-                        {agenda.speakers.filter(s => s).map((speaker, i) => (
+                        {agenda.speakers?.filter(s => s).map((speaker, i) => (
                             <li key={i}>{speaker}</li>
                         ))}
                     </ul>

@@ -52,23 +52,23 @@ export interface AsuntoBarrio {
 }
 
 export interface Hymn {
-    name: string;
-    number: number;
+    name?: string;
+    number?: number;
 }
 
 export interface SacramentMeeting {
   id:string;
   date: Timestamp;
-  preside: string;
-  dirige: string;
-  pianist: string;
-  musicDirector: string;
-  authorities: string;
-  hymnSacramental: Hymn;
-  speakers: string[];
-  hymnFinal: Hymn;
-  closingPrayer: string;
-  asuntosDelBarrio: AsuntoBarrio[];
+  preside?: string;
+  dirige?: string;
+  pianist?: string;
+  musicDirector?: string;
+  authorities?: string;
+  hymnSacramental?: Hymn;
+  speakers?: string[];
+  hymnFinal?: Hymn;
+  closingPrayer?: string;
+  asuntosDelBarrio?: AsuntoBarrio[];
   createdBy: string;
   updatedBy: string;
   createdAt: Timestamp;
