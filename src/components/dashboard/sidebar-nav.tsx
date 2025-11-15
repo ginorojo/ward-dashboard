@@ -2,7 +2,7 @@
 
 import { usePathname, useRouter } from 'next/navigation';
 import { BookOpenCheck, BookUser, CalendarCheck, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
-import { SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from '@/components/ui/sidebar';
+import { SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar';
 import Logo from '@/components/icons/logo';
 import { useAuth } from '@/firebase';
 import { signOut } from 'firebase/auth';
@@ -16,6 +16,14 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
     const auth = useAuth();
     const role = userProfile?.role;
     const { t } = useTranslation();
+    const { isMobile, setOpenMobile } = useSidebar();
+
+    const handleNavigate = (href: string) => {
+        router.push(href);
+        if (isMobile) {
+            setOpenMobile(false);
+        }
+    }
 
     const navItems = [
         { href: '/dashboard', label: t('dashboard.title'), icon: LayoutDashboard },
@@ -31,6 +39,9 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
 
     const handleLogout = async () => {
         await signOut(auth);
+        if (isMobile) {
+            setOpenMobile(false);
+        }
         router.push('/login');
     }
 
@@ -49,7 +60,7 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
                     {filteredNavItems.map(item => (
                         <SidebarMenuItem key={item.href}>
                             <SidebarMenuButton
-                                onClick={() => router.push(item.href)}
+                                onClick={() => handleNavigate(item.href)}
                                 isActive={pathname === item.href}
                                 tooltip={item.label}
                             >
@@ -66,7 +77,7 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
                     {bottomNavItems.map(item => (
                         <SidebarMenuItem key={item.href}>
                             <SidebarMenuButton
-                                onClick={() => router.push(item.href)}
+                                onClick={() => handleNavigate(item.href)}
                                 isActive={pathname === item.href}
                                 tooltip={item.label}
                             >

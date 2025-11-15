@@ -40,6 +40,7 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, t }: C
   {
     accessorKey: 'purpose',
     header: t('interviews.purpose'),
+    cell: ({ row }) => <div className="whitespace-normal max-w-xs">{row.getValue('purpose')}</div>
   },
   {
     accessorKey: 'scheduledDate',
