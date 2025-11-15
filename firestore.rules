@@ -35,16 +35,14 @@ service cloud.firestore {
         return request.auth.token.email == "ginorojoj@gmail.com";
     }
 
-    function isRequestingUserBishop() {
-      let requestingUserRole = getUserData(request.auth.uid).role;
-      return requestingUserRole == 'bishop' || isAdministrator();
-    }
-    
-    function isTargetUserBishopOrAdmin(userId) {
-        let targetUserRole = getUserData(userId).role;
-        return targetUserRole == 'bishop' || targetUserRole == 'administrator';
+    function requestingUserRole() {
+      return getUserData(request.auth.uid).role;
     }
 
+    function isBishop() {
+        return requestingUserRole() == 'bishop';
+    }
+    
     /**
      * @description Controls access to user profile data.
      * @path /users/{userId}
@@ -52,13 +50,13 @@ service cloud.firestore {
     match /users/{userId} {
       // Allow creation if the user is an admin, or a bishop creating a counselor/secretary.
       allow create: if isSignedIn() && (isAdministrator() || 
-                      (isRequestingUserBishop() && request.resource.data.role in ['counselor', 'secretary']));
+                      (isBishop() && request.resource.data.role in ['counselor', 'secretary']));
 
       // Admins and bishops can view user profiles. Users can view their own.
-      allow get: if isSignedIn() && (isRequestingUserBishop() || isOwner(userId));
+      allow get: if isSignedIn() && (isAdministrator() || isBishop() || isOwner(userId));
       
       // Admins and bishops can list all users.
-      allow list: if isSignedIn() && isRequestingUserBishop();
+      allow list: if isSignedIn() && (isAdministrator() || isBishop());
 
       // Update permissions:
       // - Admins can update any user.
@@ -66,12 +64,12 @@ service cloud.firestore {
       // - Users can update their own profile (but not their role or UID).
       allow update: if isSignedIn() && (
                       isAdministrator() ||
-                      (isRequestingUserBishop() && (getUserData(userId).role in ['counselor', 'secretary'] || (isOwner(userId) && request.resource.data.role == resource.data.role))) ||
+                      (isBishop() && (getUserData(userId).role in ['counselor', 'secretary'] || (isOwner(userId) && request.resource.data.role == resource.data.role))) ||
                       (isOwner(userId) && request.resource.data.role == resource.data.role && request.resource.data.uid == resource.data.uid)
                     );
 
       // Only administrators can delete users. Bishops can delete counselors and secretaries.
-      allow delete: if isSignedIn() && (isAdministrator() || (isRequestingUserBishop() && getUserData(userId).role in ['counselor', 'secretary']));
+      allow delete: if isSignedIn() && (isAdministrator() || (isBishop() && getUserData(userId).role in ['counselor', 'secretary']));
     }
 
     /**
