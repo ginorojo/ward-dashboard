@@ -57,7 +57,7 @@ export const columns = ({ openEditForm, handleDelete, fetchUsers, currentUser, t
   {
     accessorKey: 'role',
     header: t('common.role'),
-    cell: ({ row }) => <Badge variant="secondary" className="capitalize">{row.getValue('role')}</Badge>,
+    cell: ({ row }) => <Badge variant="secondary" className="capitalize">{t(`users.role${(row.getValue('role') as string).charAt(0).toUpperCase() + (row.getValue('role') as string).slice(1)}`)}</Badge>,
   },
   {
     accessorKey: 'isActive',
