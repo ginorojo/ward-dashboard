@@ -16,7 +16,7 @@ import { format } from 'date-fns';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { useUser, useFirestore } from '@/firebase';
-import { updateUserProfile, logAction } from '@/lib/firebase/firestore';
+import { updateUserProfile, logAction, deleteUser } from '@/lib/firebase/firestore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import UserForm from './user-form';
@@ -30,10 +30,9 @@ type ColumnsProps = {
   fetchUsers: () => void;
   currentUser: UserProfile | null;
   t: (key: string) => string;
-  handleDeleteUser: (uid: string) => void;
 }
 
-export const columns = ({ fetchUsers, currentUser, t, handleDeleteUser }: ColumnsProps): ColumnDef<UserProfile>[] => [
+export const columns = ({ fetchUsers, currentUser, t }: ColumnsProps): ColumnDef<UserProfile>[] => [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -80,7 +79,8 @@ export const columns = ({ fetchUsers, currentUser, t, handleDeleteUser }: Column
     cell: ({ row }) => {
       const user = row.original;
       const { toast } = useToast();
-      const { user: authUser, firestore } = useUser();
+      const { user: authUser } = useUser();
+      const firestore  = useFirestore();
       const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
       const handleStatusToggle = () => {
@@ -88,6 +88,17 @@ export const columns = ({ fetchUsers, currentUser, t, handleDeleteUser }: Column
         updateUserProfile(firestore, user.uid, { isActive: !user.isActive });
         logAction(firestore, authUser.uid, 'update', 'user', user.uid, `Set status to ${!user.isActive ? 'active' : 'inactive'}`);
         toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
+        fetchUsers();
+      };
+
+      const handleDeleteUser = () => {
+        if (!authUser || !firestore) {
+            toast({ variant: 'destructive', title: t('common.error'), description: 'Could not delete user. Firebase not available.' });
+            return;
+        }
+        deleteUser(firestore, user.uid);
+        logAction(firestore, authUser.uid, 'delete', 'user', user.uid, `Deleted user`);
+        toast({ title: t('common.success'), description: t('users.userDeleted') });
         fetchUsers();
       };
       
@@ -135,7 +146,7 @@ export const columns = ({ fetchUsers, currentUser, t, handleDeleteUser }: Column
                 <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                 <AlertDialogAction
                   className="bg-destructive hover:bg-destructive/90"
-                  onClick={() => handleDeleteUser(user.uid)}
+                  onClick={handleDeleteUser}
                 >
                   {t('users.continue')}
                 </AlertDialogAction>

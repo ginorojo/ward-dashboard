@@ -39,7 +39,7 @@ export default function UsersPage() {
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     if (!firestore) return;
     setLoading(true);
     try {
@@ -54,11 +54,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [firestore, authUser, toast, t]);
 
   useEffect(() => {
     fetchUsers();
-  }, [firestore, authUser]);
+  }, [fetchUsers]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
@@ -119,7 +119,7 @@ export default function UsersPage() {
     toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
     fetchUsers();
   };
-
+  
   const handleDeleteUser = useCallback((uid: string) => {
     if (!authUser || !firestore) {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Could not delete user. Firebase not available.' });
@@ -129,7 +129,7 @@ export default function UsersPage() {
     logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
     toast({ title: t('common.success'), description: t('users.userDeleted') });
     fetchUsers();
-  }, [firestore, authUser, t]);
+  }, [firestore, authUser, t, fetchUsers, toast]);
   
   const openEditForm = (user: UserProfile) => {
     setEditingUser(user);
