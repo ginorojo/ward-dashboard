@@ -14,6 +14,14 @@ import { z } from 'zod';
 import { interviewSchema } from '@/lib/schemas';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/lib/i18n';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { format } from 'date-fns';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { MoreHorizontal } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+
 
 type InterviewFormValues = z.infer<typeof interviewSchema>;
 
@@ -25,6 +33,7 @@ export default function InterviewsPage() {
   const [editingInterview, setEditingInterview] = useState<Interview | null>(null);
   const { toast } = useToast();
   const { t } = useTranslation();
+  const isMobile = useIsMobile();
 
   const fetchInterviews = async () => {
     if (!firestore) return;
@@ -102,6 +111,73 @@ export default function InterviewsPage() {
     scheduledDate: editingInterview.scheduledDate.toDate(),
   } : undefined;
 
+  const renderMobileInterviews = () => (
+    <div className="space-y-4">
+      {interviews.map(interview => (
+        <Card key={interview.id}>
+          <CardHeader>
+            <div className="flex justify-between items-start">
+              <div>
+                <CardTitle className='text-lg'>{interview.personInterviewed}</CardTitle>
+                <CardDescription>{t('interviews.interviewer')}: {interview.interviewer}</CardDescription>
+              </div>
+               <AlertDialog>
+                <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="h-8 w-8 p-0">
+                        <span className="sr-only">Open menu</span>
+                        <MoreHorizontal className="h-4 w-4" />
+                    </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => openEditForm(interview)}>{t('common.edit')}</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => handleStatusToggle(interview)}>
+                        {interview.status === 'pending' ? t('interviews.markCompleted') : t('interviews.markPending')}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <AlertDialogTrigger asChild>
+                        <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
+                    </AlertDialogTrigger>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        {t('interviews.deleteConfirmDescription')}
+                    </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDelete(interview.id)} className="bg-destructive hover:bg-destructive/90">
+                        {t('common.delete')}
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </div>
+          </CardHeader>
+          <CardContent className="space-y-2 text-sm">
+            <div>
+              <p className="font-semibold">{t('interviews.purpose')}</p>
+              <p className="text-muted-foreground">{interview.purpose}</p>
+            </div>
+            <div>
+              <p className="font-semibold">{t('common.date')}</p>
+              <p className="text-muted-foreground">{format(interview.scheduledDate.toDate(), 'PPp')}</p>
+            </div>
+            <div>
+              <p className="font-semibold">{t('common.status')}</p>
+              <Badge variant={interview.status === 'completed' ? 'default' : 'secondary'} className="capitalize mt-1">
+                {t(`interviews.${interview.status}`)}
+              </Badge>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -129,6 +205,8 @@ export default function InterviewsPage() {
             <Skeleton className="h-10 w-1/3" />
             <Skeleton className="h-40 w-full" />
          </div>
+      ) : isMobile ? (
+        renderMobileInterviews()
       ) : (
         <DataTable columns={tableColumns} data={interviews} t={t} />
       )}
