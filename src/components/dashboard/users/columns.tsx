@@ -15,14 +15,14 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { useUser } from '@/firebase';
-import { updateUserProfile, logAction, deleteUser } from '@/lib/firebase/firestore';
+import { useUser, useFirestore } from '@/firebase';
+import { updateUserProfile, logAction } from '@/lib/firebase/firestore';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import UserForm from './user-form';
 import { userSchema } from '@/lib/schemas';
 import { z } from 'zod';
-import { useFirestore } from '@/firebase';
+
 
 type UserFormValues = z.infer<typeof userSchema>;
 
@@ -80,8 +80,7 @@ export const columns = ({ fetchUsers, currentUser, t, deleteUser: handleDeleteUs
     cell: ({ row }) => {
       const user = row.original;
       const { toast } = useToast();
-      const { user: authUser } = useUser();
-      const firestore = useFirestore();
+      const { user: authUser, firestore } = useUser();
       const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
 
       const handleStatusToggle = () => {
