@@ -4,7 +4,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { BookOpenCheck, BookUser, CalendarCheck, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
 import { SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar';
 import Logo from '@/components/icons/logo';
-import { useAuth } from '@/firebase';
+import { useAuth, useUser } from '@/firebase';
 import { signOut } from 'firebase/auth';
 import { Separator } from '../ui/separator';
 import { UserProfile } from '@/lib/types';
@@ -14,7 +14,7 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
     const pathname = usePathname();
     const router = useRouter();
     const auth = useAuth();
-    const role = userProfile?.role;
+    const { user } = useUser();
     const { t } = useTranslation();
     const { isMobile, setOpenMobile } = useSidebar();
 
@@ -24,6 +24,11 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
             setOpenMobile(false);
         }
     }
+
+    // Determine role, giving precedence to the special email address.
+    const isBishopByEmail = user?.email === 'ginorojoj@gmail.com';
+    const role = isBishopByEmail ? 'bishop' : userProfile?.role;
+
 
     const navItems = [
         { href: '/dashboard', label: t('dashboard.title'), icon: LayoutDashboard },
