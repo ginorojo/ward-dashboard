@@ -130,14 +130,14 @@ export default function BishopricMeetingPage() {
         <Card key={note.id}>
           <CardContent className="p-4">
             <div className="flex justify-between items-start">
-              <div>
+              <div className="flex-1 overflow-hidden">
                 <p className="text-sm font-semibold">{format(note.date.toDate(), 'PPP')}</p>
-                <p className="mt-2 text-muted-foreground whitespace-pre-wrap">{note.content}</p>
+                <p className="mt-2 text-muted-foreground whitespace-pre-wrap break-words">{note.content}</p>
               </div>
               <AlertDialog>
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
+                    <Button variant="ghost" className="h-8 w-8 p-0 flex-shrink-0">
                       <span className="sr-only">Open menu</span>
                       <MoreHorizontal className="h-4 w-4" />
                     </Button>
