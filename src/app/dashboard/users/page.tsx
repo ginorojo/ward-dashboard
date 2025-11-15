@@ -23,6 +23,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter, FirestorePermissionError } from '@/firebase';
+import React from 'react';
 
 type UserFormValues = z.infer<typeof createUserSchema>;
 
@@ -153,66 +154,68 @@ export default function UsersPage() {
       {users.map(user => {
         const isCurrentUser = currentUser?.uid === user.uid;
         return (
-            <AlertDialog key={user.uid}>
-              <Card>
-                <CardHeader>
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <CardTitle className='text-lg'>{user.name}</CardTitle>
-                      <CardDescription>{user.email}</CardDescription>
+            <React.Fragment key={user.uid}>
+              <AlertDialog>
+                <Card>
+                  <CardHeader>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <CardTitle className='text-lg'>{user.name}</CardTitle>
+                        <CardDescription>{user.email}</CardDescription>
+                      </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                                <span className="sr-only">Open menu</span>
+                                <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => openEditForm(user)}>{t('common.edit')}</DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleStatusToggle(user)} disabled={isCurrentUser}>
+                              {user.isActive ? t('users.deactivate') : t('users.activate')}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <AlertDialogTrigger asChild>
+                                <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>{t('users.deleteUser')}</DropdownMenuItem>
+                            </AlertDialogTrigger>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
                     </div>
-                      <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => openEditForm(user)}>{t('common.edit')}</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => handleStatusToggle(user)} disabled={isCurrentUser}>
-                            {user.isActive ? t('users.deactivate') : t('users.activate')}
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <AlertDialogTrigger asChild>
-                              <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>{t('users.deleteUser')}</DropdownMenuItem>
-                          </AlertDialogTrigger>
-                          </DropdownMenuContent>
-                      </DropdownMenu>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4 text-sm">
-                  <div className="flex items-center justify-between gap-4">
-                    <div>
-                      <p className="font-semibold">{t('common.role')}</p>
-                      <Badge variant="secondary" className="capitalize mt-1">{t(`users.role${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`)}</Badge>
+                  </CardHeader>
+                  <CardContent className="space-y-4 text-sm">
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="font-semibold">{t('common.role')}</p>
+                        <Badge variant="secondary" className="capitalize mt-1">{t(`users.role${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`)}</Badge>
+                      </div>
+                      <div>
+                        <p className="font-semibold">{t('common.status')}</p>
+                         <Badge variant={user.isActive ? 'default' : 'destructive'} className="mt-1">
+                            {user.isActive ? t('users.active') : t('users.inactive')}
+                          </Badge>
+                      </div>
                     </div>
                     <div>
-                      <p className="font-semibold">{t('common.status')}</p>
-                       <Badge variant={user.isActive ? 'default' : 'destructive'} className="mt-1">
-                          {user.isActive ? t('users.active') : t('users.inactive')}
-                        </Badge>
+                      <p className="font-semibold">{t('users.createdAt')}</p>
+                      <p className="text-muted-foreground">{user.createdAt ? format((user.createdAt as any).toDate(), 'PP') : 'N/A'}</p>
                     </div>
-                  </div>
-                  <div>
-                    <p className="font-semibold">{t('users.createdAt')}</p>
-                    <p className="text-muted-foreground">{user.createdAt ? format((user.createdAt as any).toDate(), 'PP') : 'N/A'}</p>
-                  </div>
-                </CardContent>
-              </Card>
-              <AlertDialogContent>
-                  <AlertDialogHeader>
-                  <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
-                  <AlertDialogDescription>{t('users.deleteUserConfirm')}</AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                  <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                  <AlertDialogAction onClick={() => handleDeleteUser(user.uid)} className="bg-destructive hover:bg-destructive/90">
-                      {t('users.continue')}
-                  </AlertDialogAction>
-                  </AlertDialogFooter>
-              </AlertDialogContent>
-            </AlertDialog>
+                  </CardContent>
+                </Card>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                    <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
+                    <AlertDialogDescription>{t('users.deleteUserConfirm')}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction onClick={() => handleDeleteUser(user.uid)} className="bg-destructive hover:bg-destructive/90">
+                        {t('users.continue')}
+                    </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            </React.Fragment>
         )
       })}
     </div>
