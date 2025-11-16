@@ -164,7 +164,7 @@ export default function UsersPage() {
       {users.map(user => {
         const isCurrentUser = currentUser?.uid === user.uid;
         return (
-            <React.Fragment key={user.uid}>
+            <div key={user.uid}>
               <AlertDialog>
                 <Card>
                   <CardHeader>
@@ -225,7 +225,7 @@ export default function UsersPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
               </AlertDialog>
-            </React.Fragment>
+            </div>
         )
       })}
     </div>
