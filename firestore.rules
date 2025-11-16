@@ -6,6 +6,7 @@
  * The user with the email 'ginorojoj@gmail.com' is the designated 'administrator' with full rights.
  * An 'administrator' can create 'bishops'.
  * 'Bishops' can create 'counselors' and 'secretaries'.
+ * New users can create their own user document upon registration.
  *
  * Data Structure:
  * - /users/{userId}: Stores individual user profiles.
@@ -44,9 +45,11 @@ service cloud.firestore {
      * @path /users/{userId}
      */
     match /users/{userId} {
-      // Create: Admin can create any role. Bishop can create counselors/secretaries.
+      // Create: Allow if user is creating their own doc, if admin, or if bishop creating allowed roles.
       allow create: if isSignedIn() && 
-                      (isAdministrator() || (isBishop() && request.resource.data.role in ['counselor', 'secretary']));
+                      (isOwner(userId) || 
+                       isAdministrator() || 
+                       (isBishop() && request.resource.data.role in ['counselor', 'secretary']));
 
       // Read: Any signed-in user can read any profile.
       allow get: if isSignedIn();
