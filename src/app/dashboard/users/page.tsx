@@ -254,7 +254,7 @@ export default function UsersPage() {
         </Dialog>
 
       {loading ? (
-         <div className="space-y-4">
+         <div key="loading-skeletons" className="space-y-4">
             <Skeleton className="h-10 w-1/3" />
             <Skeleton className="h-40 w-full" />
          </div>
