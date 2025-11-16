@@ -143,14 +143,15 @@ export const updateUserProfile = (firestore: Firestore, uid: string, data: Parti
     });
 };
 
-export const deleteUser = (firestore: Firestore, uid: string) => {
+export const deleteUser = (firestore: Firestore, uid: string): Promise<void> => {
     const userRef = doc(firestore, 'users', uid);
-    deleteDoc(userRef).catch(serverError => {
+    return deleteDoc(userRef).catch(serverError => {
         const permissionError = new FirestorePermissionError({
             path: userRef.path,
             operation: 'delete'
         });
         errorEmitter.emit('permission-error', permissionError);
+        throw serverError;
     });
 };
 
@@ -221,3 +222,5 @@ export const deleteNoteFromMeeting = (firestore: Firestore, meetingId: string, n
     });
   logAction(firestore, userId, 'delete', 'bishopricNote', noteId, `MeetingID: ${meetingId}`);
 };
+
+    

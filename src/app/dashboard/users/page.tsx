@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
-import { getCollection, updateUserProfile, logAction, deleteUser } from '@/lib/firebase/firestore';
+import { getCollection, updateUserProfile, logAction, deleteUser as deleteUserFromDb } from '@/lib/firebase/firestore'; // Renamed deleteUser to avoid conflict
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
@@ -39,25 +39,24 @@ export default function UsersPage() {
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
-  useEffect(() => {
-    const fetchUsers = async () => {
-      if (!firestore || !authUser) return;
-      setLoading(true);
-      try {
-        const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
-        setUsers(usersList);
-        const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
-        setCurrentUser(currentUserProfile || null);
-      } catch (error) {
-        toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+  const fetchUsers = useCallback(async () => {
+    if (!firestore || !authUser) return;
+    setLoading(true);
+    try {
+      const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
+      setUsers(usersList);
+      const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
+      setCurrentUser(currentUserProfile || null);
+    } catch (error) {
+      toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
+    } finally {
+      setLoading(false);
+    }
   }, [firestore, authUser, t, toast]);
 
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
@@ -83,7 +82,7 @@ export default function UsersPage() {
       await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
       toast({ title: t('common.success'), description: t('users.userCreated') });
-      setUsers(prevUsers => [...prevUsers, { ...userDocData, createdAt: new Date() } as unknown as UserProfile]);
+      fetchUsers(); // Refresh users list
       setIsFormOpen(false);
     } catch (error: any) {
         if (error.code && error.code.startsWith('auth/')) {
@@ -109,7 +108,7 @@ export default function UsersPage() {
     updateUserProfile(firestore, editingUser.uid, updateData).then(() => {
         logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
         toast({ title: t('common.success'), description: t('users.userUpdated') });
-        setUsers(prevUsers => prevUsers.map(u => u.uid === editingUser.uid ? {...u, ...updateData} : u));
+        fetchUsers(); // Refresh users list
         setIsFormOpen(false);
         setEditingUser(null);
     });
@@ -136,10 +135,13 @@ export default function UsersPage() {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Could not delete user. Firebase not available.' });
         return;
     }
-    deleteUser(firestore, uid);
-    logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
-    toast({ title: t('common.success'), description: t('users.userDeleted') });
-    setUsers(currentUsers => currentUsers.filter(user => user.uid !== uid));
+    deleteUserFromDb(firestore, uid).then(() => {
+      logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
+      toast({ title: t('common.success'), description: t('users.userDeleted') });
+      setUsers(currentUsers => currentUsers.filter(user => user.uid !== uid));
+    }).catch(() => {
+        toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete user.' });
+    });
   }, [firestore, authUser, t, toast]);
   
   const openEditForm = (user: UserProfile) => {
