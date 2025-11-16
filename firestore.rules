@@ -47,9 +47,10 @@ service cloud.firestore {
       allow create: if isSignedIn() && 
                       (isAdministrator() || (isBishop() && request.resource.data.role in ['counselor', 'secretary']));
 
-      // Read: Admin and Bishops can read all profiles. Users can read their own.
-      allow get: if isSignedIn() && (isAdministrator() || isBishop() || isOwner(userId));
-      allow list: if isSignedIn() && (isAdministrator() || isBishop());
+      // Read: Any signed-in user can read any profile.
+      allow get: if isSignedIn();
+      // Read List: Any signed-in user can list all profiles.
+      allow list: if isSignedIn();
 
       // Update: Admin can update any user. Bishops can update counselors/secretaries. Users can update their own profile (but not their role).
       allow update: if isSignedIn() && 

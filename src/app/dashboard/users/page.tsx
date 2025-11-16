@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
-import { getCollection, updateUserProfile, logAction, deleteUser as deleteUserFromDb } from '@/lib/firebase/firestore'; // Renamed deleteUser to avoid conflict
+import { getCollection, updateUserProfile, logAction, deleteUser as deleteUserFromDb } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
@@ -55,17 +55,16 @@ export default function UsersPage() {
   }, [firestore, authUser, t, toast]);
 
   useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
+    if (firestore && authUser) {
+      fetchUsers();
+    }
+  }, [firestore, authUser, fetchUsers]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
     try {
-      // 1. Create user in Firebase Auth
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password!);
       const newUid = userCredential.user.uid;
-
-      // 2. Create user document in Firestore
       const userDocRef = doc(firestore, 'users', newUid);
       const userDocData = {
         uid: newUid,
@@ -78,17 +77,15 @@ export default function UsersPage() {
       };
       
       await setDoc(userDocRef, userDocData);
-
       await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
       toast({ title: t('common.success'), description: t('users.userCreated') });
-      fetchUsers(); // Refresh users list
+      fetchUsers();
       setIsFormOpen(false);
     } catch (error: any) {
         if (error.code && error.code.startsWith('auth/')) {
              toast({ variant: 'destructive', title: t('auth.registrationFailed'), description: error.message });
         } else {
-             // Assume Firestore error if not an auth error
             const permissionError = new FirestorePermissionError({
                 path: `users`,
                 operation: 'create',
@@ -102,13 +99,11 @@ export default function UsersPage() {
   
   const handleUpdateUser = (data: z.infer<typeof userSchema>) => {
     if(!authUser || !firestore || !editingUser) return;
-    
     const updateData = {name: data.name, email: data.email, role: data.role};
-
     updateUserProfile(firestore, editingUser.uid, updateData).then(() => {
         logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
         toast({ title: t('common.success'), description: t('users.userUpdated') });
-        fetchUsers(); // Refresh users list
+        fetchUsers();
         setIsFormOpen(false);
         setEditingUser(null);
     });
@@ -270,5 +265,3 @@ export default function UsersPage() {
     </div>
   );
 }
-
-    
