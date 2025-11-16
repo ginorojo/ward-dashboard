@@ -25,10 +25,7 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
         }
     }
 
-    // Determine role, giving precedence to the special email address.
-    const isAdministrator = user?.email === 'ginorojoj@gmail.com';
-    const role = isAdministrator ? 'administrator' : userProfile?.role;
-
+    const role = userProfile?.role || null;
 
     const navItems = [
         { href: '/dashboard', label: t('dashboard.title'), icon: LayoutDashboard },
@@ -50,7 +47,12 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
         router.push('/login');
     }
 
-    const filteredNavItems = navItems.filter(item => !item.roles || (role && item.roles.includes(role)));
+    const filteredNavItems = navItems.filter(item => {
+        if (!item.roles) return true; // Show item if it has no role restrictions
+        if (user?.email === 'ginorojoj@gmail.com') return true; // Admin override
+        return role ? item.roles.includes(role) : false;
+    });
+
 
     return (
         <>
