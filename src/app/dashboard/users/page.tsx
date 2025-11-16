@@ -39,26 +39,24 @@ export default function UsersPage() {
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
-  const fetchUsers = useCallback(async () => {
-    if (!firestore || !authUser) return;
-    setLoading(true);
-    try {
-      const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
-      setUsers(usersList);
-      const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
-      setCurrentUser(currentUserProfile || null);
-    } catch (error) {
-      toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
-    } finally {
-      setLoading(false);
-    }
-  }, [firestore, authUser, t, toast]);
-
   useEffect(() => {
-    if (firestore && authUser) {
-      fetchUsers();
-    }
-  }, [firestore, authUser, fetchUsers]);
+    const fetchUsers = async () => {
+      if (!firestore || !authUser) return;
+      setLoading(true);
+      try {
+        const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
+        setUsers(usersList);
+        const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
+        setCurrentUser(currentUserProfile || null);
+      } catch (error) {
+        toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, [firestore, authUser, t, toast]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
@@ -80,7 +78,9 @@ export default function UsersPage() {
       await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
       toast({ title: t('common.success'), description: t('users.userCreated') });
-      fetchUsers();
+      // Re-fetch users after creation
+      const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
+      setUsers(usersList);
       setIsFormOpen(false);
     } catch (error: any) {
         if (error.code && error.code.startsWith('auth/')) {
@@ -103,7 +103,7 @@ export default function UsersPage() {
     updateUserProfile(firestore, editingUser.uid, updateData).then(() => {
         logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
         toast({ title: t('common.success'), description: t('users.userUpdated') });
-        fetchUsers();
+        setUsers(currentUsers => currentUsers.map(user => user.uid === editingUser.uid ? {...user, ...updateData} : user));
         setIsFormOpen(false);
         setEditingUser(null);
     });
