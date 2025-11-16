@@ -35,7 +35,8 @@ service cloud.firestore {
     }
 
     function isBishop() {
-        return getUserData(request.auth.uid).role == 'bishop';
+      let data = getUserData(request.auth.uid);
+      return data != null && data.role == 'bishop';
     }
     
     /**
