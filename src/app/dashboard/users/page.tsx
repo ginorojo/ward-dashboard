@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, Fragment } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
 import { getCollection, updateUserProfile, logAction, deleteUser as deleteUserFromDb } from '@/lib/firebase/firestore';
@@ -39,25 +39,24 @@ export default function UsersPage() {
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
-  useEffect(() => {
+  const fetchUsers = useCallback(async () => {
     if (!firestore || !authUser) return;
-
-    const fetchUsers = async () => {
-      setLoading(true);
-      try {
-        const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
-        setUsers(usersList);
-        const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
-        setCurrentUser(currentUserProfile || null);
-      } catch (error) {
-        toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUsers();
+    setLoading(true);
+    try {
+      const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
+      setUsers(usersList);
+      const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
+      setCurrentUser(currentUserProfile || null);
+    } catch (error) {
+      toast({ variant: 'destructive', title: t('common.error'), description: t('users.fetchFailed') });
+    } finally {
+      setLoading(false);
+    }
   }, [firestore, authUser, t, toast]);
+
+  useEffect(() => {
+    fetchUsers();
+  }, [fetchUsers]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
@@ -79,9 +78,8 @@ export default function UsersPage() {
       await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
       toast({ title: t('common.success'), description: t('users.userCreated') });
-      const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
-      setUsers(usersList);
       setIsFormOpen(false);
+      fetchUsers();
     } catch (error: any) {
         if (error.code && error.code.startsWith('auth/')) {
              toast({ variant: 'destructive', title: t('auth.registrationFailed'), description: error.message });
@@ -103,9 +101,9 @@ export default function UsersPage() {
     updateUserProfile(firestore, editingUser.uid, updateData).then(() => {
         logAction(firestore, authUser.uid, 'update', 'user', editingUser.uid, `Updated user profile`);
         toast({ title: t('common.success'), description: t('users.userUpdated') });
-        setUsers(currentUsers => currentUsers.map(user => user.uid === editingUser.uid ? {...user, ...updateData} : user));
         setIsFormOpen(false);
         setEditingUser(null);
+        fetchUsers();
     });
   }
 
@@ -115,15 +113,11 @@ export default function UsersPage() {
     updateUserProfile(firestore, userToToggle.uid, { isActive: newStatus }).then(() => {
         logAction(firestore, authUser.uid, 'update', 'user', userToToggle.uid, `Set status to ${newStatus ? 'active' : 'inactive'}`);
         toast({ title: t('common.success'), description: t('users.userStatusUpdated') });
-        setUsers(currentUsers =>
-            currentUsers.map(user =>
-                user.uid === userToToggle.uid ? { ...user, isActive: newStatus } : user
-            )
-        );
+        fetchUsers();
     }).catch(() => {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
     });
-  }, [firestore, authUser, toast, t]);
+  }, [firestore, authUser, toast, t, fetchUsers]);
   
   const handleDeleteUser = useCallback((uid: string) => {
     if (!authUser || !firestore) {
@@ -133,11 +127,11 @@ export default function UsersPage() {
     deleteUserFromDb(firestore, uid).then(() => {
       logAction(firestore, authUser.uid, 'delete', 'user', uid, `Deleted user`);
       toast({ title: t('common.success'), description: t('users.userDeleted') });
-      setUsers(currentUsers => currentUsers.filter(user => user.uid !== uid));
+      fetchUsers();
     }).catch(() => {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete user.' });
     });
-  }, [firestore, authUser, t, toast]);
+  }, [firestore, authUser, t, toast, fetchUsers]);
   
   const openEditForm = (user: UserProfile) => {
     setEditingUser(user);
