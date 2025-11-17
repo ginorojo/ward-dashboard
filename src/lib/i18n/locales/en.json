@@ -47,6 +47,7 @@
     "deleteUserConfirm": "This action cannot be undone. This will permanently deactivate the user's account and remove their data from our servers.",
     "continue": "Continue",
     "fullName": "Full Name",
+    "roleAdministrator": "Administrator",
     "roleBishop": "Bishop",
     "roleCounselor": "Counselor",
     "roleSecretary": "Secretary",

@@ -122,8 +122,13 @@ export default function UsersPage() {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to update user status.' });
     }
   };
+
+console.log("Auth user:", authUser.uid);
+console.log("CurrentUser:", currentUser);
+
   
   const handleDeleteUser = async (uid: string) => {
+
     if (!authUser || !firestore) {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Could not delete user. Firebase not available.' });
         return;
@@ -262,5 +267,7 @@ export default function UsersPage() {
         <DataTable columns={tableColumns} data={users} t={t}/>
       )}
     </div>
+
+    
   );
 }

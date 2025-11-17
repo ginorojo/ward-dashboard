@@ -47,6 +47,7 @@
     "deleteUserConfirm": "Esta acción no se puede deshacer. Esto desactivará permanentemente la cuenta del usuario y eliminará sus datos de nuestros servidores.",
     "continue": "Continuar",
     "fullName": "Nombre Completo",
+    "roleAdministrator": "Administrador",
     "roleBishop": "Obispo",
     "roleCounselor": "Consejero",
     "roleSecretary": "Secretario",
