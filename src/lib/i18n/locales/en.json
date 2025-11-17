@@ -168,7 +168,15 @@
     "appearance": "Appearance",
     "appearanceDescription": "Customize the look and feel of the application.",
     "theme": "Theme",
-    "themeDescription": "Select between light and dark mode."
+    "themeDescription": "Select between light and dark mode.",
+    "changePassword": "Change Password",
+    "changePasswordDescription": "Update your account password.",
+    "newPassword": "New Password",
+    "confirmNewPassword": "Confirm New Password",
+    "updatePassword": "Update Password",
+    "passwordUpdateSuccess": "Password updated successfully.",
+    "passwordUpdateError": "Failed to update password.",
+    "passwordsDoNotMatch": "Passwords do not match."
   },
   "auth": {
     "loginTitle": "Ward Dashboard",
