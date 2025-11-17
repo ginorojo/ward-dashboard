@@ -13,7 +13,17 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from '@/components/ui/alert-dialog';
 
 type ColumnsProps = {
   openEditForm: (user: UserProfile) => void;
@@ -23,7 +33,13 @@ type ColumnsProps = {
   t: (key: string) => string;
 }
 
-export const columns = ({ openEditForm, handleDelete, handleStatusToggle, currentUser, t }: ColumnsProps): ColumnDef<UserProfile>[] => [
+export const columns = ({
+  openEditForm,
+  handleDelete,
+  handleStatusToggle,
+  currentUser,
+  t
+}: ColumnsProps): ColumnDef<UserProfile>[] => [
   {
     accessorKey: 'name',
     header: ({ column }) => {
@@ -46,7 +62,16 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, curren
   {
     accessorKey: 'role',
     header: t('common.role'),
-    cell: ({ row }) => <Badge variant="secondary" className="capitalize">{t(`users.role${(row.getValue('role') as string).charAt(0).toUpperCase() + (row.getValue('role') as string).slice(1)}`)}</Badge>,
+    cell: ({ row }) => (
+      <Badge variant="secondary" className="capitalize">
+        {t(
+          `users.role${
+            (row.getValue('role') as string).charAt(0).toUpperCase() +
+            (row.getValue('role') as string).slice(1)
+          }`
+        )}
+      </Badge>
+    ),
   },
   {
     accessorKey: 'isActive',
@@ -72,42 +97,54 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, curren
       const isCurrentUser = currentUser?.uid === user.uid;
 
       return (
-          <AlertDialog>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
-                 <DropdownMenuItem onClick={() => openEditForm(user)}>{t('common.edit')}</DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleStatusToggle(user)} disabled={isCurrentUser}>
-                  {user.isActive ? t('users.deactivate') : t('users.activate')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <AlertDialogTrigger asChild>
-                  <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>{t('users.deleteUser')}</DropdownMenuItem>
-                </AlertDialogTrigger>
-              </DropdownMenuContent>
-            </DropdownMenu>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
-                <AlertDialogDescription>{t('users.deleteUserConfirm')}</AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                <AlertDialogAction
-                  className="bg-destructive hover:bg-destructive/90"
-                  onClick={() => handleDelete(user.uid)}
+        <AlertDialog>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => openEditForm(user)}>
+                {t('common.edit')}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleStatusToggle(user)}
+                disabled={isCurrentUser}
+              >
+                {user.isActive ? t('users.deactivate') : t('users.activate')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <AlertDialogTrigger asChild>
+                <DropdownMenuItem
+                  className="text-destructive"
+                  disabled={isCurrentUser}
                 >
-                  {t('users.continue')}
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                  {t('users.deleteUser')}
+                </DropdownMenuItem>
+              </AlertDialogTrigger>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>{t('users.deleteUser')}</AlertDialogTitle>
+              <AlertDialogDescription>
+                {t('users.deleteUserConfirm')}
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive hover:bg-destructive/90"
+                onClick={() => handleDelete(user.uid)}
+              >
+                {t('common.delete')}
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       );
     },
   },
