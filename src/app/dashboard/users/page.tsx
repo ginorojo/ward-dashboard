@@ -39,15 +39,20 @@ export default function UsersPage() {
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
   const fetchUsers = async () => {
-    if (!firestore) return;
+    if (!firestore || !authUser) return;
     setLoading(true);
     try {
       const usersList = await getCollection<UserProfile>(firestore, 'users', { field: 'createdAt', direction: 'desc' });
-      setUsers(usersList);
-      if (authUser) {
-        const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
-        setCurrentUser(currentUserProfile || null);
+      const currentUserProfile = usersList.find(u => u.uid === authUser.uid);
+      setCurrentUser(currentUserProfile || null);
+
+      if (currentUserProfile && currentUserProfile.role !== 'administrator') {
+        const filteredUsers = usersList.filter(user => user.role !== 'administrator');
+        setUsers(filteredUsers);
+      } else {
+        setUsers(usersList);
       }
+
     } catch (error) {
       toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to fetch users.' });
     } finally {
@@ -293,3 +298,6 @@ export default function UsersPage() {
 
     
 
+
+
+    
