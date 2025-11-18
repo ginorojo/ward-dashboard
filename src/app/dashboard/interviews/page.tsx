@@ -161,7 +161,7 @@ export default function InterviewsPage() {
             </div>
             <div>
               <p className="font-semibold">{t('common.status')}</p>
-              <Badge variant={interview.status === 'completed' ? 'default' : 'destructive'} className=" mt-1">
+              <Badge variant={interview.status === 'completed' ? 'success' : 'destructive'} className=" mt-1">
                 {t(`interviews.${interview.status}`)}
               </Badge>
             </div>
