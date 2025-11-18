@@ -32,7 +32,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
   const form = useForm<AgendaFormValues>({
     resolver: zodResolver(sacramentMeetingSchema),
     defaultValues: initialData
-      ? { ...initialData, date: initialData.date.toDate(), speakers: initialData.speakers || ["","","",""], asuntosDelBarrio: initialData.asuntosDelBarrio || [] }
+      ? { ...initialData, date: initialData.date.toDate(), speakers: initialData.speakers || ["","",""], asuntosDelBarrio: initialData.asuntosDelBarrio || [] }
       : {
           date: new Date(),
           preside: '',
@@ -41,7 +41,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
           musicDirector: '',
           authorities: '',
           hymnSacramental: { name: '', number: undefined },
-          speakers: ['', '', '', ''],
+          speakers: ['', '', ''],
           hymnFinal: { name: '', number: undefined },
           closingPrayer: '',
           asuntosDelBarrio: [],
@@ -135,7 +135,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
              <div className="space-y-4">
               <h3 className="text-lg font-medium">{t('sacramentMeeting.speakers')}</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {[0, 1, 2, 3].map(i => (
+                {[0, 1, 2].map(i => (
                     <FormField key={i} control={form.control} name={`speakers.${i}`} render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.speaker')} {i + 1}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
                 ))}
               </div>

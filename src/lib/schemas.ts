@@ -41,7 +41,7 @@ export const sacramentMeetingSchema = z.object({
         name: z.string().optional(),
         number: z.coerce.number().optional(),
     }).optional(),
-    speakers: z.array(z.string()).max(4).optional(),
+    speakers: z.array(z.string()).max(3).optional(),
     hymnFinal: z.object({
         name: z.string().optional(),
         number: z.coerce.number().optional(),
