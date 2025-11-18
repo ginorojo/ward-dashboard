@@ -50,7 +50,15 @@ export const sacramentMeetingSchema = z.object({
     asuntosDelBarrio: z.array(z.object({
         id: z.string().optional(),
         type: z.enum(['relevo', 'sostenimiento']),
-        personName: z.string().min(2, "Required"),
-        calling: z.string().min(2, "Required"),
+        personName: z.string().optional(),
+        calling: z.string().optional(),
     })).optional(),
+});
+
+export const changePasswordSchema = z.object({
+  newPassword: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  confirmPassword: z.string(),
+}).refine(data => data.newPassword === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ['confirmPassword'],
 });
