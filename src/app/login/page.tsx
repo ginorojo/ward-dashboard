@@ -20,12 +20,6 @@ export default function LoginPage() {
         </CardHeader>
         <CardContent>
           <LoginForm />
-          <div className="mt-4 text-center text-sm">
-            {t('auth.dontHaveAccount')}{' '}
-            <Link href="/register" className="underline">
-              {t('auth.signUp')}
-            </Link>
-          </div>
         </CardContent>
       </Card>
     </div>
