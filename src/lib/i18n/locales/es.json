@@ -56,7 +56,9 @@
     "createdAt": "Creado el",
     "deactivate": "Desactivar",
     "activate": "Activar",
-    "saveChanges": "Guardar Cambios"
+    "saveChanges": "Guardar Cambios",
+    "resetPassword": "Restablecer Contraseña",
+    "passwordResetSent": "Correo de restablecimiento de contraseña enviado a"
   },
   "interviews": {
     "title": "Entrevistas",

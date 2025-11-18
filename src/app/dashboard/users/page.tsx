@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
 import { getCollection, updateUserProfile, logAction, deleteUser as deleteUserFromDb } from '@/lib/firebase/firestore';
@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter, FirestorePermissionError } from '@/firebase';
 
@@ -38,7 +38,7 @@ export default function UsersPage() {
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     if (!firestore) return;
     setLoading(true);
     try {
@@ -53,11 +53,11 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [firestore, authUser, toast]);
 
   useEffect(() => {
     fetchUsers();
-  }, [firestore, authUser]);
+  }, [fetchUsers]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
@@ -123,12 +123,7 @@ export default function UsersPage() {
     }
   };
 
-console.log("Auth user:", authUser.uid);
-console.log("CurrentUser:", currentUser);
-
-  
   const handleDeleteUser = async (uid: string) => {
-
     if (!authUser || !firestore) {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Could not delete user. Firebase not available.' });
         return;
@@ -142,6 +137,23 @@ console.log("CurrentUser:", currentUser);
         toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete user.' });
     }
   };
+
+  const handlePasswordReset = async (email: string) => {
+    if (!auth) return;
+    try {
+      await sendPasswordResetEmail(auth, email);
+      toast({
+        title: t('common.success'),
+        description: `${t('users.passwordResetSent')} ${email}`,
+      });
+    } catch (error: any) {
+      toast({
+        variant: 'destructive',
+        title: t('common.error'),
+        description: error.message,
+      });
+    }
+  };
   
   const openEditForm = (user: UserProfile) => {
     setEditingUser(user);
@@ -153,7 +165,7 @@ console.log("CurrentUser:", currentUser);
     setIsFormOpen(true);
   };
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, handleStatusToggle, currentUser, t }), [users, currentUser, t]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, handleStatusToggle, currentUser, t, handlePasswordReset }), [users, currentUser, t]);
   
   const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
   const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
@@ -168,6 +180,7 @@ console.log("CurrentUser:", currentUser);
     <div className="space-y-4">
       {users.map(user => {
         const isCurrentUser = currentUser?.uid === user.uid;
+        const isAdministrator = currentUser?.role === 'administrator';
         return (
             <AlertDialog key={user.uid}>
               <Card>
@@ -189,6 +202,11 @@ console.log("CurrentUser:", currentUser);
                           <DropdownMenuItem onClick={() => handleStatusToggle(user)} disabled={isCurrentUser}>
                             {user.isActive ? t('users.deactivate') : t('users.activate')}
                           </DropdownMenuItem>
+                          {isAdministrator && !isCurrentUser && (
+                            <DropdownMenuItem onClick={() => handlePasswordReset(user.email)}>
+                              {t('users.resetPassword')}
+                            </DropdownMenuItem>
+                          )}
                           <DropdownMenuSeparator />
                           <AlertDialogTrigger asChild>
                               <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>{t('users.deleteUser')}</DropdownMenuItem>

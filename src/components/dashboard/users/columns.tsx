@@ -31,6 +31,7 @@ type ColumnsProps = {
   handleStatusToggle: (user: UserProfile) => void;
   currentUser: UserProfile | null;
   t: (key: string) => string;
+  handlePasswordReset: (email: string) => void;
 }
 
 export const columns = ({
@@ -38,7 +39,8 @@ export const columns = ({
   handleDelete,
   handleStatusToggle,
   currentUser,
-  t
+  t,
+  handlePasswordReset,
 }: ColumnsProps): ColumnDef<UserProfile>[] => [
   {
     accessorKey: 'name',
@@ -95,6 +97,7 @@ export const columns = ({
     cell: ({ row }) => {
       const user = row.original;
       const isCurrentUser = currentUser?.uid === user.uid;
+      const isAdministrator = currentUser?.role === 'administrator';
 
       return (
         <AlertDialog>
@@ -116,6 +119,11 @@ export const columns = ({
               >
                 {user.isActive ? t('users.deactivate') : t('users.activate')}
               </DropdownMenuItem>
+              {isAdministrator && !isCurrentUser && (
+                <DropdownMenuItem onClick={() => handlePasswordReset(user.email)}>
+                  {t('users.resetPassword')}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem

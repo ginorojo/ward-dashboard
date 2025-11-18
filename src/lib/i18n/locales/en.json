@@ -56,7 +56,9 @@
     "createdAt": "Created At",
     "deactivate": "Deactivate",
     "activate": "Activate",
-    "saveChanges": "Save Changes"
+    "saveChanges": "Save Changes",
+    "resetPassword": "Reset Password",
+    "passwordResetSent": "Password reset email sent to"
   },
   "interviews": {
     "title": "Interviews",
