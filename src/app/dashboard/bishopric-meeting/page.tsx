@@ -2,7 +2,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { BishopricMeeting, BishopricMeetingNote } from '@/lib/types';
-import { addDocument, addNoteToMeeting, deleteNoteFromMeeting, getCollection, getNotesForMeeting, updateNoteInMeeting } from '@/lib/firebase/firestore';
+import { addNoteToMeeting, deleteNoteFromMeeting, getCollection, getNotesForMeeting, updateNoteInMeeting } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -67,17 +67,6 @@ export default function BishopricMeetingPage() {
       setNotes([]);
     }
   }, [selectedMeeting, firestore]);
-
-  const handleCreateMeeting = async () => {
-      if (!user || !firestore) return;
-      try {
-          await addDocument(firestore, 'bishopricMeetings', { date: new Date() }, user.uid, 'bishopricMeeting');
-          toast({ title: t('common.success'), description: t('bishopricMeeting.meetingCreated') });
-          fetchMeetings();
-      } catch (error) {
-          toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToCreateMeeting') });
-      }
-  };
 
   const handleNoteSubmit = async (data: NoteFormValues) => {
     if (!user || !firestore || !selectedMeeting) return;
@@ -172,7 +161,6 @@ export default function BishopricMeetingPage() {
           <p className="text-muted-foreground">{t('bishopricMeeting.description')}</p>
         </div>
         <div className='flex gap-1 sm: flex-col'>
-            <Button variant="outline" onClick={handleCreateMeeting}>{t('bishopricMeeting.createTodaysMeeting')}</Button>
             <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingNote(null); }}>
                 <DialogTrigger asChild>
                     <Button disabled={!selectedMeeting}>
