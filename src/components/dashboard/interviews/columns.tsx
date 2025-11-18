@@ -56,7 +56,7 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, t }: C
     cell: ({ row }) => {
       const status: "pending" | "completed" = row.getValue('status');
       return (
-        <Badge variant={status === 'completed' ? 'default' : 'secondary'} className="capitalize">
+        <Badge variant={status === 'completed' ? 'default' : 'destructive'} className="capitalize">
           {t(`interviews.${status}`)}
         </Badge>
       );

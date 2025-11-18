@@ -87,7 +87,7 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
             </FormItem>
           )}
         />
-        <div className="grid grid-cols-2 gap-4">
+        <div className="flex justify-center sm: flex-col">
           <FormField
             control={form.control}
             name="scheduledDate"
