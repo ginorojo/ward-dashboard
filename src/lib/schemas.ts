@@ -54,11 +54,3 @@ export const sacramentMeetingSchema = z.object({
         calling: z.string().min(2, "Required"),
     })).optional(),
 });
-
-export const changePasswordSchema = z.object({
-  newPassword: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-  confirmPassword: z.string().min(6, { message: 'Password must be at least 6 characters' }),
-}).refine(data => data.newPassword === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});

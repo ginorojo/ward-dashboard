@@ -47,7 +47,6 @@
     "deleteUserConfirm": "Esta acción no se puede deshacer. Esto desactivará permanentemente la cuenta del usuario y eliminará sus datos de nuestros servidores.",
     "continue": "Continuar",
     "fullName": "Nombre Completo",
-    "roleAdministrator": "Administrador",
     "roleBishop": "Obispo",
     "roleCounselor": "Consejero",
     "roleSecretary": "Secretario",
@@ -56,9 +55,7 @@
     "createdAt": "Creado el",
     "deactivate": "Desactivar",
     "activate": "Activar",
-    "saveChanges": "Guardar Cambios",
-    "resetPassword": "Restablecer Contraseña",
-    "passwordResetSent": "Correo de restablecimiento de contraseña enviado a"
+    "saveChanges": "Guardar Cambios"
   },
   "interviews": {
     "title": "Entrevistas",
@@ -170,15 +167,7 @@
     "appearance": "Apariencia",
     "appearanceDescription": "Personaliza el aspecto de la aplicación.",
     "theme": "Tema",
-    "themeDescription": "Selecciona entre el modo claro y oscuro.",
-    "changePassword": "Cambiar Contraseña",
-    "changePasswordDescription": "Actualiza la contraseña de tu cuenta.",
-    "newPassword": "Nueva Contraseña",
-    "confirmNewPassword": "Confirmar Nueva Contraseña",
-    "updatePassword": "Actualizar Contraseña",
-    "passwordUpdateSuccess": "Contraseña actualizada con éxito.",
-    "passwordUpdateError": "Error al actualizar la contraseña.",
-    "passwordsDoNotMatch": "Las contraseñas no coinciden."
+    "themeDescription": "Selecciona entre el modo claro y oscuro."
   },
   "auth": {
     "loginTitle": "Panel de Barrio",

@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useFirebase, useUser } from '@/firebase';
 import { UserProfile } from '@/lib/types';
 import { getCollection, updateUserProfile, logAction, deleteUser as deleteUserFromDb } from '@/lib/firebase/firestore';
@@ -38,7 +38,7 @@ export default function UsersPage() {
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
 
-  const fetchUsers = useCallback(async () => {
+  const fetchUsers = async () => {
     if (!firestore) return;
     setLoading(true);
     try {
@@ -53,20 +53,16 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [firestore, authUser, toast, t]);
+  };
 
   useEffect(() => {
     fetchUsers();
-  }, [fetchUsers]);
+  }, [firestore, authUser]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
     
-    // Stash the current user's UID before the auth state changes.
-    const creatorUid = authUser.uid;
-
     try {
-      // This will sign in the new user automatically, which is a known Firebase behavior.
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password!);
       const newUid = userCredential.user.uid;
       
@@ -77,20 +73,15 @@ export default function UsersPage() {
         email: data.email,
         role: data.role,
         isActive: true,
-        createdBy: creatorUid,
+        createdBy: authUser.uid,
         createdAt: serverTimestamp(),
       };
       
       await setDoc(userDocRef, userDocData);
 
-      // Log the action using the stashed UID.
-      await logAction(firestore, creatorUid, 'create', 'user', newUid, `Created user with role ${data.role}`);
+      await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
-      toast({ 
-        title: t('common.success'), 
-        description: "User created. Please log in again to continue managing users.",
-        duration: 5000,
-      });
+      toast({ title: t('common.success'), description: "User created." });
       
       setIsFormOpen(false);
       fetchUsers(); // Refresh the list
@@ -181,7 +172,7 @@ export default function UsersPage() {
     setIsFormOpen(true);
   };
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, handleStatusToggle, currentUser, t, handlePasswordReset }), [users, currentUser, t, fetchUsers]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, handleStatusToggle, currentUser, t }), [users, currentUser, t]);
   
   const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
   const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
@@ -196,10 +187,9 @@ export default function UsersPage() {
     <div className="space-y-4">
       {users.map(user => {
         const isCurrentUser = currentUser?.uid === user.uid;
-        const isAdministrator = currentUser?.role === 'administrator';
         return (
-            <AlertDialog key={user.uid}>
-              <Card>
+            <AlertDialog>
+              <Card key={user.uid}>
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
@@ -218,11 +208,6 @@ export default function UsersPage() {
                           <DropdownMenuItem onClick={() => handleStatusToggle(user)} disabled={isCurrentUser}>
                             {user.isActive ? t('users.deactivate') : t('users.activate')}
                           </DropdownMenuItem>
-                          {isAdministrator && !isCurrentUser && (
-                            <DropdownMenuItem onClick={() => handlePasswordReset(user.email)}>
-                              {t('users.resetPassword')}
-                            </DropdownMenuItem>
-                          )}
                           <DropdownMenuSeparator />
                           <AlertDialogTrigger asChild>
                               <DropdownMenuItem className="text-destructive" disabled={isCurrentUser}>{t('users.deleteUser')}</DropdownMenuItem>
@@ -275,12 +260,10 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold font-headline">{t('users.title')}</h1>
           <p className="text-muted-foreground">{t('users.description')}</p>
         </div>
-        {currentUser && (currentUser.role === 'administrator' || currentUser.role === 'bishop') && (
-            <Button onClick={openNewForm}>
-                <PlusCircle className="mr-2 h-4 w-4" />
-                {t('users.addUser')}
-            </Button>
-        )}
+        <Button onClick={openNewForm}>
+            <PlusCircle className="mr-2 h-4 w-4" />
+            {t('users.addUser')}
+        </Button>
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingUser(null); }}>
@@ -309,3 +292,4 @@ export default function UsersPage() {
 }
 
     
+
