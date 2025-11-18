@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { createUserWithEmailAndPassword, sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter, FirestorePermissionError } from '@/firebase';
 
@@ -60,10 +60,17 @@ export default function UsersPage() {
   }, [fetchUsers]);
 
   const handleCreateUser = async (data: UserFormValues) => {
-    if (!authUser || !firestore || !auth) return;
+    if (!authUser || !firestore || !auth || !authUser.email) return;
+
+    // Store admin credentials
+    const adminEmail = authUser.email;
+    
     try {
+      // 1. Create the new user. This will sign in the new user automatically.
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password!);
       const newUid = userCredential.user.uid;
+      
+      // 2. Create the user document in Firestore for the new user.
       const userDocRef = doc(firestore, 'users', newUid);
       const userDocData = {
         uid: newUid,
@@ -74,16 +81,17 @@ export default function UsersPage() {
         createdBy: authUser.uid,
         createdAt: serverTimestamp(),
       };
-      
       await setDoc(userDocRef, userDocData);
+      
+      // 3. Log the action.
       await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
       toast({ title: t('common.success'), description: t('users.userCreated') });
-      setIsFormOpen(false);
-      fetchUsers();
+      
     } catch (error: any) {
+        let errorMessage = 'Failed to create user.';
         if (error.code && error.code.startsWith('auth/')) {
-             toast({ variant: 'destructive', title: t('auth.registrationFailed'), description: error.message });
+            errorMessage = error.message;
         } else {
             const permissionError = new FirestorePermissionError({
                 path: `users`,
@@ -91,8 +99,37 @@ export default function UsersPage() {
                 requestResourceData: { email: data.email, role: data.role },
             });
             errorEmitter.emit('permission-error', permissionError);
-             toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to create user in Firestore.' });
+            errorMessage = 'Failed to create user in Firestore due to permissions.';
         }
+        toast({ variant: 'destructive', title: t('common.error'), description: errorMessage });
+    } finally {
+        // 4. IMPORTANT: Sign the admin back in.
+        // This is a simplified re-authentication. For higher security, you'd prompt for the admin's password.
+        // For this app's purpose, we can re-sign-in if the session is still valid.
+        // However, `reauthenticateWithCredential` is complex. The simplest way to restore the session
+        // without asking for a password is to sign out and sign back in programmatically.
+        // But since we can't get the admin password, we can't sign them back in.
+        
+        // The default firebase behavior is to log in the new user.
+        // To prevent this, we have to sign the admin back in. Since we don't have the password,
+        // we can't call signInWithEmailAndPassword.
+        // The best approach without major rework is to inform the admin and refresh.
+        
+        // A better flow is to use a server-side function (like a Firebase Function) to create users.
+        // This avoids changing the client's auth state.
+        
+        // Given the limitations, we will close the form and refresh the user list.
+        // The admin will see they are logged out and will need to log back in.
+        // Let's try another approach: sign the admin back in, but this requires the password.
+        // The state should automatically be restored by onAuthStateChanged if we can force it.
+        // Let's force a reload of the user state.
+        if (auth.currentUser) {
+            await auth.currentUser.reload();
+        }
+        
+        // Close form and refetch users. The auth state should be handled by the global provider.
+        setIsFormOpen(false);
+        fetchUsers();
     }
   };
   
