@@ -53,7 +53,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [firestore, authUser, toast]);
+  }, [firestore, authUser, toast, t]);
 
   useEffect(() => {
     fetchUsers();
@@ -62,12 +62,14 @@ export default function UsersPage() {
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
     
+    // Stash the current user's UID before the auth state changes.
+    const creatorUid = authUser.uid;
+
     try {
-      // Create user in Firebase Auth. This will sign in the new user automatically.
+      // This will sign in the new user automatically, which is a known Firebase behavior.
       const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password!);
       const newUid = userCredential.user.uid;
       
-      // Create the user document in Firestore.
       const userDocRef = doc(firestore, 'users', newUid);
       const userDocData = {
         uid: newUid,
@@ -75,25 +77,29 @@ export default function UsersPage() {
         email: data.email,
         role: data.role,
         isActive: true,
-        createdBy: authUser.uid, // The UID of the admin/bishop creating the user
+        createdBy: creatorUid,
         createdAt: serverTimestamp(),
       };
       
-      // This needs to succeed for the user to be properly created in the system.
       await setDoc(userDocRef, userDocData);
 
-      // Log the action. This is now executed while the original user (admin/bishop) is still contextually available,
-      // even if the auth state is about to change.
-      await logAction(firestore, authUser.uid, 'create', 'user', newUid, `Created user with role ${data.role}`);
+      // Log the action using the stashed UID.
+      await logAction(firestore, creatorUid, 'create', 'user', newUid, `Created user with role ${data.role}`);
       
-      toast({ title: t('common.success'), description: t('users.userCreated') });
+      toast({ 
+        title: t('common.success'), 
+        description: "User created. Please log in again to continue managing users.",
+        duration: 5000,
+      });
+      
+      setIsFormOpen(false);
+      fetchUsers(); // Refresh the list
 
     } catch (error: any) {
         let errorMessage = 'Failed to create user.';
         if (error.code && error.code.startsWith('auth/')) {
             errorMessage = error.message;
         } else {
-            // It's likely a Firestore permission error if it's not an auth error.
             const permissionError = new FirestorePermissionError({
                 path: `users`,
                 operation: 'create',
@@ -103,11 +109,6 @@ export default function UsersPage() {
             errorMessage = 'Failed to create user in Firestore due to permissions.';
         }
         toast({ variant: 'destructive', title: t('common.error'), description: errorMessage });
-    } finally {
-      // Close the form and refresh the user list.
-      // The person creating the user will need to log back in as Firebase auto-signs-in the new user.
-      setIsFormOpen(false);
-      fetchUsers();
     }
   };
   
@@ -180,7 +181,7 @@ export default function UsersPage() {
     setIsFormOpen(true);
   };
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, handleStatusToggle, currentUser, t, handlePasswordReset }), [users, currentUser, t]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: handleDeleteUser, handleStatusToggle, currentUser, t, handlePasswordReset }), [users, currentUser, t, fetchUsers]);
   
   const dialogTitle = editingUser ? t('users.editUser') : t('users.createNewUser');
   const formSubmitHandler = editingUser ? handleUpdateUser : handleCreateUser;
@@ -274,10 +275,12 @@ export default function UsersPage() {
           <h1 className="text-3xl font-bold font-headline">{t('users.title')}</h1>
           <p className="text-muted-foreground">{t('users.description')}</p>
         </div>
-        <Button onClick={openNewForm}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          {t('users.addUser')}
-        </Button>
+        {currentUser && (currentUser.role === 'administrator' || currentUser.role === 'bishop') && (
+            <Button onClick={openNewForm}>
+                <PlusCircle className="mr-2 h-4 w-4" />
+                {t('users.addUser')}
+            </Button>
+        )}
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingUser(null); }}>
