@@ -11,7 +11,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
-import { format } from 'date-fns';
+import { format, parse } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 
 type InterviewFormValues = z.infer<typeof interviewSchema>;
@@ -30,15 +30,24 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
       interviewer: '',
       purpose: '',
       scheduledDate: new Date(),
+      scheduledTime: format(new Date(), 'HH:mm'),
       status: 'pending',
     },
   });
 
   const { isSubmitting } = form.formState;
 
+  const handleFormSubmit = (data: InterviewFormValues) => {
+    const [hours, minutes] = data.scheduledTime.split(':').map(Number);
+    const combinedDateTime = new Date(data.scheduledDate);
+    combinedDateTime.setHours(hours, minutes);
+
+    onSubmit({ ...data, scheduledDate: combinedDateTime });
+  };
+
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+      <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-4">
         <FormField
           control={form.control}
           name="personInterviewed"
@@ -78,41 +87,56 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="scheduledDate"
-          render={({ field }) => (
-            <FormItem className="flex flex-col">
-              <FormLabel>{t('interviews.dateTime')}</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value ? format(field.value, 'PPp') : <span>{t('interviews.pickADate')}</span>}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    disabled={(date) => date < new Date('1900-01-01')}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="scheduledDate"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>{t('common.date')}</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={'outline'}
+                        className={cn(
+                          'w-full pl-3 text-left font-normal',
+                          !field.value && 'text-muted-foreground'
+                        )}
+                      >
+                        {field.value ? format(field.value, 'PPP') : <span>{t('interviews.pickADate')}</span>}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      disabled={(date) => date < new Date('1900-01-01')}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="scheduledTime"
+            render={({ field }) => (
+                <FormItem>
+                    <FormLabel>{t('interviews.time')}</FormLabel>
+                    <FormControl>
+                        <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                </FormItem>
+            )}
+            />
+        </div>
         <FormField
           control={form.control}
           name="status"

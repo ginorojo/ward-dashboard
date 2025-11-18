@@ -82,12 +82,12 @@
     "templeRecommendEtc": "Recomendación para el templo, ministración, etc.",
     "dateTime": "Fecha y Hora",
     "pickADate": "Elige una fecha",
-    "selectStatus": "Seleccionar estado"
+    "selectStatus": "Seleccionar estado",
+    "time": "Hora"
   },
   "bishopricMeeting": {
     "title": "Reunión de Obispado",
     "description": "Gestiona notas y decisiones de las reuniones de obispado.",
-    "createTodaysMeeting": "Crear Reunión de Hoy",
     "addNote": "Añadir Nota",
     "meetingCreated": "Nueva reunión creada para hoy.",
     "failedToCreateMeeting": "Error al crear la reunión.",
@@ -172,8 +172,6 @@
   "auth": {
     "loginTitle": "Panel de Barrio",
     "loginDescription": "Inicia sesión para acceder a tu panel",
-    "dontHaveAccount": "¿No tienes una cuenta?",
-    "signUp": "Regístrate",
     "signIn": "Iniciar Sesión",
     "loginFailed": "Falló el inicio de sesión",
     "loginSuccess": "Inicio de Sesión Exitoso",

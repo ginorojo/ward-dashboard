@@ -101,6 +101,7 @@ export default function InterviewsPage() {
   const formDefaultValues = editingInterview ? {
     ...editingInterview,
     scheduledDate: editingInterview.scheduledDate.toDate(),
+    scheduledTime: format(editingInterview.scheduledDate.toDate(), 'HH:mm'),
   } : undefined;
 
   const renderMobileInterviews = () => (
@@ -172,7 +173,7 @@ export default function InterviewsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between sm: flex-col">
         <div>
           <h1 className="text-3xl font-bold font-headline">{t('interviews.title')}</h1>
           <p className="text-muted-foreground">{t('interviews.description')}</p>

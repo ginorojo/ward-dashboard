@@ -21,6 +21,7 @@ export const interviewSchema = z.object({
   interviewer: z.string().min(2, { message: 'Interviewer is required' }),
   purpose: z.string().min(3, { message: 'Purpose is required' }),
   scheduledDate: z.date(),
+  scheduledTime: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Invalid time format. Use HH:mm" }),
   status: z.enum(['pending', 'completed']),
 });
 
@@ -41,7 +42,7 @@ export const sacramentMeetingSchema = z.object({
         name: z.string().optional(),
         number: z.coerce.number().optional(),
     }).optional(),
-    speakers: z.array(z.string()).max(3).optional(),
+    speakers: z.array(z.string().optional()).max(3).optional(),
     hymnFinal: z.object({
         name: z.string().optional(),
         number: z.coerce.number().optional(),

@@ -82,12 +82,12 @@
     "templeRecommendEtc": "Temple recommend, ministering, etc.",
     "dateTime": "Date and Time",
     "pickADate": "Pick a date",
-    "selectStatus": "Select status"
+    "selectStatus": "Select status",
+    "time": "Time"
   },
   "bishopricMeeting": {
     "title": "Bishopric Meeting",
     "description": "Manage notes and decisions from bishopric meetings.",
-    "createTodaysMeeting": "Create Today's Meeting",
     "addNote": "Add Note",
     "meetingCreated": "New meeting created for today.",
     "failedToCreateMeeting": "Failed to create meeting.",
@@ -172,8 +172,6 @@
   "auth": {
     "loginTitle": "Ward Dashboard",
     "loginDescription": "Sign in to access your dashboard",
-    "dontHaveAccount": "Don't have an account?",
-    "signUp": "Sign up",
     "signIn": "Sign In",
     "loginFailed": "Login Failed",
     "loginSuccess": "Login Successful",
