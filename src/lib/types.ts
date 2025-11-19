@@ -25,6 +25,17 @@ export interface Interview {
   updatedAt: Timestamp;
 }
 
+export interface Reunion {
+  id: string;
+  scheduledAt: Timestamp;
+  reason: string;
+  participants: string[];
+  createdBy: string;
+  updatedBy: string;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
+}
+
 export interface BishopricMeetingNote {
   id: string;
   date: Timestamp;
@@ -84,3 +95,5 @@ export interface Log {
     timestamp: Timestamp;
     details: string;
 }
+
+    

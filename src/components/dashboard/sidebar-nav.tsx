@@ -1,7 +1,7 @@
 'use client'
 
 import { usePathname, useRouter } from 'next/navigation';
-import { BookOpenCheck, BookUser, CalendarCheck, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
+import { BookOpenCheck, BookUser, CalendarCheck, Handshake, LayoutDashboard, LogOut, Settings, Users } from 'lucide-react';
 import { SidebarContent, SidebarHeader, SidebarFooter, SidebarMenu, SidebarMenuItem, SidebarMenuButton, useSidebar } from '@/components/ui/sidebar';
 import Logo from '@/components/icons/logo';
 import { useAuth, useUser } from '@/firebase';
@@ -31,6 +31,7 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
         { href: '/dashboard', label: t('dashboard.title'), icon: LayoutDashboard },
         { href: '/dashboard/users', label: t('dashboard.users'), icon: Users, roles: ['administrator', 'bishop'] },
         { href: '/dashboard/interviews', label: t('dashboard.interviews'), icon: CalendarCheck },
+        { href: '/dashboard/reuniones', label: t('dashboard.reuniones'), icon: Handshake },
         { href: '/dashboard/bishopric-meeting', label: t('dashboard.bishopricMeeting'), icon: BookUser },
         { href: '/dashboard/sacrament-meeting', label: t('dashboard.sacramentMeeting'), icon: BookOpenCheck },
     ]
@@ -104,3 +105,5 @@ export default function SidebarNav({ userProfile }: { userProfile: UserProfile |
         </>
     )
 }
+
+    

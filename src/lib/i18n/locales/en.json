@@ -23,6 +23,7 @@
     "overview": "Here's an overview of your ward's activities.",
     "users": "Users",
     "interviews": "Interviews",
+    "reuniones": "Meetings",
     "bishopricMeeting": "Bishopric Meeting",
     "sacramentMeeting": "Sacrament Meeting",
     "settings": "Settings",
@@ -84,6 +85,30 @@
     "pickADate": "Pick a date",
     "selectStatus": "Select status",
     "time": "Time"
+  },
+  "reuniones": {
+    "title": "Meetings",
+    "description": "Schedule and manage ward meetings.",
+    "addReunion": "Add Meeting",
+    "createNewReunion": "Create New Meeting",
+    "editReunion": "Edit Meeting",
+    "reunionUpdated": "Meeting updated successfully.",
+    "reunionCreated": "Meeting created successfully.",
+    "reunionDeleted": "Meeting deleted successfully.",
+    "failedToFetch": "Failed to fetch meetings.",
+    "failedToSave": "Failed to save meeting.",
+    "deleteConfirmTitle": "Are you sure?",
+    "deleteConfirmDescription": "This action will permanently delete this meeting record.",
+    "reason": "Reason",
+    "participants": "Participants",
+    "reunionOn": "Meeting on",
+    "at": "at",
+    "filterByReason": "Filter by reason...",
+    "noResults": "No results.",
+    "previous": "Previous",
+    "next": "Next",
+    "reasonPlaceholder": "e.g., Ward Council",
+    "participantsPlaceholder": "John Doe, Jane Smith..."
   },
   "bishopricMeeting": {
     "title": "Bishopric Meeting",
@@ -186,3 +211,5 @@
     "accountCreated": "Your account has been created."
   }
 }
+
+    

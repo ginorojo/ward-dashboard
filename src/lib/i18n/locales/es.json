@@ -23,6 +23,7 @@
     "overview": "Aquí tienes un resumen de las actividades de tu barrio.",
     "users": "Usuarios",
     "interviews": "Entrevistas",
+    "reuniones": "Reuniones",
     "bishopricMeeting": "Reunión de Obispado",
     "sacramentMeeting": "Reunión Sacramental",
     "settings": "Ajustes",
@@ -84,6 +85,30 @@
     "pickADate": "Elige una fecha",
     "selectStatus": "Seleccionar estado",
     "time": "Hora"
+  },
+  "reuniones": {
+    "title": "Reuniones",
+    "description": "Programa y gestiona las reuniones del barrio.",
+    "addReunion": "Añadir Reunión",
+    "createNewReunion": "Crear Nueva Reunión",
+    "editReunion": "Editar Reunión",
+    "reunionUpdated": "Reunión actualizada con éxito.",
+    "reunionCreated": "Reunión creada con éxito.",
+    "reunionDeleted": "Reunión eliminada con éxito.",
+    "failedToFetch": "Error al cargar las reuniones.",
+    "failedToSave": "Error al guardar la reunión.",
+    "deleteConfirmTitle": "¿Estás seguro?",
+    "deleteConfirmDescription": "Esta acción eliminará permanentemente este registro de reunión.",
+    "reason": "Motivo",
+    "participants": "Participantes",
+    "reunionOn": "Reunión el",
+    "at": "a las",
+    "filterByReason": "Filtrar por motivo...",
+    "noResults": "Sin resultados.",
+    "previous": "Anterior",
+    "next": "Siguiente",
+    "reasonPlaceholder": "Ej: Consejo de Barrio",
+    "participantsPlaceholder": "John Doe, Jane Smith..."
   },
   "bishopricMeeting": {
     "title": "Reunión de Obispado",
@@ -186,3 +211,5 @@
     "accountCreated": "Tu cuenta ha sido creada."
   }
 }
+
+    

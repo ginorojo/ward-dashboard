@@ -372,6 +372,59 @@
         "timestamp",
         "details"
       ]
+    },
+    "Reunion": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "Reunion",
+      "type": "object",
+      "description": "Represents a scheduled meeting.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the meeting. (Primary Key)"
+        },
+        "scheduledAt": {
+          "type": "number",
+          "description": "Timestamp of the scheduled meeting date and time."
+        },
+        "reason": {
+          "type": "string",
+          "description": "Reason or motive for the meeting."
+        },
+        "participants": {
+          "type": "array",
+          "description": "List of participants' names.",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdBy": {
+          "type": "string",
+          "description": "Reference to User who created this meeting."
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "Reference to User who last updated this meeting."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "Timestamp of when the meeting record was created."
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "Timestamp of when the meeting record was last updated."
+        }
+      },
+      "required": [
+        "id",
+        "scheduledAt",
+        "reason",
+        "participants",
+        "createdBy",
+        "updatedBy",
+        "createdAt",
+        "updatedAt"
+      ]
     }
   },
   "auth": {
@@ -501,8 +554,25 @@
             }
           ]
         }
+      },
+      {
+        "path": "/reuniones/{reunionId}",
+        "definition": {
+          "entityName": "Reunion",
+          "schema": {
+            "$ref": "#/backend/entities/Reunion"
+          },
+          "description": "Stores scheduled meetings (reuniones). All authenticated users have full CRUD permissions.",
+          "params": [
+            {
+              "name": "reunionId",
+              "description": "Unique identifier for the meeting."
+            }
+          ]
+        }
       }
     ],
     "reasoning": "The Firestore data structure is designed to support a role-based access control system for a Ward Dashboard application, focusing on authorization independence, clarity, and scalability.  \n\nAuthorization Independence:  The structure uses path-based ownership for user-related data and avoids `get()` calls in security rules by denormalizing user roles.  For instance, access to interviews is not dependent on reading the user document; every role can `CRUD` interviews. This strategy ensures atomic operations and simplifies security rule logic. User roles are implicitly managed by the user's document itself, enabling a more robust security posture.\n\nStructural Segregation: The segregation principle is achieved through the separation of user data and other application entities into distinct collections.  User profiles are stored in `/users/{userId}`, while interviews are stored in the `/interviews/{interviewId}` collection, bishopric meetings in `/bishopricMeetings/{meetingId}`. Subcollections like `/bishopricMeetings/{meetingId}/notes/{noteId}` further refine access control and data organization. This segregation ensures that security rules are applied uniformly within each collection or subcollection.\n\nAccess Modeling:  Path-based ownership is utilized for user data (`/users/{userId}`). Collaborative data, such as interviews and sacrament meetings, are managed at the root level, since every role can `CRUD` them.\n\nQAPs Support:  The structure supports Query as Properties (QAPs) by enabling secure `list` operations.  The use of distinct collections for different data types with consistent security requirements allows for efficient and secure querying without exposing sensitive data.  The flat structure of the `/interviews` and `/sacramentMeetings` collections with open `CRUD` permissions (for all authenticated users) simplifies queries related to those entities."
   }
 }
+    

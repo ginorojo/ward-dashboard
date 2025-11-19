@@ -25,6 +25,13 @@ export const interviewSchema = z.object({
   status: z.enum(['pending', 'completed']),
 });
 
+export const reunionSchema = z.object({
+  reason: z.string().min(3, { message: 'Reason must be at least 3 characters' }),
+  participants: z.string().min(2, { message: 'Participants are required' }),
+  scheduledAt: z.date(),
+  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Invalid time format. Use HH:mm" }),
+});
+
 export const bishopricNoteSchema = z.object({
   date: z.date(),
   content: z.string().min(10, { message: 'Note content must be at least 10 characters' }),
@@ -63,3 +70,5 @@ export const changePasswordSchema = z.object({
   message: "Passwords don't match",
   path: ['confirmPassword'],
 });
+
+    
