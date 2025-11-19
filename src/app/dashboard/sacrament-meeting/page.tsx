@@ -89,14 +89,14 @@ export default function SacramentMeetingPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline">{t('sacramentMeeting.title')}</h1>
           <p className="text-muted-foreground">{t('sacramentMeeting.description')}</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex w-full sm:w-auto sm:flex-row gap-2">
             {currentView === 'form' && <AIAgendaHelper currentAgenda={selectedAgenda} t={t} />}
-            <Button variant="outline" onClick={() => {
+            <Button onClick={() => {
                 if (currentView === 'list') {
                     handleCreateNew();
                 } else {
