@@ -162,7 +162,7 @@ export default function ReunionesPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between sm: flex-col">
+      <div className="flex items-center justify-between sm:flex-col sm:items-start sm:gap-4">
         <div>
           <h1 className="text-3xl font-bold font-headline">{t('reuniones.title')}</h1>
           <p className="text-muted-foreground">{t('reuniones.description')}</p>
