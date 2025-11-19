@@ -193,8 +193,8 @@ export default function UsersPage() {
       {users.map(user => {
         const isCurrentUser = currentUser?.uid === user.uid;
         return (
-            <AlertDialog>
-              <Card key={user.uid}>
+            <AlertDialog key={user.uid}>
+              <Card>
                 <CardHeader>
                   <div className="flex justify-between items-start">
                     <div>
@@ -301,3 +301,4 @@ export default function UsersPage() {
 
 
     
+
