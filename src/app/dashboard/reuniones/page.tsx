@@ -109,7 +109,7 @@ export default function ReunionesPage() {
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className='text-lg'>{t('reuniones.reunionOn')} {format(reunion.scheduledAt.toDate(), 'P')}</CardTitle>
+                <CardTitle className='text-lg'>{t('reuniones.reunionOn')} {format(reunion.scheduledAt.toDate(), 'dd/MM/yyyy')}</CardTitle>
                 <CardDescription>{t('reuniones.at')} {format(reunion.scheduledAt.toDate(), 'p')}</CardDescription>
               </div>
                <AlertDialog>
@@ -195,5 +195,3 @@ export default function ReunionesPage() {
     </div>
   );
 }
-
-    
