@@ -12,6 +12,8 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { Input } from '@/components/ui/input';
 
 type NoteFormValues = z.infer<typeof bishopricNoteSchema>;
 
@@ -22,6 +24,7 @@ interface NoteFormProps {
 }
 
 export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) {
+    const isMobile = useIsMobile();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -38,6 +41,10 @@ export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) 
   });
 
   const { isSubmitting } = form.formState;
+  
+  if (!isClient) {
+    return null; // Or a loading skeleton
+  }
 
   return (
     <Form {...form}>
@@ -48,30 +55,39 @@ export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) 
           render={({ field }) => (
             <FormItem className="flex flex-col">
               <FormLabel>{t('bishopricMeeting.noteDate')}</FormLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <FormControl>
-                    <Button
-                      variant={'outline'}
-                      className={cn(
-                        'w-full pl-3 text-left font-normal',
-                        !field.value && 'text-muted-foreground'
-                      )}
-                    >
-                      {field.value ? format(field.value, 'PPP') : <span>{t('interviews.pickADate')}</span>}
-                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                    </Button>
-                  </FormControl>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  {isClient && <Calendar
-                    mode="single"
-                    selected={field.value}
-                    onSelect={field.onChange}
-                    initialFocus
-                  />}
-                </PopoverContent>
-              </Popover>
+              {isMobile ? (
+                 <Input 
+                    type="date"
+                    value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                    className="w-full"
+                  />
+              ) : (
+                <Popover>
+                    <PopoverTrigger asChild>
+                    <FormControl>
+                        <Button
+                        variant={'outline'}
+                        className={cn(
+                            'w-full pl-3 text-left font-normal',
+                            !field.value && 'text-muted-foreground'
+                        )}
+                        >
+                        {field.value ? format(field.value, 'PPP') : <span>{t('interviews.pickADate')}</span>}
+                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                    </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            initialFocus
+                        />
+                    </PopoverContent>
+                </Popover>
+              )}
               <FormMessage />
             </FormItem>
           )}

@@ -18,6 +18,7 @@ import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { useState, useEffect } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 
 type AgendaFormValues = z.infer<typeof sacramentMeetingSchema>;
@@ -30,6 +31,7 @@ interface AgendaFormProps {
 }
 
 export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaFormProps) {
+    const isMobile = useIsMobile();
     const [isClient, setIsClient] = useState(false);
 
     useEffect(() => {
@@ -61,6 +63,10 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
   });
 
   const { isSubmitting } = form.formState;
+  
+  if (!isClient) {
+    return null; // Or a loading skeleton
+  }
 
   return (
     <Form {...form}>
@@ -74,22 +80,31 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
                     render={({ field }) => (
                         <FormItem className="flex flex-col">
                         <FormLabel>{t('sacramentMeeting.meetingDate')}</FormLabel>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                            <FormControl>
-                                <Button
-                                variant={'outline'}
-                                className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
-                                >
-                                {field.value ? format(field.value, 'PPP') : <span>{t('interviews.pickADate')}</span>}
-                                <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                            </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                            {isClient && <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />}
-                            </PopoverContent>
-                        </Popover>
+                        {isMobile ? (
+                            <Input 
+                                type="date"
+                                value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                                onChange={(e) => field.onChange(new Date(e.target.value))}
+                                className="w-full"
+                            />
+                        ) : (
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                <FormControl>
+                                    <Button
+                                    variant={'outline'}
+                                    className={cn('w-full pl-3 text-left font-normal', !field.value && 'text-muted-foreground')}
+                                    >
+                                    {field.value ? format(field.value, 'PPP') : <span>{t('interviews.pickADate')}</span>}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                    </Button>
+                                </FormControl>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0" align="start">
+                                    <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                                </PopoverContent>
+                            </Popover>
+                        )}
                         <FormMessage />
                         </FormItem>
                     )}
