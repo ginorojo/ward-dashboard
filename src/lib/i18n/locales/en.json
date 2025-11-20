@@ -15,7 +15,8 @@
     "name": "Name",
     "email": "Email",
     "role": "Role",
-    "password": "Password"
+    "password": "Password",
+    "addToCalendar": "Add to Calendar"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -211,5 +212,3 @@
     "accountCreated": "Your account has been created."
   }
 }
-
-    

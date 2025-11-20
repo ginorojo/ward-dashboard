@@ -4,7 +4,7 @@ import { useFirebase, useUser } from '@/firebase';
 import { Interview } from '@/lib/types';
 import { addDocument, deleteDocument, getCollection, updateDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, CalendarPlus } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/interviews/data-table';
 import { columns } from '@/components/dashboard/interviews/columns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -15,7 +15,7 @@ import { interviewSchema } from '@/lib/schemas';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/lib/i18n';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
@@ -94,8 +94,22 @@ export default function InterviewsPage() {
       toast({ title: t('common.success'), description: t('interviews.statusUpdated')});
       fetchInterviews();
   };
+  
+  const createGoogleCalendarLink = (interview: Interview) => {
+    const startTime = interview.scheduledDate.toDate();
+    const endTime = new Date(startTime.getTime() + 30 * 60000); // Assume 30 min duration
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, handleStatusToggle, t }), [interviews, t]);
+    const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+
+    const url = new URL('https://calendar.google.com/calendar/render');
+    url.searchParams.set('action', 'TEMPLATE');
+    url.searchParams.set('text', `Entrevista: ${interview.personInterviewed}`);
+    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
+    url.searchParams.set('details', `Propósito: ${interview.purpose}\nEntrevistador: ${interview.interviewer}`);
+    return url.toString();
+  }
+
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, handleStatusToggle, createGoogleCalendarLink, t }), [interviews, t]);
 
   const dialogTitle = editingInterview ? t('interviews.editInterview') : t('interviews.createNewInterview');
   const formDefaultValues = editingInterview ? {
@@ -107,7 +121,7 @@ export default function InterviewsPage() {
   const renderMobileInterviews = () => (
     <div className="space-y-4">
       {interviews.map(interview => (
-        <Card key={interview.id}>
+        <Card key={interview.id} className='flex flex-col'>
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
@@ -150,7 +164,7 @@ export default function InterviewsPage() {
               </AlertDialog>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm">
+          <CardContent className="space-y-2 text-sm flex-grow">
             <div>
               <p className="font-semibold">{t('interviews.purpose')}</p>
               <p className="text-muted-foreground">{interview.purpose}</p>
@@ -166,6 +180,14 @@ export default function InterviewsPage() {
               </Badge>
             </div>
           </CardContent>
+          <CardFooter>
+            <Button variant="outline" size="sm" asChild className='w-full'>
+              <a href={createGoogleCalendarLink(interview)} target="_blank" rel="noopener noreferrer">
+                <CalendarPlus className="mr-2" />
+                {t('common.addToCalendar')}
+              </a>
+            </Button>
+          </CardFooter>
         </Card>
       ))}
     </div>

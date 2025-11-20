@@ -1,7 +1,7 @@
 'use client';
 import { ColumnDef } from '@tanstack/react-table';
 import { Interview } from '@/lib/types';
-import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, CalendarPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,10 +19,11 @@ type ColumnsProps = {
   openEditForm: (interview: Interview) => void;
   handleDelete: (id: string) => void;
   handleStatusToggle: (interview: Interview) => void;
+  createGoogleCalendarLink: (interview: Interview) => string;
   t: (key: string) => string;
 };
 
-export const columns = ({ openEditForm, handleDelete, handleStatusToggle, t }: ColumnsProps): ColumnDef<Interview>[] => [
+export const columns = ({ openEditForm, handleDelete, handleStatusToggle, createGoogleCalendarLink, t }: ColumnsProps): ColumnDef<Interview>[] => [
   {
     accessorKey: 'personInterviewed',
     header: ({ column }) => (
@@ -81,6 +82,12 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, t }: C
               <DropdownMenuItem onClick={() => openEditForm(interview)}>{t('common.edit')}</DropdownMenuItem>
               <DropdownMenuItem onClick={() => handleStatusToggle(interview)}>
                 {interview.status === 'pending' ? t('interviews.markCompleted') : t('interviews.markPending')}
+              </DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href={createGoogleCalendarLink(interview)} target="_blank" rel="noopener noreferrer">
+                  <CalendarPlus className="mr-2" />
+                  {t('common.addToCalendar')}
+                </a>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <AlertDialogTrigger asChild>

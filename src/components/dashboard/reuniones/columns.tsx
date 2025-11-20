@@ -1,7 +1,7 @@
 'use client';
 import { ColumnDef } from '@tanstack/react-table';
 import { Reunion } from '@/lib/types';
-import { MoreHorizontal, ArrowUpDown } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, CalendarPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -17,10 +17,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 type ColumnsProps = {
   openEditForm: (reunion: Reunion) => void;
   handleDelete: (id: string) => void;
+  createGoogleCalendarLink: (reunion: Reunion) => string;
   t: (key: string) => string;
 };
 
-export const columns = ({ openEditForm, handleDelete, t }: ColumnsProps): ColumnDef<Reunion>[] => [
+export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, t }: ColumnsProps): ColumnDef<Reunion>[] => [
   {
     accessorKey: 'scheduledAt',
     header: ({ column }) => (
@@ -64,6 +65,12 @@ export const columns = ({ openEditForm, handleDelete, t }: ColumnsProps): Column
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <a href={createGoogleCalendarLink(reunion)} target="_blank" rel="noopener noreferrer">
+                  <CalendarPlus className="mr-2" />
+                  {t('common.addToCalendar')}
+                </a>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <AlertDialogTrigger asChild>
                 <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
@@ -89,5 +96,3 @@ export const columns = ({ openEditForm, handleDelete, t }: ColumnsProps): Column
     },
   },
 ];
-
-    

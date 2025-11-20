@@ -15,7 +15,8 @@
     "name": "Nombre",
     "email": "Correo electrónico",
     "role": "Rol",
-    "password": "Contraseña"
+    "password": "Contraseña",
+    "addToCalendar": "Añadir al Calendario"
   },
   "dashboard": {
     "title": "Panel de control",
@@ -211,5 +212,3 @@
     "accountCreated": "Tu cuenta ha sido creada."
   }
 }
-
-    
