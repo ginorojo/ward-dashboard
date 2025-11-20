@@ -12,6 +12,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from 'react';
 
 type ReunionFormValues = z.infer<typeof reunionSchema>;
 
@@ -22,6 +23,12 @@ interface ReunionFormProps {
 }
 
 export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormProps) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+    
   const form = useForm<ReunionFormValues>({
     resolver: zodResolver(reunionSchema),
     defaultValues: defaultValues || {
@@ -94,13 +101,13 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
+                    {isClient && <Calendar
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date('1900-01-01')}
                       initialFocus
-                    />
+                    />}
                   </PopoverContent>
                 </Popover>
                 <FormMessage />
@@ -129,5 +136,3 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
     </Form>
   );
 }
-
-    

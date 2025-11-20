@@ -11,6 +11,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from 'react';
 
 type NoteFormValues = z.infer<typeof bishopricNoteSchema>;
 
@@ -21,6 +22,12 @@ interface NoteFormProps {
 }
 
 export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) {
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
   const form = useForm<NoteFormValues>({
     resolver: zodResolver(bishopricNoteSchema),
     defaultValues: defaultValues || {
@@ -57,12 +64,12 @@ export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) 
                   </FormControl>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
+                  {isClient && <Calendar
                     mode="single"
                     selected={field.value}
                     onSelect={field.onChange}
                     initialFocus
-                  />
+                  />}
                 </PopoverContent>
               </Popover>
               <FormMessage />

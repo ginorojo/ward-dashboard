@@ -13,6 +13,7 @@ import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format, parse } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
+import { useState, useEffect } from 'react';
 
 type InterviewFormValues = z.infer<typeof interviewSchema>;
 
@@ -23,6 +24,12 @@ interface InterviewFormProps {
 }
 
 export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewFormProps) {
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+  
   const form = useForm<InterviewFormValues>({
     resolver: zodResolver(interviewSchema),
     defaultValues: defaultValues || {
@@ -110,13 +117,13 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
                     </FormControl>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
+                    {isClient && <Calendar
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) => date < new Date('1900-01-01')}
                       initialFocus
-                    />
+                    />}
                   </PopoverContent>
                 </Popover>
                 <FormMessage />

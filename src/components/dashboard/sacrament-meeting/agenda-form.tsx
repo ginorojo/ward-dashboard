@@ -17,6 +17,7 @@ import { SacramentMeeting } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { useState, useEffect } from 'react';
 
 
 type AgendaFormValues = z.infer<typeof sacramentMeetingSchema>;
@@ -29,6 +30,12 @@ interface AgendaFormProps {
 }
 
 export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaFormProps) {
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
   const form = useForm<AgendaFormValues>({
     resolver: zodResolver(sacramentMeetingSchema),
     defaultValues: initialData
@@ -80,7 +87,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
                             </FormControl>
                             </PopoverTrigger>
                             <PopoverContent className="w-auto p-0" align="start">
-                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />
+                            {isClient && <Calendar mode="single" selected={field.value} onSelect={field.onChange} initialFocus />}
                             </PopoverContent>
                         </Popover>
                         <FormMessage />
