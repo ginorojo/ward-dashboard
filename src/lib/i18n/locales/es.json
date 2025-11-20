@@ -16,7 +16,8 @@
     "email": "Correo electrónico",
     "role": "Rol",
     "password": "Contraseña",
-    "addToCalendar": "Añadir al Calendario"
+    "addToCalendar": "Añadir al Calendario",
+    "addedToCalendar": "Agregado al Calendario"
   },
   "dashboard": {
     "title": "Panel de control",

@@ -4,7 +4,7 @@ import { useFirebase, useUser } from '@/firebase';
 import { Interview } from '@/lib/types';
 import { addDocument, deleteDocument, getCollection, updateDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarPlus } from 'lucide-react';
+import { PlusCircle, CalendarPlus, CheckCircle } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/interviews/data-table';
 import { columns } from '@/components/dashboard/interviews/columns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -34,6 +34,21 @@ export default function InterviewsPage() {
   const { toast } = useToast();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const [addedToCalendar, setAddedToCalendar] = useState<string[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('addedInterviews');
+    if (stored) {
+      setAddedToCalendar(JSON.parse(stored));
+    }
+  }, []);
+
+  const handleAddToCalendar = (interviewId: string) => {
+    const newAdded = [...addedToCalendar, interviewId];
+    setAddedToCalendar(newAdded);
+    localStorage.setItem('addedInterviews', JSON.stringify(newAdded));
+  };
+
 
   const fetchInterviews = async () => {
     if (!firestore) return;
@@ -109,7 +124,7 @@ export default function InterviewsPage() {
     return url.toString();
   }
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, handleStatusToggle, createGoogleCalendarLink, t }), [interviews, t]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [interviews, t, addedToCalendar]);
 
   const dialogTitle = editingInterview ? t('interviews.editInterview') : t('interviews.createNewInterview');
   const formDefaultValues = editingInterview ? {
@@ -120,7 +135,9 @@ export default function InterviewsPage() {
 
   const renderMobileInterviews = () => (
     <div className="space-y-4">
-      {interviews.map(interview => (
+      {interviews.map(interview => {
+        const isAdded = addedToCalendar.includes(interview.id);
+        return (
         <Card key={interview.id} className='flex flex-col'>
           <CardHeader>
             <div className="flex justify-between items-start">
@@ -181,15 +198,29 @@ export default function InterviewsPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" size="sm" asChild className='w-full'>
-              <a href={createGoogleCalendarLink(interview)} target="_blank" rel="noopener noreferrer">
-                <CalendarPlus className="mr-2" />
-                {t('common.addToCalendar')}
-              </a>
-            </Button>
+             <Button
+                variant={isAdded ? "secondary" : "outline"}
+                size="sm"
+                asChild={!isAdded}
+                disabled={isAdded}
+                className='w-full'
+                onClick={() => handleAddToCalendar(interview.id)}
+              >
+                {isAdded ? (
+                  <>
+                    <CheckCircle className="mr-2" />
+                    {t('common.addedToCalendar')}
+                  </>
+                ) : (
+                  <a href={createGoogleCalendarLink(interview)} target="_blank" rel="noopener noreferrer">
+                    <CalendarPlus className="mr-2" />
+                    {t('common.addToCalendar')}
+                  </a>
+                )}
+              </Button>
           </CardFooter>
         </Card>
-      ))}
+      )})}
     </div>
   );
 

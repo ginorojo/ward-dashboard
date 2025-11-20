@@ -1,7 +1,7 @@
 'use client';
 import { ColumnDef } from '@tanstack/react-table';
 import { Reunion } from '@/lib/types';
-import { MoreHorizontal, ArrowUpDown, CalendarPlus } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, CalendarPlus, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -19,9 +19,11 @@ type ColumnsProps = {
   handleDelete: (id: string) => void;
   createGoogleCalendarLink: (reunion: Reunion) => string;
   t: (key: string) => string;
+  addedToCalendar: string[];
+  onAddToCalendar: (reunionId: string) => void;
 };
 
-export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, t }: ColumnsProps): ColumnDef<Reunion>[] => [
+export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar }: ColumnsProps): ColumnDef<Reunion>[] => [
   {
     accessorKey: 'scheduledAt',
     header: ({ column }) => (
@@ -52,6 +54,7 @@ export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, 
     id: 'actions',
     cell: ({ row }) => {
       const reunion = row.original;
+      const isAdded = addedToCalendar.includes(reunion.id);
 
       return (
         <AlertDialog>
@@ -65,11 +68,27 @@ export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, 
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href={createGoogleCalendarLink(reunion)} target="_blank" rel="noopener noreferrer">
-                  <CalendarPlus className="mr-2" />
-                  {t('common.addToCalendar')}
-                </a>
+              <DropdownMenuItem
+                disabled={isAdded}
+                onSelect={(e) => {
+                  if (!isAdded) {
+                    e.preventDefault();
+                    onAddToCalendar(reunion.id);
+                    window.open(createGoogleCalendarLink(reunion), '_blank');
+                  }
+                }}
+              >
+                {isAdded ? (
+                    <>
+                        <CheckCircle className="mr-2" />
+                        {t('common.addedToCalendar')}
+                    </>
+                ) : (
+                    <>
+                        <CalendarPlus className="mr-2" />
+                        {t('common.addToCalendar')}
+                    </>
+                )}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <AlertDialogTrigger asChild>

@@ -1,7 +1,7 @@
 'use client';
 import { ColumnDef } from '@tanstack/react-table';
 import { Interview } from '@/lib/types';
-import { MoreHorizontal, ArrowUpDown, CalendarPlus } from 'lucide-react';
+import { MoreHorizontal, ArrowUpDown, CalendarPlus, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -21,9 +21,11 @@ type ColumnsProps = {
   handleStatusToggle: (interview: Interview) => void;
   createGoogleCalendarLink: (interview: Interview) => string;
   t: (key: string) => string;
+  addedToCalendar: string[];
+  onAddToCalendar: (interviewId: string) => void;
 };
 
-export const columns = ({ openEditForm, handleDelete, handleStatusToggle, createGoogleCalendarLink, t }: ColumnsProps): ColumnDef<Interview>[] => [
+export const columns = ({ openEditForm, handleDelete, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar }: ColumnsProps): ColumnDef<Interview>[] => [
   {
     accessorKey: 'personInterviewed',
     header: ({ column }) => (
@@ -67,6 +69,7 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, create
     id: 'actions',
     cell: ({ row }) => {
       const interview = row.original;
+      const isAdded = addedToCalendar.includes(interview.id);
 
       return (
         <AlertDialog>
@@ -83,11 +86,27 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, create
               <DropdownMenuItem onClick={() => handleStatusToggle(interview)}>
                 {interview.status === 'pending' ? t('interviews.markCompleted') : t('interviews.markPending')}
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <a href={createGoogleCalendarLink(interview)} target="_blank" rel="noopener noreferrer">
-                  <CalendarPlus className="mr-2" />
-                  {t('common.addToCalendar')}
-                </a>
+               <DropdownMenuItem
+                disabled={isAdded}
+                onSelect={(e) => {
+                  if (!isAdded) {
+                    e.preventDefault();
+                    onAddToCalendar(interview.id);
+                    window.open(createGoogleCalendarLink(interview), '_blank');
+                  }
+                }}
+              >
+                {isAdded ? (
+                    <>
+                        <CheckCircle className="mr-2" />
+                        {t('common.addedToCalendar')}
+                    </>
+                ) : (
+                    <>
+                        <CalendarPlus className="mr-2" />
+                        {t('common.addToCalendar')}
+                    </>
+                )}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <AlertDialogTrigger asChild>

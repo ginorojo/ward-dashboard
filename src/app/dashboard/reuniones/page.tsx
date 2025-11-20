@@ -4,7 +4,7 @@ import { useFirebase, useUser } from '@/firebase';
 import { Reunion } from '@/lib/types';
 import { addDocument, deleteDocument, getCollection, updateDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarPlus } from 'lucide-react';
+import { PlusCircle, CalendarPlus, CheckCircle } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/reuniones/data-table';
 import { columns } from '@/components/dashboard/reuniones/columns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -32,6 +32,20 @@ export default function ReunionesPage() {
   const { toast } = useToast();
   const { t } = useTranslation();
   const isMobile = useIsMobile();
+  const [addedToCalendar, setAddedToCalendar] = useState<string[]>([]);
+
+  useEffect(() => {
+    const stored = localStorage.getItem('addedMeetings');
+    if (stored) {
+      setAddedToCalendar(JSON.parse(stored));
+    }
+  }, []);
+
+  const handleAddToCalendar = (reunionId: string) => {
+    const newAdded = [...addedToCalendar, reunionId];
+    setAddedToCalendar(newAdded);
+    localStorage.setItem('addedMeetings', JSON.stringify(newAdded));
+  };
 
   const fetchReuniones = async () => {
     if (!firestore) return;
@@ -100,12 +114,12 @@ export default function ReunionesPage() {
     const url = new URL('https://calendar.google.com/calendar/render');
     url.searchParams.set('action', 'TEMPLATE');
     url.searchParams.set('text', `Reunión: ${reunion.reason}`);
-    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
     url.searchParams.set('details', `Participantes: ${reunion.participants.join(', ')}`);
+    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
     return url.toString();
   }
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, createGoogleCalendarLink, t }), [reuniones, t]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
 
   const dialogTitle = editingReunion ? t('reuniones.editReunion') : t('reuniones.createNewReunion');
   
@@ -118,7 +132,9 @@ export default function ReunionesPage() {
 
   const renderMobileReuniones = () => (
     <div className="space-y-4">
-      {reuniones.map(reunion => (
+      {reuniones.map(reunion => {
+        const isAdded = addedToCalendar.includes(reunion.id);
+        return (
         <Card key={reunion.id} className="flex flex-col">
           <CardHeader>
             <div className="flex justify-between items-start">
@@ -170,15 +186,29 @@ export default function ReunionesPage() {
             </div>
           </CardContent>
           <CardFooter>
-            <Button variant="outline" size="sm" asChild className='w-full'>
-              <a href={createGoogleCalendarLink(reunion)} target="_blank" rel="noopener noreferrer">
-                <CalendarPlus className="mr-2" />
-                {t('common.addToCalendar')}
-              </a>
+            <Button
+              variant={isAdded ? "secondary" : "outline"}
+              size="sm"
+              asChild={!isAdded}
+              disabled={isAdded}
+              className='w-full'
+              onClick={() => handleAddToCalendar(reunion.id)}
+            >
+              {isAdded ? (
+                <>
+                  <CheckCircle className="mr-2" />
+                  {t('common.addedToCalendar')}
+                </>
+              ) : (
+                <a href={createGoogleCalendarLink(reunion)} target="_blank" rel="noopener noreferrer">
+                  <CalendarPlus className="mr-2" />
+                  {t('common.addToCalendar')}
+                </a>
+              )}
             </Button>
           </CardFooter>
         </Card>
-      ))}
+      )})}
     </div>
   );
 

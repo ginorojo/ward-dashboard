@@ -16,7 +16,8 @@
     "email": "Email",
     "role": "Role",
     "password": "Password",
-    "addToCalendar": "Add to Calendar"
+    "addToCalendar": "Add to Calendar",
+    "addedToCalendar": "Added to Calendar"
   },
   "dashboard": {
     "title": "Dashboard",
