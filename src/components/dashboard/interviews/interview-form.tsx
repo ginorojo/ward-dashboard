@@ -111,7 +111,12 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
                   <Input 
                     type="date"
                     value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
-                    onChange={(e) => field.onChange(new Date(e.target.value))}
+                    onChange={(e) => {
+                        const dateString = e.target.value;
+                        const [year, month, day] = dateString.split('-').map(Number);
+                        const localDate = new Date(year, month - 1, day);
+                        field.onChange(localDate);
+                    }}
                     className="w-full"
                   />
                 ) : (
