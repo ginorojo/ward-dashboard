@@ -13,11 +13,10 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 type ColumnsProps = {
   openEditForm: (interview: Interview) => void;
-  handleDelete: (id: string) => void;
+  handleDelete: (interview: Interview) => void;
   handleStatusToggle: (interview: Interview) => void;
   createGoogleCalendarLink: (interview: Interview) => string;
   t: (key: string) => string;
@@ -72,63 +71,47 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, create
       const isAdded = addedToCalendar.includes(interview.id);
 
       return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => openEditForm(interview)}>{t('common.edit')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleStatusToggle(interview)}>
-                {interview.status === 'pending' ? t('interviews.markCompleted') : t('interviews.markPending')}
-              </DropdownMenuItem>
-               <DropdownMenuItem
-                disabled={isAdded}
-                onSelect={(e) => {
-                  if (!isAdded) {
-                    e.preventDefault();
-                    onAddToCalendar(interview.id);
-                    window.open(createGoogleCalendarLink(interview), '_blank');
-                  }
-                }}
-              >
-                {isAdded ? (
-                    <>
-                        <CheckCircle className="mr-2" />
-                        {t('common.addedToCalendar')}
-                    </>
-                ) : (
-                    <>
-                        <CalendarPlus className="mr-2" />
-                        {t('common.addToCalendar')}
-                    </>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('interviews.deleteConfirmTitle')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('interviews.deleteConfirmDescription')}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleDelete(interview.id)} className="bg-destructive hover:bg-destructive/90">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => openEditForm(interview)}>{t('common.edit')}</DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleStatusToggle(interview)}>
+              {interview.status === 'pending' ? t('interviews.markCompleted') : t('interviews.markPending')}
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isAdded}
+              onSelect={(e) => {
+                if (!isAdded) {
+                  e.preventDefault();
+                  onAddToCalendar(interview.id);
+                  window.open(createGoogleCalendarLink(interview), '_blank');
+                }
+              }}
+            >
+              {isAdded ? (
+                  <>
+                      <CheckCircle className="mr-2" />
+                      {t('common.addedToCalendar')}
+                  </>
+              ) : (
+                  <>
+                      <CalendarPlus className="mr-2" />
+                      {t('common.addToCalendar')}
+                  </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => handleDelete(interview)} className="text-destructive">
                 {t('common.delete')}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },

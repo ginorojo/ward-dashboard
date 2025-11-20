@@ -4,7 +4,7 @@ import { useFirebase, useUser } from '@/firebase';
 import { Reunion } from '@/lib/types';
 import { addDocument, deleteDocument, getCollection, updateDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { PlusCircle, CalendarPlus, CheckCircle } from 'lucide-react';
+import { PlusCircle, CalendarPlus, CheckCircle, ExternalLink } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/reuniones/data-table';
 import { columns } from '@/components/dashboard/reuniones/columns';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -23,6 +23,44 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 
 type ReunionFormValues = z.infer<typeof reunionSchema>;
 
+const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, addedToCalendar, t }: { open: boolean, onOpenChange: (open: boolean) => void, reunion: Reunion | null, onConfirm: () => void, addedToCalendar: string[], t: (key: string) => string }) => {
+    if (!reunion) return null;
+
+    const isAdded = addedToCalendar.includes(reunion.id);
+    const calendarLink = `https://calendar.google.com/calendar/r/day?date=${format(reunion.scheduledAt.toDate(), 'yyyy-MM-dd')}`;
+
+    return (
+        <AlertDialog open={open} onOpenChange={onOpenChange}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>{t('reuniones.deleteConfirmTitle')}</AlertDialogTitle>
+                    {isAdded ? (
+                        <AlertDialogDescription>
+                            {t('reuniones.deleteConfirmDescriptionWithCalendar')}
+                            <Button variant="link" asChild className="p-0 h-auto mt-2">
+                                <a href={calendarLink} target="_blank" rel="noopener noreferrer">
+                                    {t('reuniones.openGoogleCalendar')} <ExternalLink className="ml-2 h-4 w-4" />
+                                </a>
+                            </Button>
+                        </AlertDialogDescription>
+                    ) : (
+                        <AlertDialogDescription>
+                            {t('reuniones.deleteConfirmDescription')}
+                        </AlertDialogDescription>
+                    )}
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
+                    <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
+                        {t('common.delete')}
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+};
+
+
 export default function ReunionesPage() {
   const { firestore, user } = useFirebase();
   const [reuniones, setReuniones] = useState<Reunion[]>([]);
@@ -33,6 +71,8 @@ export default function ReunionesPage() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [addedToCalendar, setAddedToCalendar] = useState<string[]>([]);
+  const [isDeleteAlertOpen, setIsDeleteAlertOpen] = useState(false);
+  const [reunionToDelete, setReunionToDelete] = useState<Reunion | null>(null);
 
   useEffect(() => {
     const stored = localStorage.getItem('addedMeetings');
@@ -98,11 +138,18 @@ export default function ReunionesPage() {
     setIsFormOpen(true);
   }
 
-  const handleDelete = (id: string) => {
-    if (!user || !firestore) return;
-    deleteDocument(firestore, 'reuniones', id, user.uid, 'reunion');
+  const openDeleteConfirmation = (reunion: Reunion) => {
+    setReunionToDelete(reunion);
+    setIsDeleteAlertOpen(true);
+  };
+
+  const confirmDelete = () => {
+    if (!user || !firestore || !reunionToDelete) return;
+    deleteDocument(firestore, 'reuniones', reunionToDelete.id, user.uid, 'reunion');
     toast({ title: t('common.success'), description: t('reuniones.reunionDeleted') });
     fetchReuniones();
+    setIsDeleteAlertOpen(false);
+    setReunionToDelete(null);
   };
   
   const createGoogleCalendarLink = (reunion: Reunion) => {
@@ -119,7 +166,7 @@ export default function ReunionesPage() {
     return url.toString();
   }
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: openDeleteConfirmation, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
 
   const dialogTitle = editingReunion ? t('reuniones.editReunion') : t('reuniones.createNewReunion');
   
@@ -142,37 +189,19 @@ export default function ReunionesPage() {
                 <CardTitle className='text-lg'>{t('reuniones.reunionOn')} {format(reunion.scheduledAt.toDate(), 'dd/MM/yyyy')}</CardTitle>
                 <CardDescription>{t('reuniones.at')} {format(reunion.scheduledAt.toDate(), 'p')}</CardDescription>
               </div>
-               <AlertDialog>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" className="h-8 w-8 p-0">
-                        <span className="sr-only">Open menu</span>
-                        <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <AlertDialogTrigger asChild>
-                        <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
-                    </AlertDialogTrigger>
-                    </DropdownMenuContent>
-                </DropdownMenu>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                    <AlertDialogTitle>{t('reuniones.deleteConfirmTitle')}</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        {t('reuniones.deleteConfirmDescription')}
-                    </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                    <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-                    <AlertDialogAction onClick={() => handleDelete(reunion.id)} className="bg-destructive hover:bg-destructive/90">
-                        {t('common.delete')}
-                    </AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+              <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" className="h-8 w-8 p-0">
+                      <span className="sr-only">Open menu</span>
+                      <MoreHorizontal className="h-4 w-4" />
+                  </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={() => openDeleteConfirmation(reunion)} className="text-destructive">{t('common.delete')}</DropdownMenuItem>
+                  </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </CardHeader>
           <CardContent className="space-y-2 text-sm flex-grow">
@@ -192,7 +221,7 @@ export default function ReunionesPage() {
               asChild={!isAdded}
               disabled={isAdded}
               className='w-full'
-              onClick={() => handleAddToCalendar(reunion.id)}
+              onClick={() => { if(!isAdded) handleAddToCalendar(reunion.id)}}
             >
               {isAdded ? (
                 <>
@@ -233,6 +262,15 @@ export default function ReunionesPage() {
             <ReunionForm onSubmit={handleFormSubmit} defaultValues={formDefaultValues} t={t} />
           </DialogContent>
         </Dialog>
+        
+      <DeleteConfirmationDialog
+        open={isDeleteAlertOpen}
+        onOpenChange={setIsDeleteAlertOpen}
+        reunion={reunionToDelete}
+        onConfirm={confirmDelete}
+        addedToCalendar={addedToCalendar}
+        t={t}
+      />
 
       {loading ? (
          <div className="space-y-4">

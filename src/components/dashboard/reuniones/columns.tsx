@@ -12,11 +12,10 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { format } from 'date-fns';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 
 type ColumnsProps = {
   openEditForm: (reunion: Reunion) => void;
-  handleDelete: (id: string) => void;
+  handleDelete: (reunion: Reunion) => void;
   createGoogleCalendarLink: (reunion: Reunion) => string;
   t: (key: string) => string;
   addedToCalendar: string[];
@@ -57,60 +56,44 @@ export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, 
       const isAdded = addedToCalendar.includes(reunion.id);
 
       return (
-        <AlertDialog>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
-              <DropdownMenuItem
-                disabled={isAdded}
-                onSelect={(e) => {
-                  if (!isAdded) {
-                    e.preventDefault();
-                    onAddToCalendar(reunion.id);
-                    window.open(createGoogleCalendarLink(reunion), '_blank');
-                  }
-                }}
-              >
-                {isAdded ? (
-                    <>
-                        <CheckCircle className="mr-2" />
-                        {t('common.addedToCalendar')}
-                    </>
-                ) : (
-                    <>
-                        <CalendarPlus className="mr-2" />
-                        {t('common.addToCalendar')}
-                    </>
-                )}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <AlertDialogTrigger asChild>
-                <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
-              </AlertDialogTrigger>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>{t('reuniones.deleteConfirmTitle')}</AlertDialogTitle>
-              <AlertDialogDescription>
-                {t('reuniones.deleteConfirmDescription')}
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
-              <AlertDialogAction onClick={() => handleDelete(reunion.id)} className="bg-destructive hover:bg-destructive/90">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" className="h-8 w-8 p-0">
+              <span className="sr-only">Open menu</span>
+              <MoreHorizontal className="h-4 w-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
+            <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={isAdded}
+              onSelect={(e) => {
+                if (!isAdded) {
+                  e.preventDefault();
+                  onAddToCalendar(reunion.id);
+                  window.open(createGoogleCalendarLink(reunion), '_blank');
+                }
+              }}
+            >
+              {isAdded ? (
+                  <>
+                      <CheckCircle className="mr-2" />
+                      {t('common.addedToCalendar')}
+                  </>
+              ) : (
+                  <>
+                      <CalendarPlus className="mr-2" />
+                      {t('common.addToCalendar')}
+                  </>
+              )}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={() => handleDelete(reunion)} className="text-destructive">
                 {t('common.delete')}
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       );
     },
   },
