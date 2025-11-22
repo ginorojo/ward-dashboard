@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 const Logo = ({ className }: { className?: string }) => (
   <div className={cn('relative rounded-full overflow-hidden', className)}>
     <Image
-      src="/logo.webp"
+      src="/ward.webp"
       alt="Ward Dashboard Logo"
       layout="fill"
       objectFit="cover"
