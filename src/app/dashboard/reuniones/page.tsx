@@ -27,7 +27,8 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, adde
     if (!reunion) return null;
 
     const isAdded = addedToCalendar.includes(reunion.id);
-    const calendarLink = `https://calendar.google.com/calendar/r/day?date=${format(reunion.scheduledAt.toDate(), 'yyyyMMdd')}`;
+    const eventDate = reunion.scheduledAt.toDate();
+    const calendarLink = `https://calendar.google.com/calendar/r/day/${eventDate.getFullYear()}/${eventDate.getMonth() + 1}/${eventDate.getDate()}`;
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -285,3 +286,5 @@ export default function ReunionesPage() {
     </div>
   );
 }
+
+    

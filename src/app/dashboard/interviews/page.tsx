@@ -29,7 +29,8 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, interview, onConfirm, ad
     if (!interview) return null;
 
     const isAdded = addedToCalendar.includes(interview.id);
-    const calendarLink = `https://calendar.google.com/calendar/r/day?date=${format(interview.scheduledDate.toDate(), 'yyyyMMdd')}`;
+    const eventDate = interview.scheduledDate.toDate();
+    const calendarLink = `https://calendar.google.com/calendar/r/day/${eventDate.getFullYear()}/${eventDate.getMonth() + 1}/${eventDate.getDate()}`;
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -298,3 +299,5 @@ export default function InterviewsPage() {
     </div>
   );
 }
+
+    
