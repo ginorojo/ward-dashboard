@@ -33,6 +33,8 @@
     "totalUsers": "Total Users",
     "pendingInterviews": "Pending Interviews",
     "totalScheduled": "Total scheduled interviews",
+    "pendingMeetings": "Pending Meetings",
+    "totalScheduledMeetings": "Total scheduled meetings",
     "sacramentAgendas": "Sacrament Agendas",
     "totalCreatedAgendas": "Total created agendas"
   },

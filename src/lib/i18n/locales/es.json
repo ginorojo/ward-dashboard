@@ -33,6 +33,8 @@
     "totalUsers": "Usuarios totales",
     "pendingInterviews": "Entrevistas pendientes",
     "totalScheduled": "Total de entrevistas programadas",
+    "pendingMeetings": "Reuniones pendientes",
+    "totalScheduledMeetings": "Total de reuniones programadas",
     "sacramentAgendas": "Agendas Sacramentales",
     "totalCreatedAgendas": "Total de agendas creadas"
   },

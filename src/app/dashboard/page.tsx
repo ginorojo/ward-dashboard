@@ -1,7 +1,7 @@
 'use client';
 import { useFirebase, useUser } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { BookOpenCheck, CalendarCheck, Users } from 'lucide-react';
+import { BookOpenCheck, CalendarCheck, Users, Handshake } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { collection, getDocs, query, where } from 'firebase/firestore';
 import { UserProfile } from '@/lib/types';
@@ -15,6 +15,7 @@ export default function DashboardHomePage() {
   const [stats, setStats] = useState({
     users: 0,
     interviews: 0,
+    reuniones: 0,
     agendas: 0,
   });
   const [loading, setLoading] = useState(true);
@@ -32,15 +33,18 @@ export default function DashboardHomePage() {
           }
 
           const interviewsQuery = query(collection(firestore, 'interviews'), where('status', '==', 'pending'));
+          const reunionesQuery = query(collection(firestore, 'reuniones'), where('status', '==', 'pending'));
 
-          const [usersSnapshot, interviewsSnapshot, agendasSnapshot] = await Promise.all([
+          const [usersSnapshot, interviewsSnapshot, reunionesSnapshot, agendasSnapshot] = await Promise.all([
             getDocs(collection(firestore, 'users')),
             getDocs(interviewsQuery),
+            getDocs(reunionesQuery),
             getDocs(collection(firestore, 'sacramentMeetings')),
           ]);
           setStats({
             users: usersSnapshot.size,
             interviews: interviewsSnapshot.size,
+            reuniones: reunionesSnapshot.size,
             agendas: agendasSnapshot.size,
           });
         } catch (error) {
@@ -62,7 +66,7 @@ export default function DashboardHomePage() {
         <p className="text-muted-foreground">{t('dashboard.overview')}</p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('dashboard.totalUsers')}</CardTitle>
@@ -80,6 +84,16 @@ export default function DashboardHomePage() {
           <CardContent>
             <div className="text-2xl font-bold">{loading ? '...' : stats.interviews}</div>
             <p className="text-xs text-muted-foreground">{t('dashboard.totalScheduled')}</p>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">{t('dashboard.pendingMeetings')}</CardTitle>
+            <Handshake className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{loading ? '...' : stats.reuniones}</div>
+            <p className="text-xs text-muted-foreground">{t('dashboard.totalScheduledMeetings')}</p>
           </CardContent>
         </Card>
         <Card>
