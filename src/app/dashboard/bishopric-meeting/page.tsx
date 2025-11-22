@@ -39,28 +39,40 @@ export default function BishopricMeetingPage() {
   useEffect(() => {
     if (!firestore) return;
     setLoadingMeetings(true);
-    getCollection<BishopricMeeting>(firestore, 'bishopricMeetings', { field: 'date', direction: 'desc' })
-      .then(meetingList => {
+    const fetchMeetings = async () => {
+      try {
+        const meetingList = await getCollection<BishopricMeeting>(firestore, 'bishopricMeetings', { field: 'date', direction: 'desc' });
         setMeetings(meetingList);
+        // If there is no meeting selected yet, select the first one from the list.
         if (meetingList.length > 0 && !selectedMeetingId) {
           setSelectedMeetingId(meetingList[0].id);
         }
-      })
-      .catch(() => toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToFetchMeetings') }))
-      .finally(() => setLoadingMeetings(false));
-  }, [firestore]);
+      } catch (error) {
+        toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToFetchMeetings') });
+      } finally {
+        setLoadingMeetings(false);
+      }
+    };
+    fetchMeetings();
+  }, [firestore]); // Only re-run if firestore instance changes.
 
   useEffect(() => {
     if (selectedMeetingId && firestore) {
       setLoadingNotes(true);
-      getNotesForMeeting(firestore, selectedMeetingId)
-        .then(setNotes)
-        .catch(() => toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToFetchNotes') }))
-        .finally(() => setLoadingNotes(false));
-    } else {
-      setNotes([]);
+      setNotes([]); // Clear previous notes while loading new ones
+      const fetchNotes = async () => {
+          try {
+              const notesList = await getNotesForMeeting(firestore, selectedMeetingId);
+              setNotes(notesList);
+          } catch (error) {
+              toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToFetchNotes') });
+          } finally {
+              setLoadingNotes(false);
+          }
+      };
+      fetchNotes();
     }
-  }, [selectedMeetingId, firestore]);
+  }, [selectedMeetingId, firestore]); // Re-run only when the selected meeting or firestore changes.
 
   const selectedMeeting = useMemo(() => {
     return meetings.find(m => m.id === selectedMeetingId) || null;
@@ -69,19 +81,23 @@ export default function BishopricMeetingPage() {
   const handleNoteSubmit = async (data: NoteFormValues) => {
     if (!user || !firestore || !selectedMeetingId) return;
     try {
+      let updatedNotes;
       if (editingNote) {
-        updateNoteInMeeting(firestore, selectedMeetingId, editingNote.id, data, user.uid);
+        await updateNoteInMeeting(firestore, selectedMeetingId, editingNote.id, data, user.uid);
         toast({ title: t('common.success'), description: t('bishopricMeeting.noteUpdated') });
+        updatedNotes = notes.map(n => n.id === editingNote.id ? { ...n, ...data, date: (data.date as any) } : n);
       } else {
-        await addNoteToMeeting(firestore, selectedMeetingId, data, user.uid);
+        const newNoteId = await addNoteToMeeting(firestore, selectedMeetingId, data, user.uid);
         toast({ title: t('common.success'), description: t('bishopricMeeting.noteAdded') });
+        const newNote = await getNotesForMeeting(firestore, selectedMeetingId);
+        updatedNotes = newNote;
       }
-      setIsFormOpen(false);
-      setEditingNote(null);
-      const newNotes = await getNotesForMeeting(firestore, selectedMeetingId);
-      setNotes(newNotes);
+      setNotes(updatedNotes);
     } catch (error: any) {
       toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToSaveNote') });
+    } finally {
+        setIsFormOpen(false);
+        setEditingNote(null);
     }
   };
 

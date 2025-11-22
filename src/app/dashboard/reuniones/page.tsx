@@ -33,7 +33,7 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, adde
     const year = eventDate.getFullYear();
     const month = eventDate.getMonth() + 1;
     const day = eventDate.getDate();
-    const calendarLink = `https://calendar.google.com/calendar/u/0/r/day/${year}/${month}/${day}`;
+    const calendarLink = `https://calendar.google.com/calendar/r/day/${year}/${month}/${day}`;
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -116,7 +116,7 @@ export default function ReunionesPage() {
     const finalData = {
         ...data,
         participants: Array.isArray(data.participants) ? data.participants : data.participants.split(',').map(p => p.trim()).filter(p => p),
-        status: editingReunion ? data.status : 'pending',
+        status: data.status || 'pending',
     };
 
     try {
@@ -124,7 +124,7 @@ export default function ReunionesPage() {
         await updateDocument(firestore, 'reuniones', editingReunion.id, finalData, user.uid, 'reunion');
         toast({ title: t('common.success'), description: t('reuniones.reunionUpdated') });
       } else {
-        await addDocument(firestore, 'reuniones', finalData, user.uid, 'reunion');
+        await addDocument(firestore, 'reuniones', { ...finalData, status: 'pending' }, user.uid, 'reunion');
         toast({ title: t('common.success'), description: t('reuniones.reunionCreated') });
       }
       setIsFormOpen(false);
