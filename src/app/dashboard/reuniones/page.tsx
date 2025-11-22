@@ -171,10 +171,10 @@ export default function ReunionesPage() {
   const dialogTitle = editingReunion ? t('reuniones.editReunion') : t('reuniones.createNewReunion');
   
   const formDefaultValues = editingReunion ? {
-    ...editingReunion,
-    scheduledAt: editingReunion.scheduledAt.toDate(),
-    time: format(editingReunion.scheduledAt.toDate(), 'HH:mm'),
-    participants: editingReunion.participants.join(', '),
+    ...reunion,
+    scheduledAt: reunion.scheduledAt.toDate(),
+    time: format(reunion.scheduledAt.toDate(), 'HH:mm'),
+    participants: reunion.participants.join(', '),
   } : undefined;
 
   const renderMobileReuniones = () => (
