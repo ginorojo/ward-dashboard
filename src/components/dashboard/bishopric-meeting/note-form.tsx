@@ -58,7 +58,7 @@ export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) 
               {isMobile ? (
                  <Input 
                     type="date"
-                    value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                    value={format(field.value || new Date(), 'yyyy-MM-dd')}
                     onChange={(e) => {
                         const dateString = e.target.value;
                         const [year, month, day] = dateString.split('-').map(Number);

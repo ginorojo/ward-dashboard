@@ -83,7 +83,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
                         {isMobile ? (
                             <Input 
                                 type="date"
-                                value={field.value ? format(field.value, 'yyyy-MM-dd') : ''}
+                                value={format(field.value || new Date(), 'yyyy-MM-dd')}
                                 onChange={(e) => {
                                     const dateString = e.target.value;
                                     const [year, month, day] = dateString.split('-').map(Number);
