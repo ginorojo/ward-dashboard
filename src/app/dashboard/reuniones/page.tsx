@@ -28,12 +28,12 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, adde
     if (!reunion) return null;
 
     const isAdded = addedToCalendar.includes(reunion.id);
+    
     const eventDate = reunion.scheduledAt.toDate();
     const year = eventDate.getFullYear();
     const month = eventDate.getMonth() + 1;
     const day = eventDate.getDate();
-
-    const calendarLink = `https://calendar.google.com/calendar/r/day/${year}/${month}/${day}`;
+    const calendarLink = `https://calendar.google.com/calendar/u/0/r/day/${year}/${month}/${day}`;
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -191,7 +191,13 @@ export default function ReunionesPage() {
     scheduledAt: editingReunion.scheduledAt.toDate(),
     time: format(editingReunion.scheduledAt.toDate(), 'HH:mm'),
     participants: Array.isArray(editingReunion.participants) ? editingReunion.participants.join(', ') : editingReunion.participants,
-  } : undefined;
+  } : {
+    reason: '',
+    participants: '',
+    scheduledAt: new Date(),
+    time: format(new Date(), 'HH:mm'),
+    status: 'pending',
+  };
 
   const renderMobileReuniones = () => (
     <div className="space-y-4">
