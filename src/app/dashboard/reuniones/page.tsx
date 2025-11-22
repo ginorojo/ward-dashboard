@@ -111,7 +111,7 @@ export default function ReunionesPage() {
     
     const finalData = {
         ...data,
-        participants: data.participants.split(',').map(p => p.trim()).filter(p => p),
+        participants: Array.isArray(data.participants) ? data.participants : data.participants.split(',').map(p => p.trim()).filter(p => p),
     };
 
     try {
@@ -167,13 +167,12 @@ export default function ReunionesPage() {
     const endTime = new Date(startTime.getTime() + 60 * 60000); // Assume 1 hour duration
 
     const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+    
+    const year = startTime.getFullYear();
+    const month = startTime.getMonth() + 1;
+    const day = startTime.getDate();
 
-    const url = new URL('https://calendar.google.com/calendar/render');
-    url.searchParams.set('action', 'TEMPLATE');
-    url.searchParams.set('text', `Reunión: ${reunion.reason}`);
-    url.searchParams.set('details', `Participantes: ${reunion.participants.join(', ')}`);
-    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
-    return url.toString();
+    return `https://calendar.google.com/calendar/r/day/${year}/${month}/${day}`;
   }
 
   const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: openDeleteConfirmation, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
@@ -184,7 +183,7 @@ export default function ReunionesPage() {
     ...editingReunion,
     scheduledAt: editingReunion.scheduledAt.toDate(),
     time: format(editingReunion.scheduledAt.toDate(), 'HH:mm'),
-    participants: editingReunion.participants.join(', '),
+    participants: Array.isArray(editingReunion.participants) ? editingReunion.participants.join(', ') : editingReunion.participants,
   } : undefined;
 
   const renderMobileReuniones = () => (
@@ -224,7 +223,7 @@ export default function ReunionesPage() {
             </div>
             <div>
               <p className="font-semibold">{t('reuniones.participants')}</p>
-              <p className="text-muted-foreground">{reunion.participants.join(', ')}</p>
+              <p className="text-muted-foreground">{Array.isArray(reunion.participants) ? reunion.participants.join(', ') : reunion.participants}</p>
             </div>
              <div>
               <p className="font-semibold">{t('common.status')}</p>
@@ -304,3 +303,5 @@ export default function ReunionesPage() {
     </div>
   );
 }
+
+    
