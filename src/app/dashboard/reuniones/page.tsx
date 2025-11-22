@@ -27,7 +27,7 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, adde
     if (!reunion) return null;
 
     const isAdded = addedToCalendar.includes(reunion.id);
-    const calendarLink = `https://calendar.google.com/calendar/r/day?date=${format(reunion.scheduledAt.toDate(), 'yyyy-MM-dd')}`;
+    const calendarLink = `https://calendar.google.com/calendar/r/day?date=${format(reunion.scheduledAt.toDate(), 'yyyyMMdd')}`;
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
