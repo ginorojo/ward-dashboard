@@ -398,6 +398,11 @@
             "type": "string"
           }
         },
+        "status": {
+          "type": "string",
+          "description": "Status of the meeting (pending or completed).",
+          "format": "enum"
+        },
         "createdBy": {
           "type": "string",
           "description": "Reference to User who created this meeting."
@@ -420,6 +425,7 @@
         "scheduledAt",
         "reason",
         "participants",
+        "status",
         "createdBy",
         "updatedBy",
         "createdAt",

@@ -16,6 +16,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useTranslation } from '@/lib/i18n';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription, CardFooter } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
@@ -152,6 +153,14 @@ export default function ReunionesPage() {
     setIsDeleteAlertOpen(false);
     setReunionToDelete(null);
   };
+
+  const handleStatusToggle = (reunion: Reunion) => {
+      if (!user || !firestore) return;
+      const newStatus = reunion.status === 'pending' ? 'completed' : 'pending';
+      updateDocument(firestore, 'reuniones', reunion.id, { status: newStatus }, user.uid, 'reunion');
+      toast({ title: t('common.success'), description: t('reuniones.statusUpdated')});
+      fetchReuniones();
+  };
   
   const createGoogleCalendarLink = (reunion: Reunion) => {
     const startTime = reunion.scheduledAt.toDate();
@@ -167,7 +176,7 @@ export default function ReunionesPage() {
     return url.toString();
   }
 
-  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: openDeleteConfirmation, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
+  const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: openDeleteConfirmation, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
 
   const dialogTitle = editingReunion ? t('reuniones.editReunion') : t('reuniones.createNewReunion');
   
@@ -199,13 +208,16 @@ export default function ReunionesPage() {
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
                   <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleStatusToggle(reunion)}>
+                      {reunion.status === 'pending' ? t('reuniones.markCompleted') : t('reuniones.markPending')}
+                  </DropdownMenuItem>
                   <DropdownMenuSeparator />
                   <DropdownMenuItem onSelect={() => openDeleteConfirmation(reunion)} className="text-destructive">{t('common.delete')}</DropdownMenuItem>
                   </DropdownMenuContent>
               </DropdownMenu>
             </div>
           </CardHeader>
-          <CardContent className="space-y-2 text-sm flex-grow">
+          <CardContent className="space-y-4 text-sm flex-grow">
             <div>
               <p className="font-semibold">{t('reuniones.reason')}</p>
               <p className="text-muted-foreground">{reunion.reason}</p>
@@ -213,6 +225,12 @@ export default function ReunionesPage() {
             <div>
               <p className="font-semibold">{t('reuniones.participants')}</p>
               <p className="text-muted-foreground">{reunion.participants.join(', ')}</p>
+            </div>
+             <div>
+              <p className="font-semibold">{t('common.status')}</p>
+              <Badge variant={reunion.status === 'completed' ? 'success' : 'destructive'} className=" mt-1">
+                {t(`reuniones.${reunion.status}`)}
+              </Badge>
             </div>
           </CardContent>
           <CardFooter>

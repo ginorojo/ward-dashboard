@@ -30,6 +30,7 @@ export interface Reunion {
   scheduledAt: Timestamp;
   reason: string;
   participants: string[];
+  status: 'pending' | 'completed';
   createdBy: string;
   updatedBy: string;
   createdAt: Timestamp;

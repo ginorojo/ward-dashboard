@@ -100,6 +100,7 @@
     "reunionUpdated": "Meeting updated successfully.",
     "reunionCreated": "Meeting created successfully.",
     "reunionDeleted": "Meeting deleted successfully.",
+    "statusUpdated": "Meeting status updated.",
     "failedToFetch": "Failed to fetch meetings.",
     "failedToSave": "Failed to save meeting.",
     "deleteConfirmTitle": "Are you sure?",
@@ -116,7 +117,12 @@
     "next": "Next",
     "reasonPlaceholder": "e.g., Ward Council",
     "participantsPlaceholder": "John Doe, Jane Smith...",
-    "fillFormToAdd": "Fill form to add to calendar"
+    "fillFormToAdd": "Fill form to add to calendar",
+    "pending": "Pending",
+    "completed": "Completed",
+    "markCompleted": "Mark as Completed",
+    "markPending": "Mark as Pending",
+    "selectStatus": "Select status"
   },
   "bishopricMeeting": {
     "title": "Bishopric Meeting",

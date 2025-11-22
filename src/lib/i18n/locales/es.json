@@ -100,6 +100,7 @@
     "reunionUpdated": "Reunión actualizada con éxito.",
     "reunionCreated": "Reunión creada con éxito.",
     "reunionDeleted": "Reunión eliminada con éxito.",
+    "statusUpdated": "Estado de la reunión actualizado.",
     "failedToFetch": "Error al cargar las reuniones.",
     "failedToSave": "Error al guardar la reunión.",
     "deleteConfirmTitle": "¿Estás seguro?",
@@ -116,7 +117,12 @@
     "next": "Siguiente",
     "reasonPlaceholder": "Ej: Consejo de Barrio",
     "participantsPlaceholder": "John Doe, Jane Smith...",
-    "fillFormToAdd": "Llene el formulario para añadir al calendario"
+    "fillFormToAdd": "Llene el formulario para añadir al calendario",
+    "pending": "Pendiente",
+    "completed": "Completada",
+    "markCompleted": "Marcar como Completada",
+    "markPending": "Marcar como Pendiente",
+    "selectStatus": "Seleccionar estado"
   },
   "bishopricMeeting": {
     "title": "Reunión de Obispado",

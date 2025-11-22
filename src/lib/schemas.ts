@@ -30,6 +30,7 @@ export const reunionSchema = z.object({
   participants: z.string().min(2, { message: 'Participants are required' }),
   scheduledAt: z.date(),
   time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, { message: "Invalid time format. Use HH:mm" }),
+  status: z.enum(['pending', 'completed']),
 });
 
 export const bishopricNoteSchema = z.object({

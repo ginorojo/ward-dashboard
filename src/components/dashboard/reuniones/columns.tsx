@@ -11,18 +11,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
 type ColumnsProps = {
   openEditForm: (reunion: Reunion) => void;
   handleDelete: (reunion: Reunion) => void;
+  handleStatusToggle: (reunion: Reunion) => void;
   createGoogleCalendarLink: (reunion: Reunion) => string;
   t: (key: string) => string;
   addedToCalendar: string[];
   onAddToCalendar: (reunionId: string) => void;
 };
 
-export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar }: ColumnsProps): ColumnDef<Reunion>[] => [
+export const columns = ({ openEditForm, handleDelete, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar }: ColumnsProps): ColumnDef<Reunion>[] => [
   {
     accessorKey: 'scheduledAt',
     header: ({ column }) => (
@@ -50,6 +52,18 @@ export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, 
     }
   },
   {
+    accessorKey: 'status',
+    header: t('common.status'),
+    cell: ({ row }) => {
+      const status: "pending" | "completed" = row.getValue('status');
+      return (
+        <Badge variant={status === 'completed' ? 'success' : 'destructive'} className="capitalize">
+          {t(`reuniones.${status}`)}
+        </Badge>
+      );
+    },
+  },
+  {
     id: 'actions',
     cell: ({ row }) => {
       const reunion = row.original;
@@ -66,6 +80,9 @@ export const columns = ({ openEditForm, handleDelete, createGoogleCalendarLink, 
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
             <DropdownMenuItem onClick={() => openEditForm(reunion)}>{t('common.edit')}</DropdownMenuItem>
+             <DropdownMenuItem onClick={() => handleStatusToggle(reunion)}>
+              {reunion.status === 'pending' ? t('reuniones.markCompleted') : t('reuniones.markPending')}
+            </DropdownMenuItem>
             <DropdownMenuItem
               disabled={isAdded}
               onSelect={(e) => {

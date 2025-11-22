@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { Textarea } from '@/components/ui/textarea';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 type ReunionFormValues = z.infer<typeof reunionSchema>;
 
@@ -38,6 +39,7 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
       participants: '',
       scheduledAt: new Date(),
       time: format(new Date(), 'HH:mm'),
+      status: 'pending',
     },
   });
 
@@ -149,6 +151,27 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
             />
         </div>
         
+        <FormField
+          control={form.control}
+          name="status"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('common.status')}</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('reuniones.selectStatus')} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="pending">{t('reuniones.pending')}</SelectItem>
+                  <SelectItem value="completed">{t('reuniones.completed')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {defaultValues ? t('common.save') : t('common.create')}
