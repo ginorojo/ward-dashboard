@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Loader2, CalendarPlus } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
@@ -33,7 +33,6 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
     
   const form = useForm<ReunionFormValues>({
     resolver: zodResolver(reunionSchema),
-    mode: 'onChange',
     defaultValues: defaultValues || {
       reason: '',
       participants: '',
@@ -42,7 +41,7 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
     },
   });
 
-  const { isSubmitting, isValid } = form.formState;
+  const { isSubmitting } = form.formState;
 
   const handleFormSubmit = (data: ReunionFormValues) => {
     const [hours, minutes] = data.time.split(':').map(Number);
@@ -50,24 +49,6 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
     combinedDateTime.setHours(hours, minutes);
 
     onSubmit({ ...data, scheduledAt: combinedDateTime });
-  };
-  
-  const createGoogleCalendarLink = () => {
-    const values = form.getValues();
-    const startTime = new Date(values.scheduledAt);
-    const [hours, minutes] = values.time.split(':').map(Number);
-    startTime.setHours(hours, minutes);
-    
-    const endTime = new Date(startTime.getTime() + 60 * 60000); // Assume 1 hour duration
-
-    const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
-
-    const url = new URL('https://calendar.google.com/calendar/render');
-    url.searchParams.set('action', 'TEMPLATE');
-    url.searchParams.set('text', `Reunión: ${values.reason}`);
-    url.searchParams.set('details', `Participantes: ${values.participants}`);
-    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
-    return url.toString();
   };
   
   if (!isClient) {
@@ -168,21 +149,6 @@ export default function ReunionForm({ onSubmit, defaultValues, t }: ReunionFormP
             />
         </div>
         
-        <Button
-          type="button"
-          variant="outline"
-          className="w-full"
-          disabled={!isValid}
-          onClick={() => {
-              if (isValid) {
-                  window.open(createGoogleCalendarLink(), '_blank');
-              }
-          }}
-        >
-          <CalendarPlus className="mr-2 h-4 w-4" />
-          {isValid ? t('common.addToCalendar') : t('reuniones.fillFormToAdd')}
-        </Button>
-
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {defaultValues ? t('common.save') : t('common.create')}
