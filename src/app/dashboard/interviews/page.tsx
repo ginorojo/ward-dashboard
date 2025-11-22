@@ -30,7 +30,11 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, interview, onConfirm, ad
 
     const isAdded = addedToCalendar.includes(interview.id);
     const eventDate = interview.scheduledDate.toDate();
-    const calendarLink = `https://calendar.google.com/calendar/r/day/${eventDate.getFullYear()}/${eventDate.getMonth() + 1}/${eventDate.getDate()}`;
+    const year = eventDate.getFullYear();
+    const month = eventDate.getMonth() + 1;
+    const day = eventDate.getDate();
+
+    const calendarLink = `https://calendar.google.com/calendar/r/day/${year}/${month}/${day}`;
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -167,9 +171,9 @@ export default function InterviewsPage() {
 
     const url = new URL('https://calendar.google.com/calendar/render');
     url.searchParams.set('action', 'TEMPLATE');
-    url.searchParams.set('text', `Entrevista: ${interview.personInterviewed}`);
+    url.searchParams.set('text', `${t('interviews.title')}: ${interview.personInterviewed}`);
     url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
-    url.searchParams.set('details', `Propósito: ${interview.purpose}\nEntrevistador: ${interview.interviewer}`);
+    url.searchParams.set('details', `${t('interviews.purpose')}: ${interview.purpose}\n${t('interviews.interviewer')}: ${interview.interviewer}`);
     return url.toString();
   }
 

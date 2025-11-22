@@ -29,7 +29,11 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, adde
 
     const isAdded = addedToCalendar.includes(reunion.id);
     const eventDate = reunion.scheduledAt.toDate();
-    const calendarLink = `https://calendar.google.com/calendar/r/day/${eventDate.getFullYear()}/${eventDate.getMonth() + 1}/${eventDate.getDate()}`;
+    const year = eventDate.getFullYear();
+    const month = eventDate.getMonth() + 1;
+    const day = eventDate.getDate();
+
+    const calendarLink = `https://calendar.google.com/calendar/r/day/${year}/${month}/${day}`;
 
     return (
         <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -112,6 +116,7 @@ export default function ReunionesPage() {
     const finalData = {
         ...data,
         participants: Array.isArray(data.participants) ? data.participants : data.participants.split(',').map(p => p.trim()).filter(p => p),
+        status: editingReunion ? data.status : 'pending',
     };
 
     try {
@@ -167,12 +172,14 @@ export default function ReunionesPage() {
     const endTime = new Date(startTime.getTime() + 60 * 60000); // Assume 1 hour duration
 
     const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
-    
-    const year = startTime.getFullYear();
-    const month = startTime.getMonth() + 1;
-    const day = startTime.getDate();
 
-    return `https://calendar.google.com/calendar/r/day/${year}/${month}/${day}`;
+    const url = new URL('https://calendar.google.com/calendar/render');
+    url.searchParams.set('action', 'TEMPLATE');
+    url.searchParams.set('text', `${t('reuniones.title')}: ${reunion.reason}`);
+    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
+    const participants = Array.isArray(reunion.participants) ? reunion.participants.join(', ') : reunion.participants;
+    url.searchParams.set('details', `${t('reuniones.reason')}: ${reunion.reason}\n${t('reuniones.participants')}: ${participants}`);
+    return url.toString();
   }
 
   const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: openDeleteConfirmation, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
@@ -303,5 +310,3 @@ export default function ReunionesPage() {
     </div>
   );
 }
-
-    
