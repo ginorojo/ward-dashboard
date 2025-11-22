@@ -29,6 +29,7 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, interview, onConfirm, ad
     if (!interview) return null;
 
     const isAdded = addedToCalendar.includes(interview.id);
+    // Correctly format the date from the interview object passed as a prop
     const calendarLink = `https://calendar.google.com/calendar/r/day?date=${format(interview.scheduledDate.toDate(), 'yyyy-MM-dd')}`;
 
     return (
