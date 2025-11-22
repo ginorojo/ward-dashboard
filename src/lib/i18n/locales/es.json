@@ -72,8 +72,8 @@
     "statusUpdated": "Estado de la entrevista actualizado.",
     "deleteConfirmTitle": "¿Estás absolutamente seguro?",
     "deleteConfirmDescription": "Esta acción eliminará permanentemente este registro de entrevista.",
-    "deleteConfirmDescriptionWithCalendar": "Esta entrevista está en tu Google Calendar. Eliminarla aquí no la quitará de tu calendario personal.",
-    "openGoogleCalendar": "Abrir Google Calendar para eliminarla",
+    "deleteConfirmDescriptionWithCalendar": "Esta entrevista está en tu Google Calendar. Eliminarla aquí no la quitará de tu calendario personal. Haz clic abajo para abrir tu calendario y eliminarla.",
+    "openGoogleCalendar": "Abrir Google Calendar",
     "person": "Persona",
     "interviewer": "Entrevistador",
     "purpose": "Propósito",
@@ -88,7 +88,8 @@
     "dateTime": "Fecha y Hora",
     "pickADate": "Elige una fecha",
     "selectStatus": "Seleccionar estado",
-    "time": "Hora"
+    "time": "Hora",
+    "fillFormToAdd": "Llene el formulario para añadir al calendario"
   },
   "reuniones": {
     "title": "Reuniones",
@@ -103,8 +104,8 @@
     "failedToSave": "Error al guardar la reunión.",
     "deleteConfirmTitle": "¿Estás seguro?",
     "deleteConfirmDescription": "Esta acción eliminará permanentemente este registro de reunión.",
-    "deleteConfirmDescriptionWithCalendar": "Esta reunión está en tu Google Calendar. Eliminarla aquí no la quitará de tu calendario personal.",
-    "openGoogleCalendar": "Abrir Google Calendar para eliminarla",
+    "deleteConfirmDescriptionWithCalendar": "Esta reunión está en tu Google Calendar. Eliminarla aquí no la quitará de tu calendario personal. Haz clic abajo para abrir tu calendario y eliminarla.",
+    "openGoogleCalendar": "Abrir Google Calendar",
     "reason": "Motivo",
     "participants": "Participantes",
     "reunionOn": "Reunión el",
@@ -114,7 +115,8 @@
     "previous": "Anterior",
     "next": "Siguiente",
     "reasonPlaceholder": "Ej: Consejo de Barrio",
-    "participantsPlaceholder": "John Doe, Jane Smith..."
+    "participantsPlaceholder": "John Doe, Jane Smith...",
+    "fillFormToAdd": "Llene el formulario para añadir al calendario"
   },
   "bishopricMeeting": {
     "title": "Reunión de Obispado",

@@ -72,8 +72,8 @@
     "statusUpdated": "Interview status updated.",
     "deleteConfirmTitle": "Are you absolutely sure?",
     "deleteConfirmDescription": "This action will permanently delete this interview record.",
-    "deleteConfirmDescriptionWithCalendar": "This interview is in your Google Calendar. Deleting it here will not remove it from your personal calendar.",
-    "openGoogleCalendar": "Open Google Calendar to remove it",
+    "deleteConfirmDescriptionWithCalendar": "This interview is in your Google Calendar. Deleting it here will not remove it from your personal calendar. Click below to open your calendar and remove it.",
+    "openGoogleCalendar": "Open Google Calendar",
     "person": "Person",
     "interviewer": "Interviewer",
     "purpose": "Purpose",
@@ -88,7 +88,8 @@
     "dateTime": "Date and Time",
     "pickADate": "Pick a date",
     "selectStatus": "Select status",
-    "time": "Time"
+    "time": "Time",
+    "fillFormToAdd": "Fill form to add to calendar"
   },
   "reuniones": {
     "title": "Meetings",
@@ -103,8 +104,8 @@
     "failedToSave": "Failed to save meeting.",
     "deleteConfirmTitle": "Are you sure?",
     "deleteConfirmDescription": "This action will permanently delete this meeting record.",
-    "deleteConfirmDescriptionWithCalendar": "This meeting is in your Google Calendar. Deleting it here will not remove it from your personal calendar.",
-    "openGoogleCalendar": "Open Google Calendar to remove it",
+    "deleteConfirmDescriptionWithCalendar": "This meeting is in your Google Calendar. Deleting it here will not remove it from your personal calendar. Click below to open your calendar and remove it.",
+    "openGoogleCalendar": "Open Google Calendar",
     "reason": "Reason",
     "participants": "Participants",
     "reunionOn": "Meeting on",
@@ -114,7 +115,8 @@
     "previous": "Previous",
     "next": "Next",
     "reasonPlaceholder": "e.g., Ward Council",
-    "participantsPlaceholder": "John Doe, Jane Smith..."
+    "participantsPlaceholder": "John Doe, Jane Smith...",
+    "fillFormToAdd": "Fill form to add to calendar"
   },
   "bishopricMeeting": {
     "title": "Bishopric Meeting",

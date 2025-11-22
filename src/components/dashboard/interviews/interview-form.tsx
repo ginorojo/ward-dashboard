@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2, CalendarPlus } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { format, parse } from 'date-fns';
@@ -34,6 +34,7 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
   
   const form = useForm<InterviewFormValues>({
     resolver: zodResolver(interviewSchema),
+    mode: 'onChange',
     defaultValues: defaultValues || {
       personInterviewed: '',
       interviewer: '',
@@ -44,7 +45,7 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
     },
   });
 
-  const { isSubmitting } = form.formState;
+  const { isSubmitting, isValid, watch } = form.formState;
 
   const handleFormSubmit = (data: InterviewFormValues) => {
     const [hours, minutes] = data.scheduledTime.split(':').map(Number);
@@ -53,6 +54,24 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
 
     onSubmit({ ...data, scheduledDate: combinedDateTime });
   };
+
+  const createGoogleCalendarLink = () => {
+    const values = form.getValues();
+    const startTime = new Date(values.scheduledDate);
+    const [hours, minutes] = values.scheduledTime.split(':').map(Number);
+    startTime.setHours(hours, minutes);
+
+    const endTime = new Date(startTime.getTime() + 30 * 60000); // Assume 30 min duration
+
+    const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+
+    const url = new URL('https://calendar.google.com/calendar/render');
+    url.searchParams.set('action', 'TEMPLATE');
+    url.searchParams.set('text', `Entrevista: ${values.personInterviewed}`);
+    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
+    url.searchParams.set('details', `Propósito: ${values.purpose}\nEntrevistador: ${values.interviewer}`);
+    return url.toString();
+  }
   
   if (!isClient) {
     return null; // Or a loading skeleton
@@ -164,6 +183,22 @@ export default function InterviewForm({ onSubmit, defaultValues, t }: InterviewF
             )}
             />
         </div>
+        
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          disabled={!isValid}
+          onClick={() => {
+              if (isValid) {
+                  window.open(createGoogleCalendarLink(), '_blank');
+              }
+          }}
+        >
+          <CalendarPlus className="mr-2 h-4 w-4" />
+          {isValid ? t('common.addToCalendar') : t('interviews.fillFormToAdd')}
+        </Button>
+
         <FormField
           control={form.control}
           name="status"
