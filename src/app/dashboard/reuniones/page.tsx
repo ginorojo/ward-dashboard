@@ -92,7 +92,7 @@ export default function ReunionesPage() {
     if (!firestore) return;
     setLoading(true);
     try {
-      const reunionList = await getCollection<Reunion>(firestore, 'reuniones', { field: 'scheduledAt', direction: 'desc' });
+      const reunionList = await getCollection<Reunion>(firestore, 'reuniones', { field: 'scheduledAt', direction: 'asc' });
       setReuniones(reunionList);
     } catch (error) {
       toast({ variant: 'destructive', title: t('common.error'), description: t('reuniones.failedToFetch') });

@@ -95,7 +95,7 @@ export default function InterviewsPage() {
     if (!firestore) return;
     setLoading(true);
     try {
-      const interviewList = await getCollection<Interview>(firestore, 'interviews', { field: 'scheduledDate', direction: 'desc' });
+      const interviewList = await getCollection<Interview>(firestore, 'interviews', { field: 'scheduledDate', direction: 'asc' });
       setInterviews(interviewList);
     } catch (error) {
       toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to fetch interviews.' });
@@ -299,5 +299,3 @@ export default function InterviewsPage() {
     </div>
   );
 }
-
-    
