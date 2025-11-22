@@ -3,7 +3,7 @@ import { useFirebase, useUser } from '@/firebase';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { BookOpenCheck, CalendarCheck, Users } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { UserProfile } from '@/lib/types';
 import { doc, getDoc } from 'firebase/firestore';
 import { useTranslation } from '@/lib/i18n';
@@ -31,9 +31,11 @@ export default function DashboardHomePage() {
             setUserProfile(userDoc.data() as UserProfile);
           }
 
+          const interviewsQuery = query(collection(firestore, 'interviews'), where('status', '==', 'pending'));
+
           const [usersSnapshot, interviewsSnapshot, agendasSnapshot] = await Promise.all([
             getDocs(collection(firestore, 'users')),
-            getDocs(collection(firestore, 'interviews')),
+            getDocs(interviewsQuery),
             getDocs(collection(firestore, 'sacramentMeetings')),
           ]);
           setStats({
