@@ -172,7 +172,7 @@ export default function ReunionesPage() {
   const dialogTitle = editingReunion ? t('reuniones.editReunion') : t('reuniones.createNewReunion');
   
   const formDefaultValues = editingReunion ? {
-    ...reunion,
+    ...editingReunion,
     scheduledAt: editingReunion.scheduledAt.toDate(),
     time: format(editingReunion.scheduledAt.toDate(), 'HH:mm'),
     participants: editingReunion.participants.join(', '),
@@ -286,5 +286,3 @@ export default function ReunionesPage() {
     </div>
   );
 }
-
-    
