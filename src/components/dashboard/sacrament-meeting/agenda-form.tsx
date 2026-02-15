@@ -116,9 +116,9 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
                 />
                 <FormField control={form.control} name="preside" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.presiding')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="dirige" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.conducting')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.visitingAuthorities')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="pianist" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.pianist')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
                 <FormField control={form.control} name="musicDirector" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.musicDirector')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.visitingAuthorities')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
             </div>
 
             <Separator />
