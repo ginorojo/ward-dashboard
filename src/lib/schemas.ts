@@ -15,6 +15,10 @@ export const createUserSchema = userSchema.extend({
   password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
 });
 
+export const profileSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+});
+
 
 export const interviewSchema = z.object({
   personInterviewed: z.string().min(2, { message: 'Name is required' }),
