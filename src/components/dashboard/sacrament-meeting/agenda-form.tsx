@@ -40,23 +40,21 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
 
   const form = useForm<AgendaFormValues>({
     resolver: zodResolver(sacramentMeetingSchema),
-    defaultValues: initialData
-      ? { ...initialData, date: initialData.date.toDate(), speakers: initialData.speakers || ["","",""], asuntosDelBarrio: initialData.asuntosDelBarrio || [] }
-      : {
-          date: new Date(),
-          preside: '',
-          dirige: '',
-          pianist: '',
-          musicDirector: '',
-          authorities: '',
-          openingHymn: { name: '', number: undefined },
-          openingPrayer: '',
-          hymnSacramental: { name: '', number: undefined },
-          speakers: ['', '', ''],
-          hymnFinal: { name: '', number: undefined },
-          closingPrayer: '',
-          asuntosDelBarrio: [],
-        },
+    defaultValues: {
+        date: initialData?.date?.toDate() ?? new Date(),
+        preside: initialData?.preside ?? '',
+        dirige: initialData?.dirige ?? '',
+        pianist: initialData?.pianist ?? '',
+        musicDirector: initialData?.musicDirector ?? '',
+        authorities: initialData?.authorities ?? '',
+        openingHymn: initialData?.openingHymn ?? { name: '', number: undefined },
+        openingPrayer: initialData?.openingPrayer ?? '',
+        hymnSacramental: initialData?.hymnSacramental ?? { name: '', number: undefined },
+        speakers: initialData?.speakers ?? ['', '', ''],
+        hymnFinal: initialData?.hymnFinal ?? { name: '', number: undefined },
+        closingPrayer: initialData?.closingPrayer ?? '',
+        asuntosDelBarrio: initialData?.asuntosDelBarrio ?? [],
+    },
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -116,18 +114,18 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
                         </FormItem>
                     )}
                 />
-                <FormField control={form.control} name="preside" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.presiding')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="dirige" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.conducting')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="pianist" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.pianist')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="musicDirector" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.musicDirector')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
-                <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.visitingAuthorities')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="preside" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.presiding')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="dirige" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.conducting')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="pianist" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.pianist')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="musicDirector" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.musicDirector')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
+                <FormField control={form.control} name="authorities" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.visitingAuthorities')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
             </div>
 
             <Separator />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-2"><FormLabel>{t('sacramentMeeting.openingHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="openingHymn.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} /></FormControl></FormItem>)} /><FormField control={form.control} name="openingHymn.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl></FormItem>)} /></div></div>
-                <FormField control={form.control} name="openingPrayer" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.openingPrayer')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
+                <div className="space-y-2"><FormLabel>{t('sacramentMeeting.openingHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="openingHymn.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} value={field.value || ''} /></FormControl></FormItem>)} /><FormField control={form.control} name="openingHymn.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl></FormItem>)} /></div></div>
+                <FormField control={form.control} name="openingPrayer" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.openingPrayer')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
             </div>
 
             <Separator />
@@ -148,8 +146,8 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
                       </FormItem>
                     )}
                   />
-                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.personName`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>{t('common.name')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl></FormItem>)} />
-                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.calling`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>{t('sacramentMeeting.calling')}</FormLabel><FormControl><Input placeholder={t('sacramentMeeting.calling')} {...field} /></FormControl></FormItem>)} />
+                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.personName`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>{t('common.name')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl></FormItem>)} />
+                   <FormField control={form.control} name={`asuntosDelBarrio.${index}.calling`} render={({ field }) => (<FormItem className='flex-1'><FormLabel>{t('sacramentMeeting.calling')}</FormLabel><FormControl><Input placeholder={t('sacramentMeeting.calling')} {...field} value={field.value || ''} /></FormControl></FormItem>)} />
                   <Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
                     <Trash2 className="h-4 w-4 text-destructive" />
                   </Button>
@@ -163,7 +161,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
             <Separator />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                 <div className="space-y-2"><FormLabel>{t('sacramentMeeting.sacramentalHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnSacramental.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnSacramental.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl></FormItem>)} /></div></div>
+                 <div className="space-y-2"><FormLabel>{t('sacramentMeeting.sacramentalHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnSacramental.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} value={field.value || ''} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnSacramental.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl></FormItem>)} /></div></div>
             </div>
 
             <Separator />
@@ -178,9 +176,9 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
             </div>
 
             <Separator />
-            <div className="space-y-2"><FormLabel>{t('sacramentMeeting.closingHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnFinal.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnFinal.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl></FormItem>)} /></div></div>
+            <div className="space-y-2"><FormLabel>{t('sacramentMeeting.closingHymn')}</FormLabel><div className="flex gap-2"><FormField control={form.control} name="hymnFinal.number" render={({ field }) => (<FormItem className="w-24"><FormControl><Input type="number" placeholder="#" {...field} value={field.value || ''} /></FormControl></FormItem>)} /><FormField control={form.control} name="hymnFinal.name" render={({ field }) => (<FormItem className="flex-1"><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl></FormItem>)} /></div></div>
 
-            <FormField control={form.control} name="closingPrayer" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.closingPrayer')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} /></FormControl><FormMessage /></FormItem>)} />
+            <FormField control={form.control} name="closingPrayer" render={({ field }) => (<FormItem><FormLabel>{t('sacramentMeeting.closingPrayer')}</FormLabel><FormControl><Input placeholder={t('common.name')} {...field} value={field.value || ''} /></FormControl><FormMessage /></FormItem>)} />
             
           </CardContent>
         </Card>
