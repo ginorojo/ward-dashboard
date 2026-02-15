@@ -218,7 +218,8 @@
     "updatePassword": "Update Password",
     "passwordUpdated": "Your password has been updated successfully.",
     "passwordUpdateFailed": "Failed to update password. You may need to sign in again to perform this operation.",
-    "notAuthenticated": "You are not authenticated."
+    "notAuthenticated": "You are not authenticated.",
+    "requiresRecentLogin": "This is a sensitive action and requires you to have signed in recently. Please log out and sign back in before trying again."
   },
   "auth": {
     "loginTitle": "Ward Dashboard",

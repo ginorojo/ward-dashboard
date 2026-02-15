@@ -47,10 +47,17 @@ export default function ChangePasswordForm({ t }: { t: (key: string) => string }
       });
       form.reset();
     } catch (error: any) {
+      let description = t('settings.passwordUpdateFailed');
+      if (error.code === 'auth/requires-recent-login') {
+        description = t('settings.requiresRecentLogin');
+      } else if (error.message) {
+        description = error.message;
+      }
+      
       toast({
         variant: 'destructive',
         title: t('common.error'),
-        description: error.message || t('settings.passwordUpdateFailed'),
+        description,
       });
     }
   };

@@ -218,7 +218,8 @@
     "updatePassword": "Actualizar Contraseña",
     "passwordUpdated": "Tu contraseña se ha actualizado con éxito.",
     "passwordUpdateFailed": "Error al actualizar la contraseña. Es posible que debas iniciar sesión de nuevo para realizar esta operación.",
-    "notAuthenticated": "No estás autenticado."
+    "notAuthenticated": "No estás autenticado.",
+    "requiresRecentLogin": "Esta es una acción sensible y requiere que hayas iniciado sesión recientemente. Por favor, cierra sesión y vuelve a iniciarla antes de intentarlo de nuevo."
   },
   "auth": {
     "loginTitle": "Panel de Barrio",
