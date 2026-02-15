@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import ProfileCard from '@/components/dashboard/settings/profile-card';
 import { useTranslation } from '@/lib/i18n';
+import ChangePasswordForm from '@/components/dashboard/settings/change-password-form';
 
 export default function SettingsPage() {
   const { t } = useTranslation();
@@ -16,6 +17,8 @@ export default function SettingsPage() {
       </div>
 
       <ProfileCard t={t} />
+
+      <ChangePasswordForm t={t} />
 
       <Card>
         <CardHeader>

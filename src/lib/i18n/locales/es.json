@@ -210,7 +210,15 @@
     "appearance": "Apariencia",
     "appearanceDescription": "Personaliza el aspecto de la aplicación.",
     "theme": "Tema",
-    "themeDescription": "Selecciona entre el modo claro y oscuro."
+    "themeDescription": "Selecciona entre el modo claro y oscuro.",
+    "changePassword": "Cambiar Contraseña",
+    "changePasswordDescription": "Actualiza la contraseña de tu cuenta aquí.",
+    "newPassword": "Nueva Contraseña",
+    "confirmNewPassword": "Confirmar Nueva Contraseña",
+    "updatePassword": "Actualizar Contraseña",
+    "passwordUpdated": "Tu contraseña se ha actualizado con éxito.",
+    "passwordUpdateFailed": "Error al actualizar la contraseña. Es posible que debas iniciar sesión de nuevo para realizar esta operación.",
+    "notAuthenticated": "No estás autenticado."
   },
   "auth": {
     "loginTitle": "Panel de Barrio",
