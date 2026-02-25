@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { ensureDate } from '@/lib/utils';
 
 interface NotesListProps {
   notes: BishopricMeetingNote[];
@@ -24,7 +25,7 @@ export default function NotesList({ notes, onEditNote, onDeleteNote, t }: NotesL
             <div key={note.id} className={`p-4 ${index < notes.length - 1 ? 'border-b' : ''}`}>
               <div className="flex justify-between items-start gap-4">
                 <div className='flex-1'>
-                  <p className="text-sm text-muted-foreground">{format(note.date.toDate(), 'PPP')}</p>
+                  <p className="text-sm text-muted-foreground">{format(ensureDate(note.date), 'PPP')}</p>
                   <p className="mt-2 whitespace-pre-wrap">{note.content}</p>
                 </div>
                  <AlertDialog>

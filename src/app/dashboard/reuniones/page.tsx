@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { useFirebase, useUser } from '@/firebase';
+import { useFirebase } from '@/firebase';
 import { Reunion } from '@/lib/types';
 import { addDocument, deleteDocument, getCollection, updateDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, CalendarPlus, CheckCircle, ExternalLink } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/reuniones/data-table';
 import { columns } from '@/components/dashboard/reuniones/columns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import ReunionForm from '@/components/dashboard/reuniones/reunion-form';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -20,7 +20,8 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { ensureDate } from '@/lib/utils';
 
 type ReunionFormValues = z.infer<typeof reunionSchema>;
 
@@ -29,7 +30,7 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, adde
 
     const isAdded = addedToCalendar.includes(reunion.id);
     
-    const eventDate = reunion.scheduledAt.toDate();
+    const eventDate = ensureDate(reunion.scheduledAt);
     const year = eventDate.getFullYear();
     const month = eventDate.getMonth() + 1;
     const day = eventDate.getDate();
@@ -55,12 +56,12 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, reunion, onConfirm, adde
                         </AlertDialogDescription>
                     )}
                 </AlertDialogHeader>
-                <AlertDialogFooter>
+                <div className="flex justify-end gap-2">
                     <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                     <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
                         {t('common.delete')}
                     </AlertDialogAction>
-                </AlertDialogFooter>
+                </div>
             </AlertDialogContent>
         </AlertDialog>
     );
@@ -168,15 +169,15 @@ export default function ReunionesPage() {
   };
   
   const createGoogleCalendarLink = (reunion: Reunion) => {
-    const startTime = reunion.scheduledAt.toDate();
-    const endTime = new Date(startTime.getTime() + 60 * 60000); // Assume 1 hour duration
+    const startTime = ensureDate(reunion.scheduledAt);
+    const endTime = new Date(startTime.getTime() + 60 * 60000);
 
-    const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+    const formatDateStr = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
 
     const url = new URL('https://calendar.google.com/calendar/render');
     url.searchParams.set('action', 'TEMPLATE');
     url.searchParams.set('text', `${t('reuniones.title')}: ${reunion.reason}`);
-    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
+    url.searchParams.set('dates', `${formatDateStr(startTime)}/${formatDateStr(endTime)}`);
     const participants = Array.isArray(reunion.participants) ? reunion.participants.join(', ') : reunion.participants;
     url.searchParams.set('details', `${t('reuniones.reason')}: ${reunion.reason}\n${t('reuniones.participants')}: ${participants}`);
     return url.toString();
@@ -188,8 +189,8 @@ export default function ReunionesPage() {
   
   const formDefaultValues = editingReunion ? {
     ...editingReunion,
-    scheduledAt: editingReunion.scheduledAt.toDate(),
-    time: format(editingReunion.scheduledAt.toDate(), 'HH:mm'),
+    scheduledAt: ensureDate(editingReunion.scheduledAt),
+    time: format(ensureDate(editingReunion.scheduledAt), 'HH:mm'),
     participants: Array.isArray(editingReunion.participants) ? editingReunion.participants.join(', ') : editingReunion.participants,
   } : {
     reason: '',
@@ -208,8 +209,8 @@ export default function ReunionesPage() {
           <CardHeader>
             <div className="flex justify-between items-start">
               <div>
-                <CardTitle className='text-lg'>{t('reuniones.reunionOn')} {format(reunion.scheduledAt.toDate(), 'dd/MM/yyyy')}</CardTitle>
-                <CardDescription>{t('reuniones.at')} {format(reunion.scheduledAt.toDate(), 'p')}</CardDescription>
+                <CardTitle className='text-lg'>{t('reuniones.reunionOn')} {format(ensureDate(reunion.scheduledAt), 'dd/MM/yyyy')}</CardTitle>
+                <CardDescription>{t('reuniones.at')} {format(ensureDate(reunion.scheduledAt), 'p')}</CardDescription>
               </div>
               <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -289,6 +290,7 @@ export default function ReunionesPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{dialogTitle}</DialogTitle>
+              <DialogDescription className="sr-only">Form to schedule or edit a meeting.</DialogDescription>
             </DialogHeader>
             <ReunionForm onSubmit={handleFormSubmit} defaultValues={formDefaultValues} t={t} />
           </DialogContent>

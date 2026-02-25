@@ -1,6 +1,6 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
-import { useFirebase, useUser } from '@/firebase';
+import { useState, useEffect } from 'react';
+import { useFirebase } from '@/firebase';
 import { SacramentMeeting } from '@/lib/types';
 import { addDocument, deleteDocument, getCollection, updateDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { format } from 'date-fns';
 import { Skeleton } from '@/components/ui/skeleton';
 import AIAgendaHelper from '@/components/dashboard/sacrament-meeting/ai-agenda-helper';
 import { useTranslation } from '@/lib/i18n';
+import { ensureDate } from '@/lib/utils';
 
 type AgendaFormValues = z.infer<typeof sacramentMeetingSchema>;
 
@@ -48,7 +49,6 @@ export default function SacramentMeetingPage() {
   const handleSaveAgenda = async (data: AgendaFormValues) => {
     if (!user || !firestore) return;
     
-    // Filter out empty speakers
     const finalData = {
         ...data,
         speakers: data.speakers?.filter(s => s && s.trim() !== '') || [],
@@ -126,7 +126,7 @@ export default function SacramentMeetingPage() {
             {agendas.map(agenda => (
               <Card key={agenda.id} className="flex flex-col">
                 <CardHeader>
-                  <CardTitle>{agenda.date ? format(agenda.date.toDate(), 'PPP') : 'No date'}</CardTitle>
+                  <CardTitle>{agenda.date ? format(ensureDate(agenda.date), 'PPP') : 'No date'}</CardTitle>
                   <CardDescription>{t('sacramentMeeting.conductedBy')} {agenda.dirige}</CardDescription>
                 </CardHeader>
                 <CardContent className="flex-grow">

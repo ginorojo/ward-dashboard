@@ -1,11 +1,11 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { useFirebase, useUser } from '@/firebase';
+import { useFirebase } from '@/firebase';
 import { BishopricMeeting, BishopricMeetingNote } from '@/lib/types';
 import { addNoteToMeeting, deleteNoteFromMeeting, getCollection, getNotesForMeeting, updateNoteInMeeting } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { PlusCircle } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import NoteForm from '@/components/dashboard/bishopric-meeting/note-form';
 import NotesList from '@/components/dashboard/bishopric-meeting/notes-list';
 import { useToast } from '@/hooks/use-toast';
@@ -20,6 +20,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { MoreHorizontal } from 'lucide-react';
 import { AlertDialog, AlertDialogTrigger, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '@/components/ui/alert-dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { ensureDate } from '@/lib/utils';
 
 type NoteFormValues = z.infer<typeof bishopricNoteSchema>;
 
@@ -43,7 +44,6 @@ export default function BishopricMeetingPage() {
       try {
         const meetingList = await getCollection<BishopricMeeting>(firestore, 'bishopricMeetings', { field: 'date', direction: 'desc' });
         setMeetings(meetingList);
-        // If there is no meeting selected yet, select the first one from the list.
         if (meetingList.length > 0 && !selectedMeetingId) {
           setSelectedMeetingId(meetingList[0].id);
         }
@@ -54,12 +54,12 @@ export default function BishopricMeetingPage() {
       }
     };
     fetchMeetings();
-  }, [firestore]); // Only re-run if firestore instance changes.
+  }, [firestore]);
 
   useEffect(() => {
     if (selectedMeetingId && firestore) {
       setLoadingNotes(true);
-      setNotes([]); // Clear previous notes while loading new ones
+      setNotes([]);
       const fetchNotes = async () => {
           try {
               const notesList = await getNotesForMeeting(firestore, selectedMeetingId);
@@ -72,7 +72,7 @@ export default function BishopricMeetingPage() {
       };
       fetchNotes();
     }
-  }, [selectedMeetingId, firestore]); // Re-run only when the selected meeting or firestore changes.
+  }, [selectedMeetingId, firestore]);
 
   const selectedMeeting = useMemo(() => {
     return meetings.find(m => m.id === selectedMeetingId) || null;
@@ -81,18 +81,16 @@ export default function BishopricMeetingPage() {
   const handleNoteSubmit = async (data: NoteFormValues) => {
     if (!user || !firestore || !selectedMeetingId) return;
     try {
-      let updatedNotes;
       if (editingNote) {
         await updateNoteInMeeting(firestore, selectedMeetingId, editingNote.id, data, user.uid);
         toast({ title: t('common.success'), description: t('bishopricMeeting.noteUpdated') });
-        updatedNotes = notes.map(n => n.id === editingNote.id ? { ...n, ...data, date: (data.date as any) } : n);
+        setNotes(notes.map(n => n.id === editingNote.id ? { ...n, ...data, date: (data.date as any) } : n));
       } else {
         const newNoteId = await addNoteToMeeting(firestore, selectedMeetingId, data, user.uid);
         toast({ title: t('common.success'), description: t('bishopricMeeting.noteAdded') });
-        const newNote = await getNotesForMeeting(firestore, selectedMeetingId);
-        updatedNotes = newNote;
+        const newNotes = await getNotesForMeeting(firestore, selectedMeetingId);
+        setNotes(newNotes);
       }
-      setNotes(updatedNotes);
     } catch (error: any) {
       toast({ variant: 'destructive', title: t('common.error'), description: t('bishopricMeeting.failedToSaveNote') });
     } finally {
@@ -118,7 +116,7 @@ export default function BishopricMeetingPage() {
   };
   
   const dialogTitle = editingNote ? t('bishopricMeeting.editNote') : t('bishopricMeeting.createNewNote');
-  const formDefaultValues = editingNote ? { ...editingNote, date: editingNote.date.toDate() } : { meetingId: selectedMeetingId || '', date: new Date() };
+  const formDefaultValues = editingNote ? { ...editingNote, date: ensureDate(editingNote.date) } : { meetingId: selectedMeetingId || '', date: new Date() };
 
   const renderMobileNotes = () => (
     <div className="space-y-4">
@@ -127,7 +125,7 @@ export default function BishopricMeetingPage() {
           <CardContent className="p-4">
             <div className="flex justify-between items-start">
               <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-semibold">{format(note.date.toDate(), 'PPP')}</p>
+                <p className="text-sm font-semibold">{format(ensureDate(note.date), 'PPP')}</p>
                 <p className="mt-2 text-muted-foreground whitespace-pre-wrap break-words">{note.content}</p>
               </div>
               <AlertDialog>
@@ -180,7 +178,10 @@ export default function BishopricMeetingPage() {
                     </Button>
                 </DialogTrigger>
                 <DialogContent>
-                    <DialogHeader><DialogTitle>{dialogTitle}</DialogTitle></DialogHeader>
+                    <DialogHeader>
+                      <DialogTitle>{dialogTitle}</DialogTitle>
+                      <DialogDescription className="sr-only">Form to create or edit a meeting note.</DialogDescription>
+                    </DialogHeader>
                     <NoteForm onSubmit={handleNoteSubmit} defaultValues={formDefaultValues} t={t} />
                 </DialogContent>
             </Dialog>
@@ -206,7 +207,7 @@ export default function BishopricMeetingPage() {
                   <SelectContent>
                       {meetings.map(meeting => (
                           <SelectItem key={meeting.id} value={meeting.id}>
-                              {format(meeting.date.toDate(), 'PPP')}
+                              {format(ensureDate(meeting.date), 'PPP')}
                           </SelectItem>
                       ))}
                   </SelectContent>

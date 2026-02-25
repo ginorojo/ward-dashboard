@@ -1,13 +1,13 @@
 'use client';
 import { useState, useEffect, useMemo } from 'react';
-import { useFirebase, useUser } from '@/firebase';
+import { useFirebase } from '@/firebase';
 import { Interview } from '@/lib/types';
 import { addDocument, deleteDocument, getCollection, updateDocument } from '@/lib/firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { PlusCircle, CalendarPlus, CheckCircle, ExternalLink } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/interviews/data-table';
 import { columns } from '@/components/dashboard/interviews/columns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import InterviewForm from '@/components/dashboard/interviews/interview-form';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -20,8 +20,8 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { MoreHorizontal } from 'lucide-react';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { ensureDate } from '@/lib/utils';
 
 type InterviewFormValues = z.infer<typeof interviewSchema>;
 
@@ -29,7 +29,7 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, interview, onConfirm, ad
     if (!interview) return null;
 
     const isAdded = addedToCalendar.includes(interview.id);
-    const eventDate = interview.scheduledDate.toDate();
+    const eventDate = ensureDate(interview.scheduledDate);
     const year = eventDate.getFullYear();
     const month = eventDate.getMonth() + 1;
     const day = eventDate.getDate();
@@ -56,12 +56,12 @@ const DeleteConfirmationDialog = ({ open, onOpenChange, interview, onConfirm, ad
                         </AlertDialogDescription>
                     )}
                 </AlertDialogHeader>
-                <AlertDialogFooter>
+                <div className="flex justify-end gap-2">
                     <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                     <AlertDialogAction onClick={onConfirm} className="bg-destructive hover:bg-destructive/90">
                         {t('common.delete')}
                     </AlertDialogAction>
-                </AlertDialogFooter>
+                </div>
             </AlertDialogContent>
         </AlertDialog>
     );
@@ -164,15 +164,15 @@ export default function InterviewsPage() {
   };
   
   const createGoogleCalendarLink = (interview: Interview) => {
-    const startTime = interview.scheduledDate.toDate();
-    const endTime = new Date(startTime.getTime() + 30 * 60000); // Assume 30 min duration
+    const startTime = ensureDate(interview.scheduledDate);
+    const endTime = new Date(startTime.getTime() + 30 * 60000);
 
-    const formatDate = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
+    const formatDateStr = (date: Date) => date.toISOString().replace(/-|:|\.\d\d\d/g, '');
 
     const url = new URL('https://calendar.google.com/calendar/render');
     url.searchParams.set('action', 'TEMPLATE');
     url.searchParams.set('text', `${t('interviews.title')}: ${interview.personInterviewed}`);
-    url.searchParams.set('dates', `${formatDate(startTime)}/${formatDate(endTime)}`);
+    url.searchParams.set('dates', `${formatDateStr(startTime)}/${formatDateStr(endTime)}`);
     url.searchParams.set('details', `${t('interviews.purpose')}: ${interview.purpose}\n${t('interviews.interviewer')}: ${interview.interviewer}`);
     return url.toString();
   }
@@ -182,8 +182,8 @@ export default function InterviewsPage() {
   const dialogTitle = editingInterview ? t('interviews.editInterview') : t('interviews.createNewInterview');
   const formDefaultValues = editingInterview ? {
     ...editingInterview,
-    scheduledDate: editingInterview.scheduledDate.toDate(),
-    scheduledTime: format(editingInterview.scheduledDate.toDate(), 'HH:mm'),
+    scheduledDate: ensureDate(editingInterview.scheduledDate),
+    scheduledTime: format(ensureDate(editingInterview.scheduledDate), 'HH:mm'),
   } : undefined;
 
   const renderMobileInterviews = () => (
@@ -223,7 +223,7 @@ export default function InterviewsPage() {
             </div>
             <div>
               <p className="font-semibold">{t('common.date')}</p>
-              <p className="text-muted-foreground">{format(interview.scheduledDate.toDate(), 'PPp')}</p>
+              <p className="text-muted-foreground">{format(ensureDate(interview.scheduledDate), 'PPp')}</p>
             </div>
             <div>
               <p className="font-semibold">{t('common.status')}</p>
@@ -276,6 +276,7 @@ export default function InterviewsPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{dialogTitle}</DialogTitle>
+              <DialogDescription className="sr-only">Form to schedule or edit an interview.</DialogDescription>
             </DialogHeader>
             <InterviewForm onSubmit={handleFormSubmit} defaultValues={formDefaultValues} t={t} />
           </DialogContent>

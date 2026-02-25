@@ -24,6 +24,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger
 } from '@/components/ui/alert-dialog';
+import { ensureDate } from '@/lib/utils';
 
 type ColumnsProps = {
   openEditForm: (user: UserProfile) => void;
@@ -86,8 +87,8 @@ export const columns = ({
     accessorKey: 'createdAt',
     header: t('users.createdAt'),
     cell: ({ row }) => {
-      const date = (row.getValue('createdAt') as any)?.toDate();
-      return date ? format(date, 'PP') : 'N/A';
+      const date = ensureDate(row.getValue('createdAt'));
+      return format(date, 'PP');
     },
   },
   {

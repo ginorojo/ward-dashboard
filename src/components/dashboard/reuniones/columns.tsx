@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { ensureDate } from '@/lib/utils';
 
 type ColumnsProps = {
   openEditForm: (reunion: Reunion) => void;
@@ -34,8 +35,8 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, create
       </Button>
     ),
     cell: ({ row }) => {
-      const date = (row.getValue('scheduledAt') as any)?.toDate();
-      return date ? <div className="font-medium">{format(date, 'PPp')}</div> : 'N/A';
+      const date = ensureDate(row.getValue('scheduledAt'));
+      return <div className="font-medium">{format(date, 'PPp')}</div>;
     },
   },
   {

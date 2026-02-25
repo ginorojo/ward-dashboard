@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 import { PlusCircle, MoreHorizontal } from 'lucide-react';
 import { DataTable } from '@/components/dashboard/users/data-table';
 import { columns } from '@/components/dashboard/users/columns';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import UserForm from '@/components/dashboard/users/user-form';
 import { useToast } from '@/hooks/use-toast';
 import { z } from 'zod';
@@ -19,10 +19,11 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { createUserWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter, FirestorePermissionError } from '@/firebase';
+import { ensureDate } from '@/lib/utils';
 
 type UserFormValues = z.infer<typeof createUserSchema>;
 
@@ -89,7 +90,7 @@ export default function UsersPage() {
       toast({ title: t('common.success'), description: "User created." });
       
       setIsFormOpen(false);
-      fetchUsers(); // Refresh the list
+      fetchUsers();
 
     } catch (error: any) {
         let errorMessage = 'Failed to create user.';
@@ -147,23 +148,6 @@ export default function UsersPage() {
         fetchUsers();
     } catch(error) {
         toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete user.' });
-    }
-  };
-
-  const handlePasswordReset = async (email: string) => {
-    if (!auth) return;
-    try {
-      await sendPasswordResetEmail(auth, email);
-      toast({
-        title: t('common.success'),
-        description: `${t('users.passwordResetSent')} ${email}`,
-      });
-    } catch (error: any) {
-      toast({
-        variant: 'destructive',
-        title: t('common.error'),
-        description: error.message,
-      });
     }
   };
   
@@ -236,7 +220,7 @@ export default function UsersPage() {
                   </div>
                   <div>
                     <p className="font-semibold">{t('users.createdAt')}</p>
-                    <p className="text-muted-foreground">{user.createdAt ? format((user.createdAt as any).toDate(), 'PP') : 'N/A'}</p>
+                    <p className="text-muted-foreground">{user.createdAt ? format(ensureDate(user.createdAt), 'PP') : 'N/A'}</p>
                   </div>
                 </CardContent>
               </Card>
@@ -245,12 +229,12 @@ export default function UsersPage() {
                   <AlertDialogTitle>{t('users.deleteUser')}</AlertDialogTitle>
                   <AlertDialogDescription>{t('users.deleteUserConfirm')}</AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
+                  <div className="flex justify-end gap-2">
                   <AlertDialogCancel>{t('common.cancel')}</AlertDialogCancel>
                   <AlertDialogAction onClick={() => handleDeleteUser(user.uid)} className="bg-destructive hover:bg-destructive/90">
                       {t('common.delete')}
                   </AlertDialogAction>
-                  </AlertDialogFooter>
+                  </div>
               </AlertDialogContent>
             </AlertDialog>
         )
@@ -275,6 +259,7 @@ export default function UsersPage() {
           <DialogContent>
             <DialogHeader>
               <DialogTitle>{dialogTitle}</DialogTitle>
+              <DialogDescription className="sr-only">Form to create or edit a user profile.</DialogDescription>
             </DialogHeader>
             <UserForm onSubmit={formSubmitHandler as any} defaultValues={formDefaultValues} isEditMode={!!editingUser} t={t} />
           </DialogContent>
@@ -291,14 +276,5 @@ export default function UsersPage() {
         <DataTable columns={tableColumns} data={users} t={t}/>
       )}
     </div>
-
-    
   );
 }
-
-    
-
-
-
-    
-

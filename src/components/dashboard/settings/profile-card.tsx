@@ -9,7 +9,7 @@ import { UserProfile } from '@/lib/types';
 import { useEffect, useState } from 'react';
 import { doc, getDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { updateUserProfile } from '@/lib/firebase/firestore';
 import { Pencil, Loader2 } from 'lucide-react';
+import { ensureDate } from '@/lib/utils';
 
 type ProfileFormValues = z.infer<typeof profileSchema>;
 
@@ -65,7 +66,7 @@ export default function ProfileCard({ t }: { t: (key: string) => string }) {
       await updateUserProfile(firestore, user.uid, data);
       toast({ title: t('common.success'), description: t('settings.profileUpdated') });
       setIsFormOpen(false);
-      fetchUserProfile(); // Re-fetch profile
+      fetchUserProfile();
     } catch (error) {
       toast({ variant: 'destructive', title: t('common.error'), description: t('settings.profileUpdateFailed') });
     }
@@ -97,6 +98,7 @@ export default function ProfileCard({ t }: { t: (key: string) => string }) {
                     <DialogContent>
                     <DialogHeader>
                         <DialogTitle>{t('settings.editProfile')}</DialogTitle>
+                        <DialogDescription className="sr-only">Edit your personal information.</DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 pt-4">
@@ -107,7 +109,7 @@ export default function ProfileCard({ t }: { t: (key: string) => string }) {
                             <FormItem>
                                 <FormLabel>{t('users.fullName')}</FormLabel>
                                 <FormControl>
-                                <Input placeholder={t('users.fullName')} {...field} />
+                                <Input placeholder={t('users.fullName')} {...field} value={field.value || ''} />
                                 </FormControl>
                                 <FormMessage />
                             </FormItem>
@@ -142,7 +144,7 @@ export default function ProfileCard({ t }: { t: (key: string) => string }) {
             <div>
               <p className="font-medium">{t('settings.accountCreated')}</p>
               <p className="text-muted-foreground mt-1">
-                {userProfile.createdAt ? format((userProfile.createdAt as any).toDate(), 'PPP') : 'N/A'}
+                {userProfile.createdAt ? format(ensureDate(userProfile.createdAt), 'PPP') : 'N/A'}
               </p>
             </div>
           </div>

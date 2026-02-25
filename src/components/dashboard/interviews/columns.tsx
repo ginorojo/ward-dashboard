@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
+import { ensureDate } from '@/lib/utils';
 
 type ColumnsProps = {
   openEditForm: (interview: Interview) => void;
@@ -48,8 +49,8 @@ export const columns = ({ openEditForm, handleDelete, handleStatusToggle, create
     accessorKey: 'scheduledDate',
     header: t('common.date'),
     cell: ({ row }) => {
-      const date = (row.getValue('scheduledDate') as any)?.toDate();
-      return date ? format(date, 'PPp') : 'N/A';
+      const date = ensureDate(row.getValue('scheduledDate'));
+      return format(date, 'PPp');
     },
   },
   {
