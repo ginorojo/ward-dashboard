@@ -7,16 +7,20 @@ import en from './locales/en.json';
 
 const translations = { es, en };
 
+/**
+ * Hook para manejar traducciones en componentes cliente.
+ */
 export const useTranslation = () => {
   const { language } = useContext(LanguageContext);
   
   function t(key: string): string {
     const keys = key.split('.');
     let result: any = translations[language];
+    
     for (const k of keys) {
       result = result?.[k];
       if (result === undefined) {
-        // Fallback to English if translation is not found
+        // Reintento con inglés si la traducción no existe en el idioma actual
         let fallbackResult: any = translations['en'];
         for (const fk of keys) {
             fallbackResult = fallbackResult?.[fk];

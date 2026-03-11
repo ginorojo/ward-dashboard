@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { ThemeProvider } from '@/components/providers/theme-provider';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase';
-import { LanguageProvider } from '@/lib/i18n';
+import { LanguageProvider } from '@/components/providers/language-provider';
 
 export const metadata: Metadata = {
   title: 'Ward Dashboard',
@@ -13,10 +13,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-  params,
 }: Readonly<{
   children: React.ReactNode;
-  params: { lang: string };
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
