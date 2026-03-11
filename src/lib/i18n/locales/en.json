@@ -83,6 +83,8 @@
     "purpose": "Purpose",
     "pending": "Pending",
     "completed": "Completed",
+    "pendingTab": "Pending",
+    "completedTab": "Completed",
     "markCompleted": "Mark as Completed",
     "markPending": "Mark as Pending",
     "personToBeInterviewed": "Person to be Interviewed",

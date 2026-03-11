@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useFirebase } from '@/firebase';
@@ -22,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreHorizontal } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ensureDate } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type InterviewFormValues = z.infer<typeof interviewSchema>;
 
@@ -177,6 +179,9 @@ export default function InterviewsPage() {
     return url.toString();
   }
 
+  const pendingInterviews = useMemo(() => interviews.filter(i => i.status === 'pending'), [interviews]);
+  const completedInterviews = useMemo(() => interviews.filter(i => i.status === 'completed'), [interviews]);
+
   const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: openDeleteConfirmation, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [interviews, t, addedToCalendar]);
 
   const dialogTitle = editingInterview ? t('interviews.editInterview') : t('interviews.createNewInterview');
@@ -186,9 +191,9 @@ export default function InterviewsPage() {
     scheduledTime: format(ensureDate(editingInterview.scheduledDate), 'HH:mm'),
   } : undefined;
 
-  const renderMobileInterviews = () => (
+  const renderMobileInterviews = (filteredList: Interview[]) => (
     <div className="space-y-4">
-      {interviews.map(interview => {
+      {filteredList.map(interview => {
         const isAdded = addedToCalendar.includes(interview.id);
         return (
         <Card key={interview.id} className='flex flex-col'>
@@ -296,10 +301,23 @@ export default function InterviewsPage() {
             <Skeleton className="h-10 w-1/3" />
             <Skeleton className="h-40 w-full" />
          </div>
-      ) : isMobile ? (
-        renderMobileInterviews()
       ) : (
-        <DataTable columns={tableColumns} data={interviews} t={t} />
+        <Tabs defaultValue="pending" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="pending">
+              {t('interviews.pendingTab')} ({pendingInterviews.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              {t('interviews.completedTab')} ({completedInterviews.length})
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="pending" className="mt-6">
+            {isMobile ? renderMobileInterviews(pendingInterviews) : <DataTable columns={tableColumns} data={pendingInterviews} t={t} />}
+          </TabsContent>
+          <TabsContent value="completed" className="mt-6">
+            {isMobile ? renderMobileInterviews(completedInterviews) : <DataTable columns={tableColumns} data={completedInterviews} t={t} />}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
