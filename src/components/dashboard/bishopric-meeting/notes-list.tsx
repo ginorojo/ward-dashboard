@@ -1,4 +1,3 @@
-
 'use client';
 import { MeetingNote } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -6,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { ensureDate } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 
@@ -52,17 +51,17 @@ export default function NotesList({ notes, onEditNote, onDeleteNote, t }: NotesL
                           <Pencil className="mr-2 h-4 w-4" />
                           {t('common.edit')}
                         </DropdownMenuItem>
-                        <DropdownMenuItem className="text-destructive" asChild>
-                          <div className="flex items-center w-full px-2 py-1.5 text-sm">
+                        <AlertDialogTrigger asChild>
+                          <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>
                             <Trash2 className="mr-2 h-4 w-4" />
                             <span>{t('common.delete')}</span>
-                          </div>
-                        </DropdownMenuItem>
+                          </DropdownMenuItem>
+                        </AlertDialogTrigger>
                       </DropdownMenuContent>
                     </DropdownMenu>
                     <AlertDialogContent>
                           <AlertDialogHeader>
-                              <AlertDialogTitle>{t('common.delete')} Note?</AlertDialogTitle>
+                              <AlertDialogTitle>{t('common.delete')} {t('bishopricMeeting.meetingNotes')}?</AlertDialogTitle>
                               <AlertDialogDescription>
                               {t('bishopricMeeting.deleteNoteConfirm')}
                               </AlertDialogDescription>

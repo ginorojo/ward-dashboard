@@ -1,4 +1,3 @@
-
 'use client';
 import { useState, useEffect } from 'react';
 import { useFirebase } from '@/firebase';
@@ -75,7 +74,7 @@ export default function MeetingNotesPage() {
     try {
       await deleteMeetingNote(firestore, noteId, user.uid);
       toast({ title: t('common.success'), description: t('bishopricMeeting.noteDeleted') });
-      setNotes(notes.filter(n => n.id !== noteId));
+      setNotes(prevNotes => prevNotes.filter(n => n.id !== noteId));
     } catch (error) {
       toast({ variant: 'destructive', title: t('common.error'), description: 'Failed to delete note.' });
     }
@@ -111,13 +110,13 @@ export default function MeetingNotesPage() {
                     <DropdownMenuItem onClick={() => handleEditNote(note)}>{t('common.edit')}</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <AlertDialogTrigger asChild>
-                      <DropdownMenuItem className="text-destructive">{t('common.delete')}</DropdownMenuItem>
+                      <DropdownMenuItem className="text-destructive" onSelect={(e) => e.preventDefault()}>{t('common.delete')}</DropdownMenuItem>
                     </AlertDialogTrigger>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{t('common.delete')} Note?</AlertDialogTitle>
+                    <AlertDialogTitle>{t('common.delete')} {t('bishopricMeeting.meetingNotes')}?</AlertDialogTitle>
                     <AlertDialogDescription>{t('bishopricMeeting.deleteNoteConfirm')}</AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
