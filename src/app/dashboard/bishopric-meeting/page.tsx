@@ -147,7 +147,10 @@ export default function MeetingNotesPage() {
       </div>
 
       <Dialog open={isFormOpen} onOpenChange={(isOpen) => { setIsFormOpen(isOpen); if (!isOpen) setEditingNote(null); }}>
-          <DialogContent>
+          <DialogContent 
+            onPointerDownOutside={(e) => e.preventDefault()} 
+            onEscapeKeyDown={(e) => e.preventDefault()}
+          >
             <DialogHeader>
               <DialogTitle>{editingNote ? t('bishopricMeeting.editNote') : t('bishopricMeeting.createNewNote')}</DialogTitle>
               <DialogDescription className="sr-only">Form to create or edit a meeting note.</DialogDescription>
