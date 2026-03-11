@@ -95,7 +95,7 @@ export const updateDocument = async <T>(firestore: Firestore, collectionName: st
         updatedAt: serverTimestamp(),
     };
 
-    updateDoc(docRef, updateData)
+    await updateDoc(docRef, updateData)
       .catch(serverError => {
           const permissionError = new FirestorePermissionError({
               path: docRef.path,
@@ -103,6 +103,7 @@ export const updateDocument = async <T>(firestore: Firestore, collectionName: st
               requestResourceData: updateData,
           });
           errorEmitter.emit('permission-error', permissionError);
+          throw serverError;
       });
       
     await logAction(firestore, userId, 'update', entityName, id, JSON.stringify(data));
@@ -110,13 +111,14 @@ export const updateDocument = async <T>(firestore: Firestore, collectionName: st
 
 export const deleteDocument = async (firestore: Firestore, collectionName: string, id: string, userId: string, entityName: string) => {
     const docRef = doc(firestore, collectionName, id);
-    deleteDoc(docRef)
+    await deleteDoc(docRef)
       .catch(serverError => {
           const permissionError = new FirestorePermissionError({
               path: docRef.path,
               operation: 'delete',
           });
           errorEmitter.emit('permission-error', permissionError);
+          throw serverError;
       });
 
     await logAction(firestore, userId, 'delete', entityName, id);
@@ -129,7 +131,7 @@ export const getUsers = async (firestore: Firestore): Promise<UserProfile[]> => 
   return querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as UserProfile));
 };
 
-export const updateUserProfile = (firestore: Firestore, uid: string, data: Partial<UserProfile>): Promise<void> => {
+export const updateUserProfile = async (firestore: Firestore, uid: string, data: Partial<UserProfile>): Promise<void> => {
   const userRef = doc(firestore, 'users', uid);
   const updateData = { ...data, updatedAt: serverTimestamp() };
   return updateDoc(userRef, updateData)
@@ -144,7 +146,7 @@ export const updateUserProfile = (firestore: Firestore, uid: string, data: Parti
     });
 };
 
-export const deleteUser = (firestore: Firestore, uid: string): Promise<void> => {
+export const deleteUser = async (firestore: Firestore, uid: string): Promise<void> => {
     const userRef = doc(firestore, 'users', uid);
     return deleteDoc(userRef).catch(serverError => {
         const permissionError = new FirestorePermissionError({
