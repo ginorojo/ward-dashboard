@@ -126,6 +126,8 @@
     "fillFormToAdd": "Fill form to add to calendar",
     "pending": "Pending",
     "completed": "Completed",
+    "pendingTab": "Pending",
+    "completedTab": "Completed",
     "markCompleted": "Mark as Completed",
     "markPending": "Mark as Pending",
     "selectStatus": "Select status"

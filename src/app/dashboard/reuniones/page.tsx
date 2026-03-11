@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useFirebase } from '@/firebase';
@@ -22,6 +23,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSepara
 import { MoreHorizontal } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ensureDate } from '@/lib/utils';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 type ReunionFormValues = z.infer<typeof reunionSchema>;
 
@@ -183,6 +185,9 @@ export default function ReunionesPage() {
     return url.toString();
   }
 
+  const pendingReuniones = useMemo(() => reuniones.filter(r => r.status === 'pending'), [reuniones]);
+  const completedReuniones = useMemo(() => reuniones.filter(r => r.status === 'completed'), [reuniones]);
+
   const tableColumns = useMemo(() => columns({ openEditForm, handleDelete: openDeleteConfirmation, handleStatusToggle, createGoogleCalendarLink, t, addedToCalendar, onAddToCalendar: handleAddToCalendar }), [reuniones, t, addedToCalendar]);
 
   const dialogTitle = editingReunion ? t('reuniones.editReunion') : t('reuniones.createNewReunion');
@@ -200,9 +205,9 @@ export default function ReunionesPage() {
     status: 'pending',
   };
 
-  const renderMobileReuniones = () => (
+  const renderMobileReuniones = (filteredList: Reunion[]) => (
     <div className="space-y-4">
-      {reuniones.map(reunion => {
+      {filteredList.map(reunion => {
         const isAdded = addedToCalendar.includes(reunion.id);
         return (
         <Card key={reunion.id} className="flex flex-col">
@@ -310,10 +315,23 @@ export default function ReunionesPage() {
             <Skeleton className="h-10 w-1/3" />
             <Skeleton className="h-40 w-full" />
          </div>
-      ) : isMobile ? (
-        renderMobileReuniones()
       ) : (
-        <DataTable columns={tableColumns} data={reuniones} t={t} />
+        <Tabs defaultValue="pending" className="w-full">
+          <TabsList className="grid w-full grid-cols-2 max-w-md">
+            <TabsTrigger value="pending">
+              {t('reuniones.pendingTab')} ({pendingReuniones.length})
+            </TabsTrigger>
+            <TabsTrigger value="completed">
+              {t('reuniones.completedTab')} ({completedReuniones.length})
+            </TabsTrigger>
+          </TabsList>
+          <TabsContent value="pending" className="mt-6">
+            {isMobile ? renderMobileReuniones(pendingReuniones) : <DataTable columns={tableColumns} data={pendingReuniones} t={t} />}
+          </TabsContent>
+          <TabsContent value="completed" className="mt-6">
+            {isMobile ? renderMobileReuniones(completedReuniones) : <DataTable columns={tableColumns} data={completedReuniones} t={t} />}
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
