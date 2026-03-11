@@ -22,16 +22,20 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
   const [language, setLanguage] = useState<Language>('es');
 
   useEffect(() => {
-    const storedLang = localStorage.getItem('language') as Language;
-    if (storedLang && ['en', 'es'].includes(storedLang)) {
-      setLanguage(storedLang);
+    if (typeof window !== 'undefined') {
+      const storedLang = localStorage.getItem('language') as Language;
+      if (storedLang && ['en', 'es'].includes(storedLang)) {
+        setLanguage(storedLang);
+      }
     }
   }, []);
 
   const value = {
     language,
     setLanguage: (lang: Language) => {
-      localStorage.setItem('language', lang);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('language', lang);
+      }
       setLanguage(lang);
     },
   };
