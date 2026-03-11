@@ -1,3 +1,4 @@
+
 'use client';
 import { useState, useEffect, useMemo } from 'react';
 import { useFirebase, useUser } from '@/firebase';
@@ -19,7 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { errorEmitter, FirestorePermissionError } from '@/firebase';
@@ -38,6 +39,11 @@ export default function UsersPage() {
   const { t } = useTranslation();
   const isMobile = useIsMobile();
   const [editingUser, setEditingUser] = useState<UserProfile | null>(null);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchUsers = async () => {
     if (!firestore || !authUser) return;
@@ -62,8 +68,10 @@ export default function UsersPage() {
   };
 
   useEffect(() => {
-    fetchUsers();
-  }, [firestore, authUser]);
+    if (isMounted) {
+      fetchUsers();
+    }
+  }, [firestore, authUser, isMounted]);
 
   const handleCreateUser = async (data: UserFormValues) => {
     if (!authUser || !firestore || !auth) return;
@@ -176,6 +184,9 @@ export default function UsersPage() {
     <div className="space-y-4">
       {users.map(user => {
         const isCurrentUser = currentUser?.uid === user.uid;
+        const roleStr = user.role || '';
+        const roleLabel = roleStr ? roleStr.charAt(0).toUpperCase() + roleStr.slice(1) : '';
+        
         return (
             <AlertDialog key={user.uid}>
               <Card>
@@ -209,7 +220,7 @@ export default function UsersPage() {
                   <div className="flex items-center justify-between gap-4">
                     <div>
                       <p className="font-semibold">{t('common.role')}</p>
-                      <Badge variant="secondary" className="capitalize mt-1">{t(`users.role${user.role.charAt(0).toUpperCase() + user.role.slice(1)}`)}</Badge>
+                      <Badge variant="secondary" className="capitalize mt-1">{t(`users.role${roleLabel}`)}</Badge>
                     </div>
                     <div>
                       <p className="font-semibold">{t('common.status')}</p>
@@ -241,6 +252,10 @@ export default function UsersPage() {
       })}
     </div>
   );
+
+  if (!isMounted) {
+    return <Skeleton className="h-96 w-full" />;
+  }
 
   return (
     <div className="space-y-8">

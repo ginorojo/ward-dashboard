@@ -1,3 +1,4 @@
+
 'use client';
 import { ColumnDef } from '@tanstack/react-table';
 import { UserProfile } from '@/lib/types';
@@ -63,16 +64,15 @@ export const columns = ({
   {
     accessorKey: 'role',
     header: t('common.role'),
-    cell: ({ row }) => (
-      <Badge variant="secondary" className="capitalize">
-        {t(
-          `users.role${
-            (row.getValue('role') as string).charAt(0).toUpperCase() +
-            (row.getValue('role') as string).slice(1)
-          }`
-        )}
-      </Badge>
-    ),
+    cell: ({ row }) => {
+      const role = row.getValue('role') as string;
+      const roleLabel = role ? role.charAt(0).toUpperCase() + role.slice(1) : '';
+      return (
+        <Badge variant="secondary" className="capitalize">
+          {t(`users.role${roleLabel}`)}
+        </Badge>
+      );
+    },
   },
   {
     accessorKey: 'isActive',

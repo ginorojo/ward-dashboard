@@ -1,3 +1,4 @@
+
 {
   "common": {
     "save": "Save",
@@ -52,6 +53,7 @@
     "deleteUserConfirm": "This action cannot be undone. This will permanently deactivate the user's account and remove their data from our servers.",
     "continue": "Continue",
     "fullName": "Full Name",
+    "roleAdministrator": "Administrator",
     "roleBishop": "Bishop",
     "roleCounselor": "Counselor",
     "roleSecretary": "Secretary",
@@ -219,7 +221,11 @@
     "passwordUpdated": "Your password has been updated successfully.",
     "passwordUpdateFailed": "Failed to update password. You may need to sign in again to perform this operation.",
     "notAuthenticated": "You are not authenticated.",
-    "requiresRecentLogin": "This is a sensitive action and requires you to have signed in recently. Please log out and sign back in before trying again."
+    "requiresRecentLogin": "This is a sensitive action and requires you to have signed in recently. Please log out and sign back in before trying again.",
+    "profileDescription": "View and manage your personal information.",
+    "editProfile": "Edit Profile",
+    "profileUpdated": "Your profile has been updated successfully.",
+    "profileUpdateFailed": "Failed to update profile."
   },
   "auth": {
     "loginTitle": "Ward Dashboard",

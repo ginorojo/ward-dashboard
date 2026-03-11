@@ -1,3 +1,4 @@
+
 {
   "common": {
     "save": "Guardar",
@@ -52,6 +53,7 @@
     "deleteUserConfirm": "Esta acción no se puede deshacer. Esto desactivará permanentemente la cuenta del usuario y eliminará sus datos de nuestros servidores.",
     "continue": "Continuar",
     "fullName": "Nombre Completo",
+    "roleAdministrator": "Administrador",
     "roleBishop": "Obispo",
     "roleCounselor": "Consejero",
     "roleSecretary": "Secretario",
@@ -219,7 +221,11 @@
     "passwordUpdated": "Tu contraseña se ha actualizado con éxito.",
     "passwordUpdateFailed": "Error al actualizar la contraseña. Es posible que debas iniciar sesión de nuevo para realizar esta operación.",
     "notAuthenticated": "No estás autenticado.",
-    "requiresRecentLogin": "Esta es una acción sensible y requiere que hayas iniciado sesión recientemente. Por favor, cierra sesión y vuelve a iniciarla antes de intentarlo de nuevo."
+    "requiresRecentLogin": "Esta es una acción sensible y requiere que hayas iniciado sesión recientemente. Por favor, cierra sesión y vuelve a iniciarla antes de intentarlo de nuevo.",
+    "profileDescription": "Ve y gestiona tu información personal.",
+    "editProfile": "Editar Perfil",
+    "profileUpdated": "Tu perfil ha sido actualizado con éxito.",
+    "profileUpdateFailed": "Error al actualizar el perfil."
   },
   "auth": {
     "loginTitle": "Panel de Barrio",
