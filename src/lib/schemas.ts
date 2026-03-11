@@ -1,3 +1,4 @@
+
 import { z } from 'zod';
 
 export const loginSchema = z.object({
@@ -37,11 +38,14 @@ export const reunionSchema = z.object({
   status: z.enum(['pending', 'completed']),
 });
 
-export const bishopricNoteSchema = z.object({
-  date: z.date(),
-  content: z.string().min(10, { message: 'Note content must be at least 10 characters' }),
-  meetingId: z.string()
+export const meetingNoteSchema = z.object({
+  date: z.date({ required_error: "La fecha es requerida" }),
+  type: z.string({ required_error: "El tipo de reunión es requerido" }),
+  otherType: z.string().optional(),
+  content: z.string().min(1, { message: 'El contenido no puede estar vacío' }),
 });
+
+export const bishopricNoteSchema = meetingNoteSchema; // Compatibility
 
 export const sacramentMeetingSchema = z.object({
     date: z.date({ required_error: "La fecha es requerida" }),

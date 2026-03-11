@@ -1,3 +1,4 @@
+
 import type { Timestamp } from 'firebase/firestore';
 
 export type UserRole = 'administrator' | 'bishop' | 'counselor' | 'secretary';
@@ -37,23 +38,19 @@ export interface Reunion {
   updatedAt: Timestamp;
 }
 
-export interface BishopricMeetingNote {
+export interface MeetingNote {
   id: string;
   date: Timestamp;
+  type: string;
+  otherType?: string;
   content: string;
   createdBy: string;
   updatedBy: string;
   createdAt: Timestamp;
   updatedAt: Timestamp;
-  meetingId: string;
 }
 
-export interface BishopricMeeting {
-    id: string;
-    date: Timestamp;
-    createdBy: string;
-    createdAt: Timestamp;
-}
+export interface BishopricMeetingNote extends MeetingNote {} // Backwards compatibility for now
 
 export interface AsuntoBarrio {
   id: string;
@@ -98,5 +95,3 @@ export interface Log {
     timestamp: Timestamp;
     details: string;
 }
-
-    

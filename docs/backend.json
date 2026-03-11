@@ -1,3 +1,4 @@
+
 {
   "entities": {
     "User": {
@@ -46,6 +47,41 @@
         "createdBy",
         "isActive"
       ]
+    },
+    "MeetingNote": {
+      "$schema": "http://json-schema.org/draft-07/schema#",
+      "title": "MeetingNote",
+      "type": "object",
+      "description": "Represents a note taken during a meeting.",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for the note."
+        },
+        "date": {
+          "type": "number",
+          "description": "Timestamp of the meeting date."
+        },
+        "type": {
+          "type": "string",
+          "description": "Type of meeting (e.g., bishopric, ward_council, other)."
+        },
+        "otherType": {
+          "type": "string",
+          "description": "Specific type if 'other' is selected."
+        },
+        "content": {
+          "type": "string",
+          "description": "Content of the note."
+        },
+        "createdBy": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "number"
+        }
+      },
+      "required": ["id", "date", "type", "content", "createdBy", "createdAt"]
     },
     "Interview": {
       "$schema": "http://json-schema.org/draft-07/schema#",
@@ -102,86 +138,6 @@
         "interviewer",
         "purpose",
         "status",
-        "createdBy",
-        "updatedBy",
-        "createdAt",
-        "updatedAt"
-      ]
-    },
-    "BishopricMeeting": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "BishopricMeeting",
-      "type": "object",
-      "description": "Represents a bishopric meeting.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the bishopric meeting. (Primary Key)"
-        },
-        "date": {
-          "type": "number",
-          "description": "Timestamp of the bishopric meeting date."
-        },
-        "createdBy": {
-          "type": "string",
-          "description": "Reference to User who created this meeting. (Relationship: User 1:N BishopricMeeting)"
-        },
-        "createdAt": {
-          "type": "number",
-          "description": "Timestamp of when the bishopric meeting record was created."
-        }
-      },
-      "required": [
-        "id",
-        "date",
-        "createdBy",
-        "createdAt"
-      ]
-    },
-    "Note": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "Note",
-      "type": "object",
-      "description": "Represents a note taken during a bishopric meeting.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the note. (Primary Key)"
-        },
-        "bishopricMeetingId": {
-          "type": "string",
-          "description": "Reference to BishopricMeeting this note belongs to. (Relationship: BishopricMeeting 1:N Note)"
-        },
-        "date": {
-          "type": "number",
-          "description": "Timestamp of the note date."
-        },
-        "content": {
-          "type": "string",
-          "description": "Content of the note."
-        },
-        "createdBy": {
-          "type": "string",
-          "description": "Reference to User who created this note. (Relationship: User 1:N Note)"
-        },
-        "updatedBy": {
-          "type": "string",
-          "description": "Reference to User who last updated this note. (Relationship: User 1:N Note)"
-        },
-        "createdAt": {
-          "type": "number",
-          "description": "Timestamp of when the note record was created."
-        },
-        "updatedAt": {
-          "type": "number",
-          "description": "Timestamp of when the note record was last updated."
-        }
-      },
-      "required": [
-        "id",
-        "bishopricMeetingId",
-        "date",
-        "content",
         "createdBy",
         "updatedBy",
         "createdAt",
@@ -284,47 +240,6 @@
         "updatedBy",
         "createdAt",
         "updatedAt"
-      ]
-    },
-    "AsuntoBarrio": {
-      "$schema": "http://json-schema.org/draft-07/schema#",
-      "title": "AsuntoBarrio",
-      "type": "object",
-      "description": "Represents an asunto del barrio (ward business item) in a sacrament meeting agenda.",
-      "properties": {
-        "id": {
-          "type": "string",
-          "description": "Unique identifier for the asunto del barrio. (Primary Key)"
-        },
-        "sacramentMeetingId": {
-          "type": "string",
-          "description": "Reference to SacramentMeeting this item belongs to. (Relationship: SacramentMeeting 1:N AsuntoBarrio)"
-        },
-        "type": {
-          "type": "string",
-          "description": "Type of asunto (relevo or sostenimiento).",
-          "format": "enum"
-        },
-        "personName": {
-          "type": "string",
-          "description": "Name of the person involved in the asunto."
-        },
-        "calling": {
-          "type": "string",
-          "description": "The calling of the person involved."
-        },
-        "createdAt": {
-          "type": "number",
-          "description": "Timestamp of when the asunto record was created."
-        }
-      },
-      "required": [
-        "id",
-        "sacramentMeetingId",
-        "type",
-        "personName",
-        "calling",
-        "createdAt"
       ]
     },
     "Log": {
@@ -448,7 +363,7 @@
           "schema": {
             "$ref": "#/backend/entities/User"
           },
-          "description": "Stores user profile information. User role determines access to other collections. Access to other collections is defined in security rules based on the user's authentication and role.",
+          "description": "Stores user profile information.",
           "params": [
             {
               "name": "userId",
@@ -464,7 +379,7 @@
           "schema": {
             "$ref": "#/backend/entities/Interview"
           },
-          "description": "Stores interview records. All authenticated users have full CRUD permissions.",
+          "description": "Stores interview records.",
           "params": [
             {
               "name": "interviewId",
@@ -474,34 +389,14 @@
         }
       },
       {
-        "path": "/bishopricMeetings/{meetingId}",
+        "path": "/meetingNotes/{noteId}",
         "definition": {
-          "entityName": "BishopricMeeting",
+          "entityName": "MeetingNote",
           "schema": {
-            "$ref": "#/backend/entities/BishopricMeeting"
+            "$ref": "#/backend/entities/MeetingNote"
           },
-          "description": "Stores bishopric meeting records. All authenticated users have full CRUD permissions.",
+          "description": "Stores meeting notes from various types of meetings.",
           "params": [
-            {
-              "name": "meetingId",
-              "description": "Unique identifier for the bishopric meeting."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/bishopricMeetings/{meetingId}/notes/{noteId}",
-        "definition": {
-          "entityName": "Note",
-          "schema": {
-            "$ref": "#/backend/entities/Note"
-          },
-          "description": "Stores notes associated with a bishopric meeting. All authenticated users have full CRUD permissions.",
-          "params": [
-            {
-              "name": "meetingId",
-              "description": "Unique identifier for the parent bishopric meeting."
-            },
             {
               "name": "noteId",
               "description": "Unique identifier for the note."
@@ -516,31 +411,11 @@
           "schema": {
             "$ref": "#/backend/entities/SacramentMeeting"
           },
-          "description": "Stores sacrament meeting agenda records. All authenticated users have full CRUD permissions.",
+          "description": "Stores sacrament meeting agenda records.",
           "params": [
             {
               "name": "meetingId",
               "description": "Unique identifier for the sacrament meeting."
-            }
-          ]
-        }
-      },
-      {
-        "path": "/sacramentMeetings/{meetingId}/asuntosBarrio/{asuntoId}",
-        "definition": {
-          "entityName": "AsuntoBarrio",
-          "schema": {
-            "$ref": "#/backend/entities/AsuntoBarrio"
-          },
-          "description": "Stores asuntos del barrio associated with a sacrament meeting. All authenticated users have full CRUD permissions.",
-          "params": [
-            {
-              "name": "meetingId",
-              "description": "Unique identifier for the parent sacrament meeting."
-            },
-            {
-              "name": "asuntoId",
-              "description": "Unique identifier for the asunto del barrio."
             }
           ]
         }
@@ -552,7 +427,7 @@
           "schema": {
             "$ref": "#/backend/entities/Log"
           },
-          "description": "Stores logs of user actions.  Only allows create operations from the client. Read, update, and delete are disallowed.",
+          "description": "Stores logs of user actions.",
           "params": [
             {
               "name": "logId",
@@ -568,7 +443,7 @@
           "schema": {
             "$ref": "#/backend/entities/Reunion"
           },
-          "description": "Stores scheduled meetings (reuniones). All authenticated users have full CRUD permissions.",
+          "description": "Stores scheduled meetings.",
           "params": [
             {
               "name": "reunionId",
@@ -577,8 +452,6 @@
           ]
         }
       }
-    ],
-    "reasoning": "The Firestore data structure is designed to support a role-based access control system for a Ward Dashboard application, focusing on authorization independence, clarity, and scalability.  \n\nAuthorization Independence:  The structure uses path-based ownership for user-related data and avoids `get()` calls in security rules by denormalizing user roles.  For instance, access to interviews is not dependent on reading the user document; every role can `CRUD` interviews. This strategy ensures atomic operations and simplifies security rule logic. User roles are implicitly managed by the user's document itself, enabling a more robust security posture.\n\nStructural Segregation: The segregation principle is achieved through the separation of user data and other application entities into distinct collections.  User profiles are stored in `/users/{userId}`, while interviews are stored in the `/interviews/{interviewId}` collection, bishopric meetings in `/bishopricMeetings/{meetingId}`. Subcollections like `/bishopricMeetings/{meetingId}/notes/{noteId}` further refine access control and data organization. This segregation ensures that security rules are applied uniformly within each collection or subcollection.\n\nAccess Modeling:  Path-based ownership is utilized for user data (`/users/{userId}`). Collaborative data, such as interviews and sacrament meetings, are managed at the root level, since every role can `CRUD` them.\n\nQAPs Support:  The structure supports Query as Properties (QAPs) by enabling secure `list` operations.  The use of distinct collections for different data types with consistent security requirements allows for efficient and secure querying without exposing sensitive data.  The flat structure of the `/interviews` and `/sacramentMeetings` collections with open `CRUD` permissions (for all authenticated users) simplifies queries related to those entities."
+    ]
   }
 }
-    

@@ -1,3 +1,4 @@
+
 import {
   addDoc,
   collection,
@@ -14,7 +15,7 @@ import {
   Firestore,
   SetOptions
 } from 'firebase/firestore';
-import type { UserProfile, Log, Interview, BishopricMeetingNote, SacramentMeeting, AsuntoBarrio } from '../types';
+import type { UserProfile, Log, Interview, MeetingNote, SacramentMeeting, AsuntoBarrio } from '../types';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
 
@@ -46,7 +47,7 @@ export const logAction = async (
     });
 };
 
-// Generic Firestore Functions for Reads (can still throw if rules disallow reads)
+// Generic Firestore Functions for Reads
 export const getCollection = async <T>(firestore: Firestore, collectionName: string, order?: {field: string, direction?: "asc" | "desc"}): Promise<T[]> => {
     const collRef = collection(firestore, collectionName);
     const q = order ? query(collRef, orderBy(order.field, order.direction || 'desc')) : collRef;
@@ -61,7 +62,7 @@ export const getDocument = async <T>(firestore: Firestore, collectionName: strin
 };
 
 
-// Non-blocking Firestore Write Operations with Contextual Error Handling
+// Non-blocking Firestore Write Operations
 export const addDocument = async <T>(firestore: Firestore, collectionName: string, data: T, userId: string, entityName: string): Promise<string> => {
     const docData = {
         ...data,
@@ -79,7 +80,7 @@ export const addDocument = async <T>(firestore: Firestore, collectionName: strin
             requestResourceData: docData,
         });
         errorEmitter.emit('permission-error', permissionError);
-        throw serverError; // Re-throw to allow component-level handling if needed
+        throw serverError;
       });
       
     await logAction(firestore, userId, 'create', entityName, docRef.id, JSON.stringify(data));
@@ -122,7 +123,7 @@ export const deleteDocument = async (firestore: Firestore, collectionName: strin
 };
 
 
-// User Management (Read operations are async, write is non-blocking)
+// User Management
 export const getUsers = async (firestore: Firestore): Promise<UserProfile[]> => {
   const querySnapshot = await getDocs(collection(firestore, 'users'));
   return querySnapshot.docs.map(doc => ({ ...doc.data(), uid: doc.id } as UserProfile));
@@ -131,7 +132,7 @@ export const getUsers = async (firestore: Firestore): Promise<UserProfile[]> => 
 export const updateUserProfile = (firestore: Firestore, uid: string, data: Partial<UserProfile>): Promise<void> => {
   const userRef = doc(firestore, 'users', uid);
   const updateData = { ...data, updatedAt: serverTimestamp() };
-  return updateDoc(userRef, updateData) // return the promise
+  return updateDoc(userRef, updateData)
     .catch(serverError => {
       const permissionError = new FirestorePermissionError({
         path: userRef.path,
@@ -139,7 +140,7 @@ export const updateUserProfile = (firestore: Firestore, uid: string, data: Parti
         requestResourceData: updateData
       });
       errorEmitter.emit('permission-error', permissionError);
-      throw serverError; // Re-throw to be caught by the caller
+      throw serverError;
     });
 };
 
@@ -155,72 +156,19 @@ export const deleteUser = (firestore: Firestore, uid: string): Promise<void> => 
     });
 };
 
-
-// Specific for Bishopric Meeting Notes (subcollection)
-export const getNotesForMeeting = async (firestore: Firestore, meetingId: string): Promise<BishopricMeetingNote[]> => {
-  const notesRef = collection(firestore, `bishopricMeetings/${meetingId}/notes`);
-  const q = query(notesRef, orderBy('date', 'desc'));
-  const snapshot = await getDocs(q);
-  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data(), meetingId } as BishopricMeetingNote));
+// Meeting Notes Specific
+export const getMeetingNotes = async (firestore: Firestore): Promise<MeetingNote[]> => {
+  return getCollection<MeetingNote>(firestore, 'meetingNotes', { field: 'date', direction: 'desc' });
 };
 
-export const addNoteToMeeting = async (firestore: Firestore, meetingId: string, data: Omit<BishopricMeetingNote, 'id' | 'createdAt' | 'updatedAt' | 'meetingId'>, userId: string) => {
-  const notesRef = collection(firestore, `bishopricMeetings/${meetingId}/notes`);
-  const noteData = {
-    ...data,
-    createdBy: userId,
-    createdAt: serverTimestamp(),
-    updatedBy: userId,
-    updatedAt: serverTimestamp(),
-  };
-  
-  const noteRef = await addDoc(notesRef, noteData)
-    .catch(serverError => {
-        const permissionError = new FirestorePermissionError({
-            path: notesRef.path,
-            operation: 'create',
-            requestResourceData: noteData,
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        throw serverError;
-    });
-
-  await logAction(firestore, userId, 'create', 'bishopricNote', noteRef.id, `MeetingID: ${meetingId}`);
-  return noteRef.id;
+export const saveMeetingNote = async (firestore: Firestore, data: any, userId: string, id?: string) => {
+  if (id) {
+    return updateDocument(firestore, 'meetingNotes', id, data, userId, 'meetingNote');
+  } else {
+    return addDocument(firestore, 'meetingNotes', data, userId, 'meetingNote');
+  }
 };
 
-export const updateNoteInMeeting = (firestore: Firestore, meetingId: string, noteId: string, data: Partial<BishopricMeetingNote>, userId: string) => {
-  const noteRef = doc(firestore, `bishopricMeetings/${meetingId}/notes`, noteId);
-  const noteData = {
-    ...data,
-    updatedBy: userId,
-    updatedAt: serverTimestamp(),
-  };
-
-  updateDoc(noteRef, noteData)
-    .catch(serverError => {
-      const permissionError = new FirestorePermissionError({
-        path: noteRef.path,
-        operation: 'update',
-        requestResourceData: noteData
-      });
-      errorEmitter.emit('permission-error', permissionError);
-    });
-
-  logAction(firestore, userId, 'update', 'bishopricNote', noteId, `MeetingID: ${meetingId}`);
+export const deleteMeetingNote = async (firestore: Firestore, id: string, userId: string) => {
+  return deleteDocument(firestore, 'meetingNotes', id, userId, 'meetingNote');
 };
-
-export const deleteNoteFromMeeting = (firestore: Firestore, meetingId: string, noteId: string, userId: string) => {
-  const noteRef = doc(firestore, `bishopricMeetings/${meetingId}/notes`, noteId);
-  deleteDoc(noteRef)
-    .catch(serverError => {
-      const permissionError = new FirestorePermissionError({
-          path: noteRef.path,
-          operation: 'delete'
-      });
-      errorEmitter.emit('permission-error', permissionError);
-    });
-  logAction(firestore, userId, 'delete', 'bishopricNote', noteId, `MeetingID: ${meetingId}`);
-};
-
-    

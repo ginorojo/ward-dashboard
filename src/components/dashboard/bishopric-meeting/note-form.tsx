@@ -1,8 +1,9 @@
+
 'use client';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { bishopricNoteSchema } from '@/lib/schemas';
+import { meetingNoteSchema } from '@/lib/schemas';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -14,8 +15,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { useState, useEffect } from 'react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-type NoteFormValues = z.infer<typeof bishopricNoteSchema>;
+type NoteFormValues = z.infer<typeof meetingNoteSchema>;
 
 interface NoteFormProps {
   onSubmit: (data: NoteFormValues) => Promise<void>;
@@ -32,18 +34,20 @@ export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) 
     }, []);
 
   const form = useForm<NoteFormValues>({
-    resolver: zodResolver(bishopricNoteSchema),
+    resolver: zodResolver(meetingNoteSchema),
     defaultValues: defaultValues || {
       date: new Date(),
+      type: 'bishopric',
+      otherType: '',
       content: '',
-      meetingId: '',
     },
   });
 
-  const { isSubmitting } = form.formState;
+  const { isSubmitting, watch } = form.formState;
+  const selectedType = form.watch('type');
   
   if (!isClient) {
-    return null; // Or a loading skeleton
+    return null;
   }
 
   return (
@@ -97,6 +101,46 @@ export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) 
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name="type"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>{t('bishopricMeeting.noteType')}</FormLabel>
+              <Select onValueChange={field.onChange} defaultValue={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder={t('bishopricMeeting.selectType')} />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  <SelectItem value="bishopric">{t('bishopricMeeting.type_bishopric')}</SelectItem>
+                  <SelectItem value="ward_council">{t('bishopricMeeting.type_ward_council')}</SelectItem>
+                  <SelectItem value="other">{t('bishopricMeeting.type_other')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {selectedType === 'other' && (
+          <FormField
+            control={form.control}
+            name="otherType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>{t('bishopricMeeting.specifyOther')}</FormLabel>
+                <FormControl>
+                  <Input placeholder={t('bishopricMeeting.specifyOther')} {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         <FormField
           control={form.control}
           name="content"
@@ -112,7 +156,7 @@ export default function NoteForm({ onSubmit, defaultValues, t }: NoteFormProps) 
         />
         <Button type="submit" className="w-full" disabled={isSubmitting}>
           {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-          {defaultValues?.content ? t('users.saveChanges') : t('common.create')}
+          {defaultValues?.content ? t('common.save') : t('common.create')}
         </Button>
       </form>
     </Form>

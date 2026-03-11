@@ -1,21 +1,28 @@
+
 'use client';
-import { BishopricMeetingNote } from '@/lib/types';
+import { MeetingNote } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
 import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ensureDate } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 interface NotesListProps {
-  notes: BishopricMeetingNote[];
-  onEditNote: (note: BishopricMeetingNote) => void;
+  notes: MeetingNote[];
+  onEditNote: (note: MeetingNote) => void;
   onDeleteNote: (noteId: string) => void;
   t: (key: string) => string;
 }
 
 export default function NotesList({ notes, onEditNote, onDeleteNote, t }: NotesListProps) {
+
+  const getNoteTypeLabel = (note: MeetingNote) => {
+    if (note.type === 'other') return note.otherType || t('bishopricMeeting.type_other');
+    return t(`bishopricMeeting.type_${note.type}`);
+  };
 
   return (
     <Card>
@@ -25,7 +32,12 @@ export default function NotesList({ notes, onEditNote, onDeleteNote, t }: NotesL
             <div key={note.id} className={`p-4 ${index < notes.length - 1 ? 'border-b' : ''}`}>
               <div className="flex justify-between items-start gap-4">
                 <div className='flex-1'>
-                  <p className="text-sm text-muted-foreground">{format(ensureDate(note.date), 'PPP')}</p>
+                  <div className="flex items-center gap-2 mb-1">
+                    <p className="text-sm font-semibold text-muted-foreground">{format(ensureDate(note.date), 'PPP')}</p>
+                    <Badge variant="secondary" className="text-[10px] uppercase">
+                      {getNoteTypeLabel(note)}
+                    </Badge>
+                  </div>
                   <p className="mt-2 whitespace-pre-wrap">{note.content}</p>
                 </div>
                  <AlertDialog>
@@ -40,12 +52,12 @@ export default function NotesList({ notes, onEditNote, onDeleteNote, t }: NotesL
                           <Pencil className="mr-2 h-4 w-4" />
                           {t('common.edit')}
                         </DropdownMenuItem>
-                        <AlertDialogTrigger asChild>
-                          <DropdownMenuItem className="text-destructive">
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              {t('common.delete')}
-                          </DropdownMenuItem>
-                        </AlertDialogTrigger>
+                        <DropdownMenuItem className="text-destructive" asChild>
+                          <div className="flex items-center w-full px-2 py-1.5 text-sm">
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            <span>{t('common.delete')}</span>
+                          </div>
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                     <AlertDialogContent>
