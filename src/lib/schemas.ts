@@ -45,31 +45,31 @@ export const bishopricNoteSchema = z.object({
 
 export const sacramentMeetingSchema = z.object({
     date: z.date(),
-    preside: z.string().optional(),
-    dirige: z.string().optional(),
-    pianist: z.string().optional(),
-    musicDirector: z.string().optional(),
-    authorities: z.string().optional(),
+    preside: z.string().optional().or(z.literal('')),
+    dirige: z.string().optional().or(z.literal('')),
+    pianist: z.string().optional().or(z.literal('')),
+    musicDirector: z.string().optional().or(z.literal('')),
+    authorities: z.string().optional().or(z.literal('')),
     openingHymn: z.object({
-        name: z.string().optional(),
-        number: z.coerce.number().optional(),
+        name: z.string().optional().or(z.literal('')),
+        number: z.preprocess((val) => (val === '' || val === null ? undefined : val), z.coerce.number().optional()),
     }).optional(),
-    openingPrayer: z.string().optional(),
+    openingPrayer: z.string().optional().or(z.literal('')),
     hymnSacramental: z.object({
-        name: z.string().optional(),
-        number: z.coerce.number().optional(),
+        name: z.string().optional().or(z.literal('')),
+        number: z.preprocess((val) => (val === '' || val === null ? undefined : val), z.coerce.number().optional()),
     }).optional(),
-    speakers: z.array(z.string().optional()).max(3).optional(),
+    speakers: z.array(z.string().optional().or(z.literal(''))).max(3).optional(),
     hymnFinal: z.object({
-        name: z.string().optional(),
-        number: z.coerce.number().optional(),
+        name: z.string().optional().or(z.literal('')),
+        number: z.preprocess((val) => (val === '' || val === null ? undefined : val), z.coerce.number().optional()),
     }).optional(),
-    closingPrayer: z.string().optional(),
+    closingPrayer: z.string().optional().or(z.literal('')),
     asuntosDelBarrio: z.array(z.object({
         id: z.string().optional(),
-        type: z.enum(['relevo', 'sostenimiento']).optional(),
-        personName: z.string().optional(),
-        calling: z.string().optional(),
+        type: z.enum(['relevo', 'sostenimiento']).optional().or(z.literal('')),
+        personName: z.string().optional().or(z.literal('')),
+        calling: z.string().optional().or(z.literal('')),
     })).optional(),
 });
 
@@ -80,5 +80,3 @@ export const changePasswordSchema = z.object({
   message: "Passwords don't match",
   path: ['confirmPassword'],
 });
-
-    

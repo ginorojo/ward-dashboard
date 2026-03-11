@@ -11,7 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon, Loader2, PlusCircle, Trash2 } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
-import { cn } from '@/lib/utils';
+import { cn, ensureDate } from '@/lib/utils';
 import { format } from 'date-fns';
 import { SacramentMeeting } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
@@ -41,7 +41,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
   const form = useForm<AgendaFormValues>({
     resolver: zodResolver(sacramentMeetingSchema),
     defaultValues: {
-        date: initialData?.date?.toDate() ?? new Date(),
+        date: ensureDate(initialData?.date),
         preside: initialData?.preside ?? '',
         dirige: initialData?.dirige ?? '',
         pianist: initialData?.pianist ?? '',
@@ -65,7 +65,7 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
   const { isSubmitting } = form.formState;
   
   if (!isClient) {
-    return null; // Or a loading skeleton
+    return null;
   }
 
   return (
@@ -139,9 +139,12 @@ export default function AgendaForm({ onSave, onDelete, initialData, t }: AgendaF
                     name={`asuntosDelBarrio.${index}.type`}
                     render={({ field }) => (
                       <FormItem className='flex-1'><FormLabel>{t('sacramentMeeting.type')}</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select onValueChange={field.onChange} value={field.value || ''}>
                             <FormControl><SelectTrigger><SelectValue placeholder={t('sacramentMeeting.type')} /></SelectTrigger></FormControl>
-                            <SelectContent><SelectItem value="sostenimiento">{t('sacramentMeeting.sustaining')}</SelectItem><SelectItem value="relevo">{t('sacramentMeeting.release')}</SelectItem></SelectContent>
+                            <SelectContent>
+                                <SelectItem value="sostenimiento">{t('sacramentMeeting.sustaining')}</SelectItem>
+                                <SelectItem value="relevo">{t('sacramentMeeting.release')}</SelectItem>
+                            </SelectContent>
                         </Select>
                       </FormItem>
                     )}
