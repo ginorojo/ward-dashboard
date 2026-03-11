@@ -44,7 +44,7 @@ export const bishopricNoteSchema = z.object({
 });
 
 export const sacramentMeetingSchema = z.object({
-    date: z.date(),
+    date: z.date({ required_error: "La fecha es requerida" }),
     preside: z.string().optional().or(z.literal('')),
     dirige: z.string().optional().or(z.literal('')),
     pianist: z.string().optional().or(z.literal('')),
@@ -52,25 +52,25 @@ export const sacramentMeetingSchema = z.object({
     authorities: z.string().optional().or(z.literal('')),
     openingHymn: z.object({
         name: z.string().optional().or(z.literal('')),
-        number: z.preprocess((val) => (val === '' || val === null ? undefined : val), z.coerce.number().optional()),
-    }).optional(),
+        number: z.any().optional(),
+    }).optional().default({}),
     openingPrayer: z.string().optional().or(z.literal('')),
     hymnSacramental: z.object({
         name: z.string().optional().or(z.literal('')),
-        number: z.preprocess((val) => (val === '' || val === null ? undefined : val), z.coerce.number().optional()),
-    }).optional(),
-    speakers: z.array(z.string().optional().or(z.literal(''))).max(3).optional(),
+        number: z.any().optional(),
+    }).optional().default({}),
+    speakers: z.array(z.string().optional().or(z.literal(''))).optional().default(['', '', '']),
     hymnFinal: z.object({
         name: z.string().optional().or(z.literal('')),
-        number: z.preprocess((val) => (val === '' || val === null ? undefined : val), z.coerce.number().optional()),
-    }).optional(),
+        number: z.any().optional(),
+    }).optional().default({}),
     closingPrayer: z.string().optional().or(z.literal('')),
     asuntosDelBarrio: z.array(z.object({
         id: z.string().optional(),
-        type: z.enum(['relevo', 'sostenimiento']).optional().or(z.literal('')),
+        type: z.string().optional().or(z.literal('')),
         personName: z.string().optional().or(z.literal('')),
         calling: z.string().optional().or(z.literal('')),
-    })).optional(),
+    })).optional().default([]),
 });
 
 export const changePasswordSchema = z.object({
