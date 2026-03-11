@@ -10,6 +10,8 @@ import { useToast } from '@/hooks/use-toast';
 import { suggestSacramentMeetingAgendaImprovements } from '@/ai/flows/suggest-sacrament-meeting-agenda-improvements';
 import { SacramentMeeting } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
+import { ensureDate } from '@/lib/utils';
+import { format } from 'date-fns';
 
 interface AIAgendaHelperProps {
   currentAgenda: SacramentMeeting | null;
@@ -26,13 +28,14 @@ export default function AIAgendaHelper({ currentAgenda, t }: AIAgendaHelperProps
 
   const getAgendaString = () => {
     if (!currentAgenda) return "No current agenda provided.";
+    const dateStr = currentAgenda.date ? format(ensureDate(currentAgenda.date), 'PPP') : 'N/A';
     return `
-        Date: ${currentAgenda.date.toDate().toLocaleDateString()}
-        Presiding: ${currentAgenda.preside}
-        Conducting: ${currentAgenda.dirige}
-        Speakers: ${currentAgenda.speakers.join(', ')}
-        Sacramental Hymn: ${currentAgenda.hymnSacramental.name} (#${currentAgenda.hymnSacramental.number})
-        Closing Hymn: ${currentAgenda.hymnFinal.name} (#${currentAgenda.hymnFinal.number})
+        Date: ${dateStr}
+        Presiding: ${currentAgenda.preside || 'N/A'}
+        Conducting: ${currentAgenda.dirige || 'N/A'}
+        Speakers: ${currentAgenda.speakers?.filter(s => s).join(', ') || 'N/A'}
+        Sacramental Hymn: ${currentAgenda.hymnSacramental?.name || 'N/A'} (#${currentAgenda.hymnSacramental?.number || ''})
+        Closing Hymn: ${currentAgenda.hymnFinal?.name || 'N/A'} (#${currentAgenda.hymnFinal?.number || ''})
     `;
   };
 
@@ -101,7 +104,7 @@ export default function AIAgendaHelper({ currentAgenda, t }: AIAgendaHelperProps
             />
           </div>
         </div>
-        <Button onClick={handleGenerateSuggestion} disabled={loading}>
+        <Button onClick={handleGenerateSuggestion} disabled={loading} className="w-full">
           {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           {t('sacramentMeeting.generateSuggestions')}
         </Button>

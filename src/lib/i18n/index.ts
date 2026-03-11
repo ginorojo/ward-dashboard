@@ -1,7 +1,7 @@
 'use client';
 
 import { useContext } from 'react';
-import { LanguageContext, LanguageProvider } from '@/components/providers/language-provider';
+import { LanguageContext } from '@/components/providers/language-provider';
 import es from './locales/es.json';
 import en from './locales/en.json';
 
@@ -29,5 +29,3 @@ export const useTranslation = () => {
 
   return { t, language };
 };
-
-export { LanguageProvider };
